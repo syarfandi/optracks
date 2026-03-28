@@ -932,7 +932,7 @@ export default function App() {
                             {/* Decorative background element */}
                             <div className="absolute -top-10 -right-10 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-all duration-700" />
 
-                            <div className="flex flex-col gap-4 relative z-10">
+                            <div className="flex flex-col gap-2.5 relative z-10">
                                 <div className="flex items-center justify-between gap-3">
                                     <div className="flex-1 min-w-0">
                                         <span className={`text-[9px] font-black uppercase tracking-[0.2em] mb-1 block ${isDarkMode ? 'text-neutral-500' : 'text-neutral-400'}`}>Unit Perangkat</span>
@@ -949,21 +949,21 @@ export default function App() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-2.5">
-                                    <button onClick={exportProgress} className={`flex items-center justify-center gap-2 py-2.5 rounded-xl transition-all hover:scale-[1.03] active:scale-95 shadow-sm border ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-amber-500 hover:bg-neutral-700' : 'bg-neutral-50 border-neutral-200 text-amber-700 hover:bg-neutral-100'}`}>
-                                        <Download size={14} strokeWidth={3} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest pt-0.5">Export</span>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button onClick={exportProgress} className={`flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all hover:scale-[1.03] active:scale-95 shadow-sm border ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-amber-500 hover:bg-neutral-700' : 'bg-neutral-50 border-neutral-200 text-amber-700 hover:bg-neutral-100'}`}>
+                                        <Download size={13} strokeWidth={3} />
+                                        <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">Export</span>
                                     </button>
-                                    <label className={`flex items-center justify-center gap-2 py-2.5 rounded-xl transition-all hover:scale-[1.03] active:scale-95 shadow-sm border cursor-pointer ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-amber-500 hover:bg-neutral-700' : 'bg-neutral-50 border-neutral-200 text-amber-700 hover:bg-neutral-100'}`}>
-                                        <Upload size={14} strokeWidth={3} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest pt-0.5">Import</span>
+                                    <label className={`flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all hover:scale-[1.03] active:scale-95 shadow-sm border cursor-pointer ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-amber-500 hover:bg-neutral-700' : 'bg-neutral-50 border-neutral-200 text-amber-700 hover:bg-neutral-100'}`}>
+                                        <Upload size={13} strokeWidth={3} />
+                                        <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">Import</span>
                                         <input type="file" className="hidden" accept=".json" onChange={(e) => { importProgress(e); setIsSidebarOpen(false); }} />
                                     </label>
                                 </div>
 
-                                <button onClick={requestNotification} disabled={notificationsEnabled} className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-95 shadow-sm border ${notificationsEnabled ? (isDarkMode ? 'bg-green-900/20 border-green-800/50 text-green-500 opacity-80' : 'bg-green-50 border-green-200 text-green-600 opacity-80') : (isDarkMode ? 'bg-neutral-800 border-neutral-700 text-blue-400 hover:bg-neutral-700' : 'bg-neutral-50 border-neutral-200 text-blue-600 hover:bg-neutral-100')}`}>
-                                    <Bell size={14} strokeWidth={3} className={notificationsEnabled ? "" : "animate-pulse"} />
-                                    <span className="text-[10px] font-black uppercase tracking-widest pt-0.5">{notificationsEnabled ? "Notifikasi Aktif" : "Aktifkan Notifikasi"}</span>
+                                <button onClick={requestNotification} disabled={notificationsEnabled} className={`w-full flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all hover:scale-[1.02] active:scale-95 shadow-sm border ${notificationsEnabled ? (isDarkMode ? 'bg-green-900/20 border-green-800/50 text-green-500 opacity-80' : 'bg-green-50 border-green-200 text-green-600 opacity-80') : (isDarkMode ? 'bg-neutral-800 border-neutral-700 text-blue-400 hover:bg-neutral-700' : 'bg-neutral-50 border-neutral-200 text-blue-600 hover:bg-neutral-100')}`}>
+                                    <Bell size={13} strokeWidth={3} className={notificationsEnabled ? "" : "animate-pulse"} />
+                                    <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">{notificationsEnabled ? "Notifikasi Aktif" : "Aktifkan Notifikasi"}</span>
                                 </button>
 
                                 <div className="text-center">
@@ -1126,7 +1126,7 @@ export default function App() {
                                                                     </button>
 
                                                                     <div className="flex-1 min-w-0 pr-3 sm:pr-4">
-                                                                        <h4 className={`font-bold truncate text-sm sm:text-[15px] ${finished ? 'line-through text-neutral-400 decoration-green-500/50' : ''}`}> {arc.title} </h4>
+                                                                        <h4 className={`font-bold truncate text-sm sm:text-[15px] ${finished ? 'line-through text-neutral-400 decoration-green-500/80 decoration-2' : ''}`}> {arc.title} </h4>
                                                                         <div className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-0.5 text-[9.5px] font-bold ${theme.muted}`}>
                                                                             <span className="whitespace-nowrap">Ep {arc.start} - {arc.end}</span>
                                                                             <div className="flex items-center gap-1.5 w-full sm:w-auto">
@@ -1176,7 +1176,7 @@ export default function App() {
                                                                                                 </div>
                                                                                                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleEpisode(epNum)}>
                                                                                                     <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                                                                                                        <h5 className={`text-xs sm:text-[13px] font-bold leading-tight line-clamp-2 sm:line-clamp-none ${isWatched ? 'line-through decoration-green-500/30 text-neutral-400' : ''}`}>
+                                                                                                        <h5 className={`text-xs sm:text-[13px] font-bold leading-tight line-clamp-2 sm:line-clamp-none ${isWatched ? 'line-through decoration-green-500/80 decoration-[2px] text-neutral-400' : ''}`}>
                                                                                                             {getEpisodeTitle(epNum)}
                                                                                                         </h5>
                                                                                                         {arc.type === 'Mixed' && (
