@@ -1,9 +1,5 @@
 # OP Tracker
 
-> **⚠️ Disclaimer Hukum / Legal Disclaimer**
-> 
-> *This is a fan-made, non-profit, open-source project. This project is not affiliated with, endorsed by, or sponsored by Eiichiro Oda, Shueisha, Toei Animation, or any of the official copyright holders of 'One Piece'. All trademarks, character names, and related images belong to their respective owners. No copyrighted media files are hosted on this repository.*
-
 [![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8.0-646CFF?logo=vite)](https://vitejs.dev/)
@@ -19,6 +15,10 @@
 > *   **Sistem Rank** - Pantau kenaikan level Anda dari Rookie hingga Yonko.
 > *   **Multi-Device** - Tampilan optimal dan ringan di HP maupun Desktop.
 > *   **Update Rutin** - Sinkronisasi otomatis setiap hari dengan database terbaru.
+
+> **⚠️ Disclaimer Hukum / Legal Disclaimer**
+> 
+> *This is a fan-made, non-profit, open-source project. This project is not affiliated with, endorsed by, or sponsored by Eiichiro Oda, Shueisha, Toei Animation, or any of the official copyright holders of 'One Piece'. All trademarks, character names, and related images belong to their respective owners. No copyrighted media files are hosted on this repository.*
 
 ---
 
