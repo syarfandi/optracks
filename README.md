@@ -5,19 +5,27 @@
 [![Vite](https://img.shields.io/badge/Vite-8.0-646CFF?logo=vite)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.2-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 
-**Grand Line Tracker** adalah aplikasi web modern dan premium yang dirancang khusus untuk para penggemar One Piece untuk melacak perjalanan mereka melalui dunia luas ciptaan Eiichiro Oda. Dari East Blue hingga Final Saga, jangan pernah kehilangan jejak di mana Anda berada dalam cerita ini.
+**Grand Line Tracker** adalah aplikasi web modern dan premium yang dirancang khusus untuk para penggemar One Piece untuk melacak perjalanan mereka melalui dunia luas ciptaan Eiichiro Oda secara langsung di perangkat Anda tanpa perlu login.
+
+---
+
+## 📱 Pelacakan Berbasis Perangkat (No Login)
+
+Grand Line Tracker menggunakan filosofi **"Device-First"**. Anda tidak perlu membuat akun atau login. Semua data Anda aman tersimpan di dalam browser perangkat Anda sendiri.
+
+- **📍 Deteksi Otomatis**: Aplikasi mendeteksi perangkat (Mobile/Desktop) dan sistem operasi Anda untuk memastikan kompatibilitas.
+- **💾 Penyimpanan Lokal**: Menggunakan `localStorage` browser untuk menyimpan progres secara instan dan aman.
+- **🔄 Pemindahan Data**: Ingin pindah perangkat? Gunakan fitur **Ekspor/Impor** untuk memindahkan logbook Anda ke ponsel atau komputer lain dengan mudah melalui file JSON.
 
 ---
 
 ## ✨ Fitur Utama
 
 - **🚢 Logbook Lengkap**: Setiap episode dan film dikategorikan berdasarkan Saga dan Arc, memastikan Anda mengikuti perjalanan dengan benar.
-- **⚔️ Pelacakan Canon vs Filler**: Identifikasi dengan mudah episode **Canon**, **Mixed**, dan **Filler** untuk mengoptimalkan pengalaman menonton Anda.
-- **📊 Statistik Real-time**: Visualisasi bar progres yang indah menunjukkan persentase penyelesaian untuk seri utama, saga, konten filler, hingga film.
-- **📺 Integrasi Bilibili**: Tautan langsung untuk menonton episode di Bilibili dengan judul yang sudah dilokalisasi untuk pengalaman yang mulus.
-- **💾 Progres Persisten**: Data Anda disimpan secara lokal di browser, memastikan logbook Anda selalu sinkron tanpa perlu membuat akun.
-- **🧭 Navigasi Cerdas**: Fitur "Lanjut Nonton" yang secara otomatis menemukan dan menggulir ke episode berikutnya yang belum ditonton.
-- **🌓 Desain Premium**: UI yang sepenuhnya responsif dibangun dengan Tailwind CSS v4, menampilkan mode gelap yang indah dan mikro-animasi yang halus.
+- **📊 Statistik Kompak**: Visualisasi bar progres yang ringkas untuk seri utama (Canon), Saga, konten Filler, hingga film.
+- **📺 Integrasi Bilibili**: Tautan langsung untuk menonton episode di Bilibili dengan judul yang sudah dilokalisasi.
+- **🧭 Navigasi Cerdas**: Fitur "Lanjut Nonton" yang secara otomatis menemukan episode berikutnya di logbook Anda.
+- **🌓 Desain Premium**: UI responsif dengan Tailwind CSS v4, mode gelap yang indah, dan mikro-animasi yang halus.
 
 ---
 
@@ -57,13 +65,15 @@ Untuk menjalankan salinan lokal di komputer Anda, ikuti langkah-langkah sederhan
 
 ---
 
-## 📖 Cara Penggunaan
+## 📖 Cara Penggunaan & Migrasi Data
 
 1. **Lacak Episode**: Centang lingkaran di sebelah episode yang telah Anda tonton.
-2. **Selesaikan Arc**: Anda dapat mencentang seluruh Arc sekaligus untuk mempercepat pengisian logbook.
-3. **Cari Saga**: Gunakan fitur pencarian untuk menemukan Saga atau Arc tertentu dengan cepat.
-4. **Statistik**: Pantau bar progres di sidebar untuk melihat seberapa jauh perjalanan Anda menuju One Piece (kini mencakup progres Saga dan Filler!).
-5. **Lanjut Nonton**: Klik tombol "Lanjut Nonton" untuk langsung diarahkan ke episode berikutnya yang belum Anda tonton.
+2. **Penyimpanan Perangkat**: Di sidebar, Anda akan melihat status "Tersimpan di [OS] ([Device])".
+3. **Pindah Perangkat**:
+    - Klik **📥 Simpan File** di perangkat lama untuk mengunduh logbook Anda.
+    - Kirim file JSON tersebut ke perangkat baru.
+    - Di perangkat baru, klik **📤 Muat File** dan pilih file tersebut.
+4. **Lanjut Nonton**: Klik tombol tombol logo kapal untuk langsung diarahkan ke episode berikutnya.
 
 ---
 
@@ -74,5 +84,5 @@ Didistribusikan di bawah Lisensi MIT. Lihat `LICENSE` untuk informasi lebih lanj
 ---
 
 <p align="center">
-  <i>Dibuat dengan ❤️ untuk seluruh Nakama di seluruh dunia.</i>
+  <i>Dibuat dengan ❤️ untuk seluruh Nakama di seluruh dunia. Tanpa Login, Tanpa Ribet.</i>
 </p>

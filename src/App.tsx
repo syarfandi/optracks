@@ -16,11 +16,29 @@ import {
     Play,
     Share2,
     Trash2,
-    ExternalLink
+    ExternalLink,
+    Menu,
+    X
 } from 'lucide-react';
 
 // --- Konfigurasi & Data ---
 const appId = 'one-piece-tracker-v4';
+
+const getDeviceInfo = () => {
+    const ua = navigator.userAgent;
+    let device = "Dekstop";
+    if (/tablet|ipad|playbook|silk/i.test(ua)) device = "Tablet";
+    else if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) device = "Mobile";
+
+    let os = "OS Tidak Diketahui";
+    if (ua.indexOf("Win") !== -1) os = "Windows";
+    if (ua.indexOf("Mac") !== -1) os = "macOS";
+    if (ua.indexOf("Linux") !== -1) os = "Linux";
+    if (ua.indexOf("Android") !== -1) os = "Android";
+    if (ua.indexOf("like Mac") !== -1) os = "iOS";
+
+    return { device, os };
+};
 
 // Episode Database is now imported from ./data/bilibili_episodes.json
 
@@ -174,6 +192,7 @@ export default function App() {
     const [showFiller] = useState(true);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const [expandedSagas, setExpandedSagas] = useState<string[]>([]);
     const [expandedArcs, setExpandedArcs] = useState<string[]>([]);
@@ -267,9 +286,50 @@ export default function App() {
         if (window.confirm("Hapus semua progres tontonan Anda secara lokal?")) {
             setWatchedEpisodes([]);
             setWatchedMovies([]);
-            saveLocally({ watchedEpisodes: [], watchedMovies: [] });
+            saveLocally({ watchedEpisodes: [], watchedMovies: [], lastUpdated: new Date().toISOString() });
         }
     };
+
+    const exportProgress = () => {
+        const data = {
+            watchedEpisodes,
+            watchedMovies,
+            lastUpdated: new Date().toISOString(),
+            device: getDeviceInfo().device
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `gp-tracker-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const importProgress = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const data = JSON.parse(event.target?.result as string);
+                if (data.watchedEpisodes) setWatchedEpisodes(data.watchedEpisodes);
+                if (data.watchedMovies) setWatchedMovies(data.watchedMovies);
+                saveLocally({
+                    watchedEpisodes: data.watchedEpisodes || [],
+                    watchedMovies: data.watchedMovies || [],
+                    lastUpdated: new Date().toISOString()
+                });
+                alert("Progres berhasil diimpor!");
+            } catch (err) {
+                alert("Format file tidak valid.");
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    const deviceInfo = useMemo(() => getDeviceInfo(), []);
 
     const continueWatching = () => {
         let firstUnwatchedArc: any = null;
@@ -413,29 +473,78 @@ export default function App() {
     }
 
     return (
-        <div className={`min-h-screen font-sans selection:bg-indigo-500/30 transition-colors duration-500 flex flex-col lg:flex-row ${theme.bg}`}>
+        <div className={`min-h-screen font-sans selection:bg-indigo-500/30 transition-colors duration-500 flex flex-col lg:flex-row-reverse ${theme.bg}`}>
+            
+            {/* Mobile Header */}
+            <div className={`lg:hidden sticky top-0 z-40 flex items-center justify-between p-4 border-b backdrop-blur-md shadow-sm ${theme.header}`}>
+                <div className="flex items-center gap-3">
+                    <img src="/mugiwara-logo.png" alt="Mugiwara Logo" className="w-8 h-8 object-contain drop-shadow-md" />
+                    <div>
+                        <h1 className="text-xl font-black tracking-tight uppercase">Grand Line Logbook</h1>
+                        <p className={`text-[10px] font-bold uppercase tracking-widest ${theme.muted}`}>Catat Jejak Perjalananmu</p>
+                    </div>
+                </div>
+                <button onClick={() => setIsSidebarOpen(true)} className={`p-2 rounded-xl transition-all ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                    <Menu size={24} />
+                </button>
+            </div>
+
+            {/* Mobile Overlay */}
+            {isSidebarOpen && (
+                <div className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
+            )}
+
             {/* Sidebar / Header */}
-            <aside className={`sticky top-0 z-50 lg:h-screen lg:w-80 lg:shrink-0 lg:sticky lg:overflow-y-auto border-b lg:border-b-0 lg:border-r backdrop-blur-md shadow-xl transition-all duration-500 ${theme.header}`}>
+            <aside className={`fixed inset-y-0 right-0 z-50 w-80 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-l backdrop-blur-2xl shadow-2xl transition-transform duration-300 transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} lg:translate-x-0 overflow-y-auto ${theme.header}`}>
                 <div className="p-4 lg:p-8 flex flex-col h-full">
                     {/* Brand & Theme */}
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center gap-3">
-                            <div className="bg-indigo-600 p-2 rounded-lg shadow-indigo-600/20 shadow-lg">
-                                <Skull size={24} className="text-white" />
+                            <div className="bg-slate-900 p-2 rounded-lg shadow-black/20 shadow-lg border border-slate-700 hidden lg:block">
+                                <img src="/mugiwara-logo.png" alt="Mugiwara Logo" className="w-8 h-8 object-contain drop-shadow-md" />
                             </div>
                             <div>
-                                <h1 className="text-xl font-black tracking-tight uppercase">Grand Line</h1>
-                                <p className={`text-[10px] font-bold uppercase tracking-widest ${theme.muted}`}>Track Your Journey</p>
+                                <h1 className="text-xl font-black tracking-tight uppercase lg:block hidden">Grand Line Logbook</h1>
+                                <p className={`text-[10px] font-bold uppercase tracking-widest ${theme.muted} lg:block hidden`}>Catat Jejak Perjalananmu</p>
+                                <span className="lg:hidden text-lg font-black uppercase">Menu Utama</span>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
                             <button onClick={toggleDarkMode} className={`p-2 rounded-xl transition-all ${isDarkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                                 {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
                             </button>
-                            <button onClick={shareProgress} className={`p-2 rounded-xl transition-all ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                            <button onClick={() => { setIsSidebarOpen(false); shareProgress(); }} className={`p-2 rounded-xl transition-all ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                                 <Share2 size={20} />
                             </button>
+                            <button onClick={() => setIsSidebarOpen(false)} className={`lg:hidden p-2 rounded-xl transition-all ${isDarkMode ? 'bg-slate-800 text-red-400 hover:bg-slate-700' : 'bg-slate-100 text-red-500 hover:bg-slate-200'}`}>
+                                <X size={20} />
+                            </button>
                         </div>
+                    </div>
+
+                    {/* Device Persistence Card */}
+                    <div className={`p-4 rounded-3xl mb-8 border transition-all ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="bg-indigo-600/10 p-2 rounded-xl text-indigo-600">
+                                <Compass size={20} />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600">Penyimpanan Lokal</p>
+                                <h3 className="text-xs font-bold">📍 {deviceInfo.os} ({deviceInfo.device})</h3>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 mb-4">
+                            <button onClick={exportProgress} className={`p-2 rounded-xl text-[10px] font-bold flex items-center justify-center gap-2 transition-all ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-100 hover:bg-slate-200'}`}>
+                                📥 Cadangkan
+                            </button>
+                            <label className={`p-2 rounded-xl text-[10px] font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-100 hover:bg-slate-200'}`}>
+                                📤 Pulihkan
+                                <input type="file" className="hidden" accept=".json" onChange={(e) => { importProgress(e); setIsSidebarOpen(false); }} />
+                            </label>
+                        </div>
+                        
+                        <p className={`text-[9px] font-bold opacity-40 uppercase tracking-tighter text-center`}>Tidak perlu login. Data tersimpan di web browser Anda.</p>
                     </div>
 
                     {/* Compact Stats Section */}
@@ -443,7 +552,7 @@ export default function App() {
                         {/* Canon Stats */}
                         <div className={`p-3 rounded-xl border transition-all hover:scale-[1.01] ${isDarkMode ? 'bg-indigo-950/20 border-indigo-500/20' : 'bg-indigo-50/50 border-indigo-100'}`}>
                             <div className="flex items-center justify-between text-[9px] font-black uppercase mb-1.5">
-                                <span className="text-indigo-600 flex items-center gap-1"> <Trophy size={12} className="text-amber-500" /> Canon</span>
+                                <span className="text-indigo-600 flex items-center gap-1"> <Trophy size={12} className="text-amber-500" /> Cerita Utama</span>
                                 <span className="text-indigo-600">{stats.canonPercent}%</span>
                             </div>
                             <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
@@ -454,7 +563,7 @@ export default function App() {
                         {/* Saga Stats */}
                         <div className={`p-3 rounded-xl border transition-all hover:scale-[1.01] ${isDarkMode ? 'bg-amber-950/20 border-amber-500/20' : 'bg-amber-50/50 border-amber-100'}`}>
                             <div className="flex items-center justify-between text-[9px] font-black uppercase mb-1.5">
-                                <span className="text-amber-600 flex items-center gap-1"> <Compass size={12} /> Saga</span>
+                                <span className="text-amber-600 flex items-center gap-1"> <Compass size={12} /> Saga Tamat</span>
                                 <span className="text-amber-600">{stats.sagasPercent}%</span>
                             </div>
                             <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
@@ -465,7 +574,7 @@ export default function App() {
                         {/* Filler Stats */}
                         <div className={`p-3 rounded-xl border transition-all hover:scale-[1.01] ${isDarkMode ? 'bg-rose-950/20 border-rose-500/20' : 'bg-rose-50/50 border-rose-100'}`}>
                             <div className="flex items-center justify-between text-[9px] font-black uppercase mb-1.5">
-                                <span className="text-rose-600 flex items-center gap-1"> <Skull size={12} /> Filler</span>
+                                <span className="text-rose-600 flex items-center gap-1"> <Skull size={12} /> Filler Tontonan</span>
                                 <span className="text-rose-600">{stats.fillerPercent}%</span>
                             </div>
                             <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
@@ -476,7 +585,7 @@ export default function App() {
                         {/* Movie Stats */}
                         <div className={`p-3 rounded-xl border transition-all hover:scale-[1.01] ${isDarkMode ? 'bg-slate-800/30 border-slate-700' : 'bg-slate-100/50 border-slate-200'}`}>
                             <div className="flex items-center justify-between text-[9px] font-black uppercase mb-1.5">
-                                <span className={`${theme.muted} flex items-center gap-1`}> <Film size={12} /> Movies</span>
+                                <span className={`${theme.muted} flex items-center gap-1`}> <Film size={12} /> Film Layar Lebar</span>
                                 <span>{stats.moviePercent}%</span>
                             </div>
                             <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-700' : 'bg-indigo-100'}`}>
@@ -489,15 +598,15 @@ export default function App() {
                     <div className="flex flex-col gap-3 mt-auto lg:mt-0">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                            <input type="text" placeholder="Cari Log..." className={`w-full rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none ${theme.input}`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                            <input type="text" placeholder="Temukan Arc/Saga..." className={`w-full rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none ${theme.input}`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                         </div>
-                        <button onClick={continueWatching} className="bg-indigo-600 text-white flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-indigo-600/20 w-full">
-                            <Ship size={18} /> <span>Lanjut Nonton</span>
+                        <button onClick={() => { continueWatching(); setIsSidebarOpen(false); }} className="bg-indigo-600 text-white flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-indigo-600/20 w-full">
+                            <Ship size={18} /> <span>Mulai Petualangan!</span>
                         </button>
                     </div>
 
                     <div className="mt-10 pt-6 border-t border-slate-200 dark:border-slate-800 hidden lg:block opacity-40">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-center italic">© Grand Line Tracker v4</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-center italic">© Grand Line Tracker v4.1</p>
                     </div>
                 </div>
             </aside>
@@ -615,10 +724,11 @@ export default function App() {
                     </div>
                 )}
 
-                <div className="mt-12 flex justify-center border-t border-slate-200 dark:border-slate-800 pt-8">
+                <div className="mt-12 flex flex-col items-center gap-4 border-t border-slate-200 dark:border-slate-800 pt-8">
                     <button onClick={resetProgress} className="flex items-center gap-2 text-xs font-bold text-red-400 hover:text-red-500 transition-all active:scale-95">
                         <Trash2 size={14} /> Reset Seluruh Log Progres
                     </button>
+                    <p className="text-[10px] font-bold opacity-30 text-center">Data ini hanya ada di browser {deviceInfo.device} ini. <br/> Simpan file jika ingin pindah perangkat.</p>
                 </div>
             </main>
 
