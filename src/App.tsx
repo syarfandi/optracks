@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import confetti from 'canvas-confetti';
+import * as htmlToImage from 'html-to-image';
 import EPISODE_DB from './data/bilibili_episodes.json';
 import {
     CheckCircle2,
@@ -14,7 +17,6 @@ import {
     Compass,
     Film,
     Play,
-    Share2,
     Trash2,
     ExternalLink,
     Menu,
@@ -22,7 +24,8 @@ import {
     LayoutGrid,
     List,
     Download,
-    Upload
+    Upload,
+    Camera
 } from 'lucide-react';
 
 // --- Konfigurasi & Data ---
@@ -204,25 +207,33 @@ const MOVIE_DATA = [
     { id: 'm15', title: 'Film: Red', year: 2022, recommended: true },
 ];
 
+const successSound = typeof Audio !== 'undefined' ? new Audio('/success.mp3') : null;
+
 export default function App() {
     const [watchedEpisodes, setWatchedEpisodes] = useState<string[]>([]);
     const [watchedMovies, setWatchedMovies] = useState<string[]>([]);
     const [activeTab, setActiveTab] = useState('episodes');
-    const [showFiller] = useState(true);
+    const [showFiller, setShowFiller] = useState(true);
+    const [hideWatched, setHideWatched] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
     const [sagaViewMode, setSagaViewMode] = useState<'card' | 'list'>('card');
+    const [isExporting, setIsExporting] = useState(false);
 
     const [expandedSagas, setExpandedSagas] = useState<string[]>([]);
     const [expandedArcs, setExpandedArcs] = useState<string[]>([]);
 
     const [loading, setLoading] = useState(true);
-    const [copyFeedback, setCopyFeedback] = useState(false);
 
     const arcRefs = useRef<any>({});
 
     // --- Data Persistence using LocalStorage ---
+    useEffect(() => {
+        // Apply dark mode class to root for Tailwind dark: variants
+        document.documentElement.classList.toggle('dark', isDarkMode);
+    }, [isDarkMode]);
+
     useEffect(() => {
         // Load data on mount
         const savedData = localStorage.getItem(`gl-tracker-${appId}`);
@@ -254,6 +265,60 @@ export default function App() {
 
         setWatchedEpisodes(newWatched);
         saveLocally({ watchedEpisodes: newWatched });
+
+        // Evaluasi penyelesaian Arc untuk Confetti
+        if (!watchedEpisodes.includes(epKey)) {
+            const epNumVal = Number(epNum);
+            for (const saga of SAGA_DATA) {
+                for (const arc of saga.arcs) {
+                    if (epNumVal >= arc.start && epNumVal <= arc.end) {
+                        let allFinished = true;
+                        for (let i = arc.start; i <= arc.end; i++) {
+                            if (!newWatched.includes(`ep-${i}`)) {
+                                allFinished = false;
+                                break;
+                            }
+                        }
+                        if (allFinished) fireConfetti();
+                        return;
+                    }
+                }
+            }
+        }
+    };
+
+    const fireConfetti = () => {
+        // Play success sound
+        if (successSound) {
+            successSound.currentTime = 0;
+            successSound.play().catch(() => console.log("Audio play blocked"));
+        }
+
+        const duration = 2500;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+        const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+        const interval: any = setInterval(function () {
+            const timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+
+            const particleCount = 50 * (timeLeft / duration);
+            confetti({
+                ...defaults, particleCount,
+                origin: { x: randomInRange(0.1, 0.3), y: randomInRange(0.2, 0.4) },
+                colors: ['#ef4444', '#f59e0b', '#3b82f6']
+            });
+            confetti({
+                ...defaults, particleCount,
+                origin: { x: randomInRange(0.7, 0.9), y: randomInRange(0.2, 0.4) },
+                colors: ['#ef4444', '#f59e0b', '#3b82f6']
+            });
+        }, 250);
     };
 
     const toggleMovie = (movieId: string) => {
@@ -277,6 +342,7 @@ export default function App() {
             newWatched = watchedEpisodes.filter(k => !epKeys.includes(k));
         } else {
             newWatched = [...new Set([...watchedEpisodes, ...epKeys])];
+            fireConfetti();
         }
 
         setWatchedEpisodes(newWatched);
@@ -316,6 +382,7 @@ export default function App() {
             newWatched = watchedEpisodes.filter(k => !epKeys.includes(k));
         } else {
             newWatched = [...new Set([...watchedEpisodes, ...epKeys])];
+            fireConfetti();
         }
 
         setWatchedEpisodes(newWatched);
@@ -407,19 +474,51 @@ export default function App() {
         }
     };
 
-    const shareProgress = () => {
-        const text = `Progres One Piece-ku: ${stats.canonPercent}% Tamat (Canon). Lacak progresmu di One Piece Tracker!`;
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(text);
-            setCopyFeedback(true);
-            setTimeout(() => setCopyFeedback(false), 2000);
-        }
-    };
-
     const getEpisodeTitle = (num: number | string) => {
         const epData = (EPISODE_DB as any)[num];
         return epData?.title || `Episode ${num}: Petualangan Menuju One Piece`;
     };
+
+    // Auto-expand arcs and sagas when searching for a specific term
+    useEffect(() => {
+        const q = searchQuery.toLowerCase().trim();
+        if (q.length > 2) {
+            const sagasToApp: string[] = [];
+            const arcsToApp: string[] = [];
+
+            SAGA_DATA.forEach(saga => {
+                let sagaTitleMatch = saga.title.toLowerCase().includes(q);
+
+                saga.arcs.forEach(arc => {
+                    let arcMatched = false;
+                    if (arc.title.toLowerCase().includes(q) || sagaTitleMatch) {
+                        arcMatched = true;
+                    } else {
+                        for (let i = arc.start; i <= arc.end; i++) {
+                            const epStr = i.toString();
+                            const epTitle = getEpisodeTitle(i).toLowerCase();
+                            if (epStr === q || epTitle.includes(q)) {
+                                arcMatched = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (arcMatched) {
+                        if (!sagasToApp.includes(saga.id)) sagasToApp.push(saga.id);
+                        if (!arcsToApp.includes(arc.id)) arcsToApp.push(arc.id);
+                    }
+                });
+            });
+
+            if (sagasToApp.length > 0) {
+                setExpandedSagas(prev => Array.from(new Set([...prev, ...sagasToApp])));
+            }
+            if (arcsToApp.length > 0) {
+                setExpandedArcs(prev => Array.from(new Set([...prev, ...arcsToApp])));
+            }
+        }
+    }, [searchQuery]);
 
     // --- Statistics ---
     const stats = useMemo(() => {
@@ -467,17 +566,59 @@ export default function App() {
         };
     }, [watchedEpisodes, watchedMovies]);
 
+    const gamerRank = useMemo(() => {
+        const total = stats.canonWatched + stats.fillerWatched;
+        if (total === 0) return { title: 'Tukang Pel (Rookie)', color: 'text-neutral-500' };
+        if (total < 100) return { title: 'Kadet Berani', color: 'text-blue-500' };
+        if (total < 300) return { title: 'Kapten Bajak Laut', color: 'text-green-500' };
+        if (total < 500) return { title: 'Supernova', color: 'text-amber-500' };
+        if (total < 800) return { title: 'Shichibukai', color: 'text-purple-500' };
+        if (total < 1000) return { title: 'Komandan Yonko', color: 'text-rose-500' };
+        return { title: 'Yonko / Raja Bajak Laut', color: 'text-red-500 drop-shadow-md' };
+    }, [stats]);
+
     const filteredEps = useMemo(() => {
         return SAGA_DATA.map(saga => ({
             ...saga,
             arcs: saga.arcs.filter(arc => {
-                const matchesSearch = arc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    saga.title.toLowerCase().includes(searchQuery.toLowerCase());
+                const q = searchQuery.toLowerCase().trim();
+                let matchesSearch = false;
+
+                if (q === '') {
+                    matchesSearch = true;
+                } else {
+                    if (arc.title.toLowerCase().includes(q) || saga.title.toLowerCase().includes(q)) {
+                        matchesSearch = true;
+                    } else {
+                        for (let i = arc.start; i <= arc.end; i++) {
+                            const epStr = i.toString();
+                            const epTitle = getEpisodeTitle(i).toLowerCase();
+                            if (epStr === q || epTitle.includes(q)) {
+                                matchesSearch = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 const matchesFiller = showFiller || (arc.type !== 'Filler' && arc.type !== 'Special/Crossover');
-                return matchesSearch && matchesFiller;
+
+                let notFullyWatched = true;
+                if (hideWatched) {
+                    let allWatched = true;
+                    for (let i = arc.start; i <= arc.end; i++) {
+                        if (!watchedEpisodes.includes(`ep-${i}`)) {
+                            allWatched = false;
+                            break;
+                        }
+                    }
+                    if (allWatched) notFullyWatched = false;
+                }
+
+                return matchesSearch && matchesFiller && notFullyWatched;
             })
         })).filter(saga => saga.arcs.length > 0);
-    }, [searchQuery, showFiller]);
+    }, [searchQuery, showFiller, hideWatched, watchedEpisodes]);
 
     const filteredMovies = useMemo(() => {
         return MOVIE_DATA.filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -505,20 +646,53 @@ export default function App() {
         return `${Math.min(...starts)} - ${Math.max(...ends)}`;
     };
 
+    const exportImage = async () => {
+        setIsExporting(true);
+        // Beri waktu sebentar agar flag isExporting memicu re-render judul di poster
+        setTimeout(async () => {
+            const element = document.getElementById('stats-poster');
+            if (!element) {
+                setIsExporting(false);
+                return;
+            }
+
+            try {
+                const dataUrl = await htmlToImage.toPng(element, {
+                    backgroundColor: isDarkMode ? '#0a0a0a' : '#fafafa',
+                    pixelRatio: 3,
+                    skipFonts: true,
+                    style: { transform: 'scale(1)', transformOrigin: 'top left' }
+                });
+                const link = document.createElement('a');
+                link.download = `OnePieceTracker_${gamerRank.title.replace(/\s+/g, '_')}.png`;
+                link.href = dataUrl;
+                link.click();
+
+                setTimeout(() => {
+                    fireConfetti();
+                }, 300);
+            } catch (e) {
+                console.error('Error exporting image', e);
+            } finally {
+                setIsExporting(false);
+            }
+        }, 100);
+    };
+
     const theme = {
-        bg: isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900',
-        header: isDarkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-slate-200',
-        card: isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm',
-        hover: isDarkMode ? 'hover:bg-slate-800/50' : 'hover:bg-slate-100/50',
-        input: isDarkMode ? 'bg-slate-800 text-slate-100 placeholder:text-slate-500' : 'bg-white text-slate-900 placeholder:text-slate-400 border-slate-200 border',
-        muted: isDarkMode ? 'text-slate-400' : 'text-slate-500',
-        border: isDarkMode ? 'border-slate-700/60' : 'border-slate-200',
-        dropdownBg: isDarkMode ? 'bg-slate-950/50' : 'bg-slate-50',
+        bg: isDarkMode ? 'bg-neutral-950 text-neutral-100' : 'bg-neutral-50 text-neutral-900',
+        header: isDarkMode ? 'bg-neutral-900/95 border-neutral-800' : 'bg-white/95 border-neutral-200',
+        card: isDarkMode ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200 shadow-sm',
+        hover: isDarkMode ? 'hover:bg-neutral-800/50' : 'hover:bg-neutral-100/50',
+        input: isDarkMode ? 'bg-neutral-800 text-neutral-100 placeholder:text-neutral-500' : 'bg-white text-neutral-900 placeholder:text-neutral-400 border-neutral-200 border',
+        muted: isDarkMode ? 'text-neutral-400' : 'text-neutral-500',
+        border: isDarkMode ? 'border-neutral-700/60' : 'border-neutral-200',
+        dropdownBg: isDarkMode ? 'bg-neutral-950/50' : 'bg-neutral-50',
     };
 
     if (loading) {
         return (
-            <div className={`min-h-screen flex items-center justify-center transition-colors duration-500 ${isDarkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
+            <div className={`min-h-screen flex items-center justify-center transition-colors duration-500 ${isDarkMode ? 'bg-neutral-950' : 'bg-neutral-50'}`}>
                 <div className="flex flex-col items-center gap-4 text-red-600 animate-pulse">
                     <Ship size={64} className="animate-bounce" />
                     <p className="font-bold text-xl uppercase tracking-widest text-center bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text">Menyiapkan Logbook...</p>
@@ -531,12 +705,12 @@ export default function App() {
         <div className={`min-h-screen font-sans selection:bg-amber-500/30 transition-colors duration-500 flex flex-col lg:flex-row-reverse ${theme.bg}`}>
 
 
-            {/* Mobile Menu FAB */}
+            {/* Menu FAB */}
             {!isSidebarOpen && (
                 <button
                     onClick={() => setIsSidebarOpen(true)}
-                    className="lg:hidden fixed bottom-6 right-6 z-40 p-4 rounded-2xl bg-gradient-to-br from-red-600 to-amber-500 text-white shadow-2xl shadow-red-500/30 transition-transform hover:scale-110 active:scale-95 flex items-center justify-center border border-white/20"
-                    title="Menu Utama"
+                    className="fixed bottom-6 right-6 z-40 p-4 rounded-2xl bg-gradient-to-br from-red-600 to-amber-500 text-white shadow-2xl shadow-red-500/30 transition-transform hover:scale-110 active:scale-95 flex items-center justify-center border border-white/20"
+                    title="Buka Menu"
                 >
                     <Menu size={26} strokeWidth={2.5} />
                 </button>
@@ -544,135 +718,157 @@ export default function App() {
 
             {/* Mobile Overlay */}
             {isSidebarOpen && (
-                <div className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
+                <div className="fixed inset-0 bg-black/80 z-40 lg:hidden backdrop-blur-md transition-all duration-300" onClick={() => setIsSidebarOpen(false)} />
             )}
 
             {/* Sidebar / Header */}
-            <aside className={`fixed inset-y-0 right-0 z-50 w-full lg:w-[360px] lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-l backdrop-blur-2xl shadow-2xl transition-transform duration-300 transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} lg:translate-x-0 overflow-y-auto ${theme.header}`}>
-                <div className="p-4 sm:p-5 lg:p-6 flex flex-col min-h-full">
+            <aside className={`fixed inset-y-0 right-0 z-50 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-l backdrop-blur-3xl shadow-2xl transition-all duration-500 overflow-hidden ${isSidebarOpen ? 'w-full lg:w-[380px] translate-x-0 opacity-100' : 'w-full lg:w-0 translate-x-full lg:translate-x-0 opacity-0 lg:border-none'} ${isDarkMode ? 'bg-neutral-950/90 border-neutral-800/50' : 'bg-white/95 border-neutral-200'}`}>
+                <div className="w-[100vw] lg:w-[380px] p-5 sm:p-6 lg:p-8 flex flex-col min-h-full scrollbar-hidden overflow-y-auto">
                     {/* Brand & Theme */}
-                    <div className="flex items-center justify-between mb-5 sm:mb-6">
+                    <div className="flex items-center justify-between mb-8 sm:mb-10">
                         <div>
-                            <span className="text-xl sm:text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-slate-100">Menu Utama</span>
+                            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.3em] text-neutral-400 dark:text-neutral-500 mb-1 block">Logbook Navigation</span>
+                            <span className={`text-xl sm:text-2xl font-black uppercase tracking-tight drop-shadow-sm transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-neutral-800'}`}>Menu Utama</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <button onClick={toggleDarkMode} className={`p-2.5 rounded-2xl transition-all ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700 text-yellow-400' : 'bg-slate-100 hover:bg-slate-200 text-slate-600'}`}>
+                        <div className="flex items-center gap-3">
+                            <button onClick={toggleDarkMode} className={`p-3 rounded-[1.25rem] transition-all duration-300 hover:scale-110 active:scale-95 ${isDarkMode ? 'bg-neutral-800/80 border border-neutral-700/50 text-yellow-400 shadow-lg shadow-yellow-500/5' : 'bg-neutral-100 border border-neutral-200 text-neutral-600 shadow-sm'}`}>
                                 {isDarkMode ? <Sun size={20} strokeWidth={2.5} /> : <Moon size={20} strokeWidth={2.5} />}
                             </button>
-                            <button onClick={() => setIsSidebarOpen(false)} className={`lg:hidden p-2.5 rounded-2xl transition-all ${isDarkMode ? 'bg-red-900/40 text-red-400 hover:bg-red-900/60' : 'bg-red-100 hover:bg-red-200 text-red-600'}`}>
+                            <button onClick={() => setIsSidebarOpen(false)} className={`p-3 rounded-[1.25rem] transition-all duration-300 hover:scale-110 active:scale-95 ${isDarkMode ? 'bg-red-900/30 border border-red-800/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 border border-red-100 text-red-600'}`}>
                                 <X size={20} strokeWidth={2.5} />
                             </button>
                         </div>
                     </div>
 
                     {/* Navigation / Search Controls */}
-                    <div className="flex flex-col gap-2.5 mb-5 sm:mb-6">
+                    <div className="flex flex-col mb-5 sm:mb-6">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                            <Search className="absolute left-3 top-1/2 -tranneutral-y-1/2 text-neutral-400" size={16} />
                             <input type="text" placeholder="Temukan Arc/Saga..." className={`w-full rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-amber-500 transition-all outline-none ${theme.input}`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                         </div>
-                        <button onClick={() => { continueWatching(); setIsSidebarOpen(false); }} className="bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-red-500/20 w-full shrink-0">
-                            <Ship size={18} className="shrink-0" />
-                            <span className="truncate">Lanjut Petualangan!</span>
-                        </button>
                     </div>
 
-                    {/* Compact Stats Section */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 sm:gap-2.5 mb-2">
-                        {/* Canon Stats */}
-                        <div className={`p-3 sm:p-3.5 rounded-[1.25rem] border transition-all hover:scale-[1.02] shadow-sm ${isDarkMode ? 'bg-red-950/20 border-red-500/20 shadow-red-500/5' : 'bg-red-50/80 border-red-100 shadow-red-500/5'}`}>
-                            <div className="flex items-center gap-3 mb-2 sm:mb-2.5">
-                                <div className={`p-1.5 sm:p-2 rounded-xl shrink-0 ${isDarkMode ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-600'}`}>
-                                    <Trophy size={14} strokeWidth={2.5} />
-                                </div>
-                                <div className="flex-1 min-w-0 flex flex-wrap items-center justify-between gap-y-0.5 gap-x-2">
-                                    <h4 className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider leading-tight ${isDarkMode ? 'text-red-400' : 'text-red-700'}`}>
-                                        Cerita Utama
-                                    </h4>
-                                    <div className="flex flex-col items-end shrink-0 ml-auto">
-                                        <span className={`text-[13px] sm:text-sm font-black leading-none ${isDarkMode ? 'text-red-500' : 'text-red-700'}`}>{stats.canonPercent}%</span>
-                                        <span className={`text-[8px] font-bold tracking-widest uppercase mt-1 ${isDarkMode ? 'text-red-500/80' : 'text-red-700/60'}`}>{stats.canonWatched} / {stats.canonTotal} Ep</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-red-950/50 shadow-inner border border-red-900/30' : 'bg-red-200/50'}`}>
-                                <div className="h-full rounded-full bg-gradient-to-r from-red-400 to-red-600 transition-all duration-1000" style={{ width: `${stats.canonPercent}%` }} />
-                            </div>
-                        </div>
+                    {/* Compact Stats Section / Poster Export */}
+                    <div id="stats-poster" className={`transition-all duration-300 ${isExporting ? 'p-6 rounded-3xl bg-neutral-50 dark:bg-neutral-950 shadow-2xl min-w-[360px]' : ''}`}>
 
-                        {/* Saga Stats */}
-                        <div className={`p-3 sm:p-3.5 rounded-[1.25rem] border transition-all hover:scale-[1.02] shadow-sm ${isDarkMode ? 'bg-amber-950/20 border-amber-500/20 shadow-amber-500/5' : 'bg-amber-50/80 border-amber-100 shadow-amber-500/5'}`}>
-                            <div className="flex items-center gap-3 mb-2 sm:mb-2.5">
-                                <div className={`p-1.5 sm:p-2 rounded-xl shrink-0 ${isDarkMode ? 'bg-amber-900/40 text-amber-400' : 'bg-amber-100 text-amber-600'}`}>
-                                    <Compass size={14} strokeWidth={2.5} />
-                                </div>
-                                <div className="flex-1 min-w-0 flex flex-wrap items-center justify-between gap-y-0.5 gap-x-2">
-                                    <h4 className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider leading-tight ${isDarkMode ? 'text-amber-400' : 'text-amber-700'}`}>
-                                        Saga Tamat
-                                    </h4>
-                                    <div className="flex flex-col items-end shrink-0 ml-auto">
-                                        <span className={`text-[13px] sm:text-sm font-black leading-none ${isDarkMode ? 'text-amber-500' : 'text-amber-700'}`}>{stats.sagasPercent}%</span>
-                                        <span className={`text-[8px] font-bold tracking-widest uppercase mt-1 ${isDarkMode ? 'text-amber-500/80' : 'text-amber-700/60'}`}>{stats.sagasWatched} / {stats.sagasTotal} Saga</span>
+                        {/* Judul & Pangkat Khusus untuk Hasil Export Poster */}
+                        {isExporting && (
+                            <div className="flex items-center gap-4 mb-6 pb-4 border-b border-neutral-200 dark:border-neutral-800">
+                                <img src="/mugiwara-logo.png" className="w-12 h-12 object-contain drop-shadow-sm" alt="Logo" />
+                                <div className="flex-1">
+                                    <h3 className="text-[18px] font-black uppercase tracking-tight bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none pb-1">One Piece Tracker</h3>
+                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${isDarkMode ? 'bg-neutral-800 text-neutral-400' : 'bg-neutral-200 text-neutral-500'}`}>Pangkat</span>
+                                        <span className={`text-[11px] font-black uppercase tracking-widest pt-0.5 ${gamerRank.color}`}>{gamerRank.title}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-amber-950/50 shadow-inner border border-amber-900/30' : 'bg-amber-200/50'}`}>
-                                <div className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500 transition-all duration-1000" style={{ width: `${stats.sagasPercent}%` }} />
-                            </div>
-                        </div>
+                        )}
 
-                        {/* Filler Stats */}
-                        <div className={`p-3 sm:p-3.5 rounded-[1.25rem] border transition-all hover:scale-[1.02] shadow-sm ${isDarkMode ? 'bg-slate-800/20 border-slate-700 shadow-black/10' : 'bg-slate-50 border-slate-200 shadow-slate-500/5'}`}>
-                            <div className="flex items-center gap-3 mb-2 sm:mb-2.5">
-                                <div className={`p-1.5 sm:p-2 rounded-xl shrink-0 ${isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-200 text-slate-500'}`}>
-                                    <Skull size={14} strokeWidth={2.5} />
-                                </div>
-                                <div className="flex-1 min-w-0 flex flex-wrap items-center justify-between gap-y-0.5 gap-x-2">
-                                    <h4 className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider leading-tight ${isDarkMode ? 'text-slate-400' : 'text-slate-700'}`}>
-                                        Filler Tontonan
-                                    </h4>
-                                    <div className="flex flex-col items-end shrink-0 ml-auto">
-                                        <span className={`text-[13px] sm:text-sm font-black leading-none ${isDarkMode ? 'text-slate-400' : 'text-slate-700'}`}>{stats.fillerPercent}%</span>
-                                        <span className={`text-[8px] font-bold tracking-widest uppercase mt-1 ${isDarkMode ? 'text-slate-500/80' : 'text-slate-600/60'}`}>{stats.fillerWatched} / {stats.fillerTotal} Ep</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 sm:gap-2.5 mb-2">
+                            {/* Canon Stats */}
+                            <div className={`p-3 sm:p-3.5 rounded-[1.25rem] border transition-all hover:scale-[1.02] shadow-sm ${isDarkMode ? 'bg-red-950/20 border-red-500/20 shadow-red-500/5' : 'bg-red-50/80 border-red-100 shadow-red-500/5'}`}>
+                                <div className="flex items-center gap-3 mb-2 sm:mb-2.5">
+                                    <div className={`p-1.5 sm:p-2 rounded-xl shrink-0 ${isDarkMode ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-600'}`}>
+                                        <Trophy size={14} strokeWidth={2.5} />
+                                    </div>
+                                    <div className="flex-1 min-w-0 flex flex-wrap items-center justify-between gap-y-0.5 gap-x-2">
+                                        <h4 className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider leading-tight ${isDarkMode ? 'text-red-400' : 'text-red-700'}`}>
+                                            Cerita Utama
+                                        </h4>
+                                        <div className="flex flex-col items-end shrink-0 ml-auto">
+                                            <span className={`text-[13px] sm:text-sm font-black leading-none ${isDarkMode ? 'text-red-500' : 'text-red-700'}`}>{stats.canonPercent}%</span>
+                                            <span className={`text-[8px] font-bold tracking-widest uppercase mt-1 ${isDarkMode ? 'text-red-500/80' : 'text-red-700/60'}`}>{stats.canonWatched} / {stats.canonTotal} Ep</span>
+                                        </div>
                                     </div>
                                 </div>
+                                <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-red-950/50 shadow-inner border border-red-900/30' : 'bg-red-200/50'}`}>
+                                    <div className="h-full rounded-full bg-gradient-to-r from-red-400 to-red-600 transition-all duration-1000" style={{ width: `${stats.canonPercent}%` }} />
+                                </div>
                             </div>
-                            <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-900/50 shadow-inner border border-slate-800/30' : 'bg-slate-200/60'}`}>
-                                <div className="h-full rounded-full bg-slate-400 transition-all duration-1000" style={{ width: `${stats.fillerPercent}%` }} />
-                            </div>
-                        </div>
 
-                        {/* Movie Stats */}
-                        <div className={`p-3 sm:p-3.5 rounded-[1.25rem] border transition-all hover:scale-[1.02] shadow-sm ${isDarkMode ? 'bg-indigo-950/20 border-indigo-500/20 shadow-indigo-500/5' : 'bg-indigo-50/80 border-indigo-100 shadow-indigo-500/5'}`}>
-                            <div className="flex items-center gap-3 mb-2 sm:mb-2.5">
-                                <div className={`p-1.5 sm:p-2 rounded-xl shrink-0 ${isDarkMode ? 'bg-indigo-900/40 text-indigo-400' : 'bg-indigo-100 text-indigo-600'}`}>
-                                    <Film size={14} strokeWidth={2.5} />
-                                </div>
-                                <div className="flex-1 min-w-0 flex flex-wrap items-center justify-between gap-y-0.5 gap-x-2">
-                                    <h4 className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider leading-tight ${isDarkMode ? 'text-indigo-400' : 'text-indigo-700'}`}>
-                                        Film Layar Lebar
-                                    </h4>
-                                    <div className="flex flex-col items-end shrink-0 ml-auto">
-                                        <span className={`text-[13px] sm:text-sm font-black leading-none ${isDarkMode ? 'text-indigo-500' : 'text-indigo-700'}`}>{stats.moviePercent}%</span>
-                                        <span className={`text-[8px] font-bold tracking-widest uppercase mt-1 ${isDarkMode ? 'text-indigo-500/80' : 'text-indigo-700/60'}`}>{stats.movieWatched} / {stats.movieTotal} Film</span>
+                            {/* Saga Stats */}
+                            <div className={`p-3 sm:p-3.5 rounded-[1.25rem] border transition-all hover:scale-[1.02] shadow-sm ${isDarkMode ? 'bg-amber-950/20 border-amber-500/20 shadow-amber-500/5' : 'bg-amber-50/80 border-amber-100 shadow-amber-500/5'}`}>
+                                <div className="flex items-center gap-3 mb-2 sm:mb-2.5">
+                                    <div className={`p-1.5 sm:p-2 rounded-xl shrink-0 ${isDarkMode ? 'bg-amber-900/40 text-amber-400' : 'bg-amber-100 text-amber-600'}`}>
+                                        <Compass size={14} strokeWidth={2.5} />
+                                    </div>
+                                    <div className="flex-1 min-w-0 flex flex-wrap items-center justify-between gap-y-0.5 gap-x-2">
+                                        <h4 className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider leading-tight ${isDarkMode ? 'text-amber-400' : 'text-amber-700'}`}>
+                                            Saga Tamat
+                                        </h4>
+                                        <div className="flex flex-col items-end shrink-0 ml-auto">
+                                            <span className={`text-[13px] sm:text-sm font-black leading-none ${isDarkMode ? 'text-amber-500' : 'text-amber-700'}`}>{stats.sagasPercent}%</span>
+                                            <span className={`text-[8px] font-bold tracking-widest uppercase mt-1 ${isDarkMode ? 'text-amber-500/80' : 'text-amber-700/60'}`}>{stats.sagasWatched} / {stats.sagasTotal} Saga</span>
+                                        </div>
                                     </div>
                                 </div>
+                                <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-amber-950/50 shadow-inner border border-amber-900/30' : 'bg-amber-200/50'}`}>
+                                    <div className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500 transition-all duration-1000" style={{ width: `${stats.sagasPercent}%` }} />
+                                </div>
                             </div>
-                            <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-indigo-950/50 shadow-inner border border-indigo-900/30' : 'bg-indigo-200/50'}`}>
-                                <div className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600 transition-all duration-1000" style={{ width: `${stats.moviePercent}%` }} />
+
+                            {/* Filler Stats */}
+                            <div className={`p-3 sm:p-3.5 rounded-[1.25rem] border transition-all hover:scale-[1.02] shadow-sm ${isDarkMode ? 'bg-neutral-800/20 border-neutral-700 shadow-black/10' : 'bg-neutral-50 border-neutral-200 shadow-neutral-500/5'}`}>
+                                <div className="flex items-center gap-3 mb-2 sm:mb-2.5">
+                                    <div className={`p-1.5 sm:p-2 rounded-xl shrink-0 ${isDarkMode ? 'bg-neutral-800 text-neutral-400' : 'bg-neutral-200 text-neutral-500'}`}>
+                                        <Skull size={14} strokeWidth={2.5} />
+                                    </div>
+                                    <div className="flex-1 min-w-0 flex flex-wrap items-center justify-between gap-y-0.5 gap-x-2">
+                                        <h4 className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider leading-tight ${isDarkMode ? 'text-neutral-400' : 'text-neutral-700'}`}>
+                                            Filler Tontonan
+                                        </h4>
+                                        <div className="flex flex-col items-end shrink-0 ml-auto">
+                                            <span className={`text-[13px] sm:text-sm font-black leading-none ${isDarkMode ? 'text-neutral-400' : 'text-neutral-700'}`}>{stats.fillerPercent}%</span>
+                                            <span className={`text-[8px] font-bold tracking-widest uppercase mt-1 ${isDarkMode ? 'text-neutral-500/80' : 'text-neutral-600/60'}`}>{stats.fillerWatched} / {stats.fillerTotal} Ep</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-neutral-900/50 shadow-inner border border-neutral-800/30' : 'bg-neutral-200/60'}`}>
+                                    <div className="h-full rounded-full bg-neutral-400 transition-all duration-1000" style={{ width: `${stats.fillerPercent}%` }} />
+                                </div>
+                            </div>
+
+                            {/* Movie Stats */}
+                            <div className={`p-3 sm:p-3.5 rounded-[1.25rem] border transition-all hover:scale-[1.02] shadow-sm ${isDarkMode ? 'bg-indigo-950/20 border-indigo-500/20 shadow-indigo-500/5' : 'bg-indigo-50/80 border-indigo-100 shadow-indigo-500/5'}`}>
+                                <div className="flex items-center gap-3 mb-2 sm:mb-2.5">
+                                    <div className={`p-1.5 sm:p-2 rounded-xl shrink-0 ${isDarkMode ? 'bg-indigo-900/40 text-indigo-400' : 'bg-indigo-100 text-indigo-600'}`}>
+                                        <Film size={14} strokeWidth={2.5} />
+                                    </div>
+                                    <div className="flex-1 min-w-0 flex flex-wrap items-center justify-between gap-y-0.5 gap-x-2">
+                                        <h4 className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider leading-tight ${isDarkMode ? 'text-indigo-400' : 'text-indigo-700'}`}>
+                                            Film Layar Lebar
+                                        </h4>
+                                        <div className="flex flex-col items-end shrink-0 ml-auto">
+                                            <span className={`text-[13px] sm:text-sm font-black leading-none ${isDarkMode ? 'text-indigo-500' : 'text-indigo-700'}`}>{stats.moviePercent}%</span>
+                                            <span className={`text-[8px] font-bold tracking-widest uppercase mt-1 ${isDarkMode ? 'text-indigo-500/80' : 'text-indigo-700/60'}`}>{stats.movieWatched} / {stats.movieTotal} Film</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-indigo-950/50 shadow-inner border border-indigo-900/30' : 'bg-indigo-200/50'}`}>
+                                    <div className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600 transition-all duration-1000" style={{ width: `${stats.moviePercent}%` }} />
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <button onClick={exportImage} disabled={isExporting} className="mt-1 mb-4 w-full flex items-center justify-center gap-2 p-3.5 rounded-2xl bg-gradient-to-r from-orange-500/10 to-red-500/10 hover:from-orange-500/20 hover:to-red-500/20 text-orange-600 dark:text-orange-500 transition-all font-black text-[11px] uppercase tracking-widest border border-orange-500/20 hover:border-orange-500/40 hover:scale-[1.02] active:scale-95 shadow-sm">
+                        {isExporting ? (
+                            <div className="w-4 h-4 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+                        ) : (
+                            <><Camera size={18} strokeWidth={2.5} /> Pamer Hasil!</>
+                        )}
+                    </button>
 
                     {/* Device Persistence Card */}
                     <div className="mt-auto flex flex-col pt-3 sm:pt-4 pb-2 shrink-0">
-                        <div className={`p-4 rounded-[1.25rem] border transition-all flex flex-col gap-3.5 ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-slate-50/50 border-slate-200 shadow-sm'}`}>
+                        <div className={`p-4 rounded-[1.25rem] border transition-all flex flex-col gap-3.5 ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-neutral-50/50 border-neutral-200 shadow-sm'}`}>
                             <div className="flex items-center justify-between gap-2">
-                                <span className={`flex-1 min-w-0 flex items-center gap-2.5 text-xs font-black uppercase tracking-[0.15em] ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                                <span className={`flex-1 min-w-0 flex items-center gap-2.5 text-xs font-black uppercase tracking-[0.15em] ${isDarkMode ? 'text-neutral-300' : 'text-neutral-600'}`}>
                                     <Compass size={16} className="text-amber-500 shrink-0" strokeWidth={2.5} />
                                     <span className="truncate">{deviceInfo.os}</span>
                                 </span>
-                                <div className={`flex items-center gap-3.5 border-l-[1.5px] pl-3 sm:pl-3.5 shrink-0 h-7 ${isDarkMode ? 'border-slate-700/50' : 'border-slate-800'}`}>
+                                <div className={`flex items-center gap-3.5 border-l-[1.5px] pl-3 sm:pl-3.5 shrink-0 h-7 ${isDarkMode ? 'border-neutral-700/50' : 'border-neutral-800'}`}>
                                     <button onClick={exportProgress} title="Cadangkan Data" className={`flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'text-amber-500 hover:text-amber-400' : 'text-amber-600 hover:text-amber-500'}`}>
                                         <Download size={14} strokeWidth={2.5} />
                                         <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">Export</span>
@@ -684,7 +880,7 @@ export default function App() {
                                     </label>
                                 </div>
                             </div>
-                            <p className="text-[9px] font-black uppercase text-slate-400 leading-relaxed tracking-wider">
+                            <p className="text-[9px] font-black uppercase text-neutral-400 leading-relaxed tracking-wider">
                                 Data tersimpan otomatis di browser ini. Cadangkan ke .json jika ingin pindah perangkat.
                             </p>
                         </div>
@@ -693,209 +889,274 @@ export default function App() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 w-full max-w-5xl mx-auto px-4 lg:px-10 py-8 pb-32 lg:overflow-y-auto">
-                {/* Global Header & Toggles */}
-                <div className={`flex flex-col md:flex-row md:items-end justify-between gap-5 lg:gap-4 mb-6 ${sagaViewMode === 'card' && activeTab === 'episodes' ? 'md:col-span-2' : ''}`}>
-                    <div className="flex items-center gap-3 lg:gap-4 flex-1 min-w-0">
-                        <img src="/mugiwara-logo.png" alt="Mugiwara Logo" className="w-[12vw] max-w-[48px] h-auto lg:max-w-none lg:w-14 lg:h-14 object-contain drop-shadow-sm shrink-0" />
-                        <div className="flex-1 min-w-0 flex flex-col justify-center">
-                            <h2 className="text-[5.5vw] sm:text-2xl lg:text-4xl font-black uppercase tracking-tight bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none pb-0.5 truncate">
-                                {activeTab === 'episodes' ? 'One Piece Tracker' : 'Movie Logbook'}
-                            </h2>
-                            <p className={`text-[2.5vw] sm:text-[10px] lg:text-xs font-bold uppercase tracking-widest ${theme.muted} truncate leading-tight`}>
-                                {activeTab === 'episodes' ? 'Catat Jejak Perjalanan Cerita One Piece' : 'Koleksi Film Layar Lebar'}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 sm:gap-3 self-start md:self-end shrink-0 w-full md:w-auto">
-                        {/* Type Toggle */}
-                        <div className="flex flex-1 md:flex-none p-1 bg-slate-200 dark:bg-slate-800 rounded-lg shadow-inner min-w-0">
-                            <button onClick={() => setActiveTab('episodes')} className={`flex-1 md:flex-none px-2 sm:px-4 py-1.5 text-[10px] sm:text-xs font-bold uppercase rounded-md transition-all truncate ${activeTab === 'episodes' ? 'bg-white dark:bg-slate-700 shadow-sm text-red-600' : 'opacity-50 hover:opacity-100 text-slate-500'}`}>
-                                SAGA
-                            </button>
-                            <button onClick={() => setActiveTab('movies')} className={`flex-1 md:flex-none px-2 sm:px-4 py-1.5 text-[10px] sm:text-xs font-bold uppercase rounded-md transition-all truncate ${activeTab === 'movies' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-indigo-400' : 'opacity-50 hover:opacity-100 text-slate-500'}`}>
-                                MOVIE
-                            </button>
-                        </div>
-
-                        {/* Layout Toggle (Saga Only) */}
-                        {activeTab === 'episodes' && (
-                            <div className="flex p-1 bg-slate-200 dark:bg-slate-800 rounded-lg shadow-inner shrink-0">
-                                <button onClick={() => setSagaViewMode('list')} className={`p-1.5 rounded-md transition-all ${sagaViewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow-sm text-red-600' : 'opacity-50 hover:opacity-100 text-slate-500'}`}>
-                                    <List size={16} />
-                                </button>
-                                <button onClick={() => setSagaViewMode('card')} className={`p-1.5 rounded-md transition-all ${sagaViewMode === 'card' ? 'bg-white dark:bg-slate-700 shadow-sm text-red-600' : 'opacity-50 hover:opacity-100 text-slate-500'}`}>
-                                    <LayoutGrid size={16} />
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {activeTab === 'episodes' ? (
-                    <div className={sagaViewMode === 'card' ? 'grid grid-cols-1 md:grid-cols-2 gap-4 items-start' : 'space-y-4'}>
-                        {filteredEps.map((saga) => (
-                            <section key={saga.id} className={`rounded-[1.25rem] overflow-hidden border transition-all duration-300 ${theme.card} ${sagaViewMode === 'card' && expandedSagas.includes(saga.id) ? 'md:col-span-2' : ''}`}>
-                                <div className={`cursor-pointer ${sagaViewMode === 'card' ? 'p-4 sm:p-5' : 'p-3 sm:px-4'} ${theme.hover}`} onClick={() => toggleSaga(saga.id)}>
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1 min-w-0 pr-3">
-                                            <div className={sagaViewMode === 'list' ? 'flex items-center gap-3' : ''}>
-                                                <div className="flex items-center gap-2 mb-0.5">
-                                                    <span className="text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"> Saga </span>
-                                                    <span className={`text-[10px] font-bold ${theme.muted} ${sagaViewMode === 'list' ? 'hidden sm:inline' : ''}`}> {getSagaRange(saga)} </span>
-                                                </div>
-                                                <h2 className={`${sagaViewMode === 'card' ? 'text-lg sm:text-xl' : 'text-[15px] sm:text-base'} font-black truncate`}>{saga.title}</h2>
-                                                {sagaViewMode === 'card' && <p className={`text-[11px] font-medium leading-relaxed mt-1 line-clamp-2 ${theme.muted}`}> {saga.description} </p>}
-                                            </div>
-                                        </div>
-
-                                        {/* Expand Toggle */}
-                                        <div className={`p-1.5 rounded-xl shrink-0 mt-0.5 ${isDarkMode ? 'bg-slate-800' : 'bg-slate-100'}`}>
-                                            {expandedSagas.includes(saga.id) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                                        </div>
+            <main className="flex-1 w-full max-w-5xl mx-auto px-4 lg:px-10 pb-10 relative">
+                <div className={`sticky -top-0.5 z-40 pt-2 sm:pt-4 pb-2 sm:pb-4 -mx-4 px-4 lg:-mx-10 lg:px-10 transition-all duration-300 ${isDarkMode ? 'bg-neutral-950/90 backdrop-blur-xl' : 'bg-neutral-50/90 backdrop-blur-xl'}`}>
+                    <div className="flex flex-col gap-2 sm:gap-4">
+                        {/* Header Row 1: Brand & Switcher */}
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+                                <img src="/mugiwara-logo.png" alt="Logo" className="w-8 h-8 sm:w-12 sm:h-12 object-contain drop-shadow-sm shrink-0" />
+                                <div className="min-w-0">
+                                    <h2 className={`text-xs sm:text-lg lg:text-3xl font-black uppercase tracking-tight bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none truncate`}>
+                                        {activeTab === 'episodes' ? 'One Piece Tracker' : 'Movie Archive'}
+                                    </h2>
+                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                        <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-widest px-1 py-0.5 rounded border ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-neutral-400' : 'bg-neutral-100 border-neutral-200 text-neutral-500'} shrink-0`}>Rank</span>
+                                        <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-widest pt-0.5 truncate ${gamerRank.color}`}>{gamerRank.title}</span>
                                     </div>
+                                </div>
+                            </div>
 
-                                    {/* Saga Progress Bar */}
-                                    {(() => {
-                                        const progress = getSagaProgress(saga);
-                                        const finished = progress.count === progress.total;
-                                        return (
-                                            <div className={`flex items-center gap-3 ${sagaViewMode === 'card' ? 'mt-4 pt-4 border-t' : 'mt-2 pl-0 sm:pl-[72px]'} ${theme.border}`}>
-                                                <button onClick={(e) => toggleSagaComplete(saga, e)} className={`flex-shrink-0 transition-all hover:scale-110 active:scale-95 ${finished ? 'text-green-500' : 'text-slate-300'}`}>
-                                                    {finished ? <CheckCircle2 size={24} className="text-green-500 bg-white dark:bg-transparent rounded-full" /> : <Circle size={24} />}
-                                                </button>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center justify-between text-[9px] font-bold mb-1">
-                                                        <span className={theme.muted}>{progress.percent}% Selesai SAGA Ini</span>
-                                                        <span className={theme.muted}>{progress.count} / {progress.total} Misi</span>
-                                                    </div>
-                                                    <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-800' : 'bg-slate-200'}`}>
-                                                        <div className="h-full bg-gradient-to-r from-red-500 to-amber-500 transition-all duration-1000" style={{ width: `${progress.percent}%` }} />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })()}
+                            <div className="flex items-center gap-2">
+                                {/* Compact Tab Switcher */}
+                                <div className={`flex p-0.5 rounded-lg border transition-all ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-neutral-200/50 border-neutral-300'}`}>
+                                    <button onClick={() => setActiveTab('episodes')} className={`px-2 py-1 text-[9px] sm:text-xs font-bold uppercase rounded-md transition-all ${activeTab === 'episodes' ? (isDarkMode ? 'bg-neutral-800 text-red-500 shadow-lg' : 'bg-white text-red-600 shadow-sm') : 'opacity-50 text-neutral-500'}`}>Saga</button>
+                                    <button onClick={() => setActiveTab('movies')} className={`px-2 py-1 text-[9px] sm:text-xs font-bold uppercase rounded-md transition-all ${activeTab === 'movies' ? (isDarkMode ? 'bg-neutral-800 text-indigo-400 shadow-lg' : 'bg-white text-indigo-600 shadow-sm') : 'opacity-50 text-neutral-500'}`}>Movie</button>
                                 </div>
 
-                                {expandedSagas.includes(saga.id) && (
-                                    <div className={`border-t ${theme.border}`}>
-                                        {saga.arcs.map((arc, arcIdx) => {
-                                            const finished = isArcFinished(arc);
-                                            const progress = getArcProgress(arc);
-                                            const isExpanded = expandedArcs.includes(arc.id);
-
-                                            return (
-                                                <div key={arc.id} className={`group ${arcIdx < saga.arcs.length - 1 ? `border-b ${theme.border}` : ''}`} ref={el => { arcRefs.current[arc.id] = el }}>
-                                                    <div className={`flex items-center py-2.5 px-3 sm:py-3 sm:px-4 transition-colors cursor-pointer ${theme.hover}`} onClick={() => toggleArcDropdown(arc.id)}>
-                                                        <button onClick={(e) => toggleArcComplete(arc, e)} className={`flex-shrink-0 mr-3 sm:mr-3.5 transition-all hover:scale-110 active:scale-95 ${finished ? 'text-green-500' : 'text-slate-300'}`}>
-                                                            {finished ? <CheckCircle2 size={22} className="text-green-500" /> : <Circle size={22} />}
-                                                        </button>
-
-                                                        <div className="flex-1 min-w-0 pr-3 sm:pr-4">
-                                                            <h4 className={`font-bold truncate text-sm sm:text-[15px] ${finished ? 'line-through text-slate-400 decoration-green-500/50' : ''}`}> {arc.title} </h4>
-                                                            <div className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-0.5 text-[9.5px] font-bold ${theme.muted}`}>
-                                                                <span className="whitespace-nowrap">Ep {arc.start} - {arc.end}</span>
-                                                                <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                                                                    <div className="flex-1 sm:w-16 sm:flex-none h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                                                                        <div className="h-full bg-red-500" style={{ width: `${(progress.count / progress.total) * 100}%` }} />
-                                                                    </div>
-                                                                    <span className="whitespace-nowrap">{progress.count} / {progress.total}</span>
-                                                                </div>
-                                                                <span className={`px-1 py-0.5 rounded text-[8px] uppercase tracking-tighter ${arc.type === 'Filler' ? 'bg-slate-100 dark:bg-slate-800' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600'} whitespace-nowrap`}> {arc.type} </span>
-                                                            </div>
-                                                        </div>
-                                                        <div className={`p-1 flex-shrink-0 rounded-lg transition-all ${isExpanded ? 'bg-red-500 text-white shadow-md' : theme.muted}`}>
-                                                            {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                                                        </div>
-                                                    </div>
-
-                                                    {isExpanded && (
-                                                        <div className={`border-t ${theme.border} ${theme.dropdownBg}`}>
-                                                            {Array.from({ length: arc.end - arc.start + 1 }, (_, i) => {
-                                                                const epNum = arc.start + i;
-                                                                const isWatched = watchedEpisodes.includes(`ep-${epNum}`);
-                                                                const isLastEp = i === (arc.end - arc.start);
-                                                                return (
-                                                                    <div key={epNum} className={`flex items-center gap-2 sm:gap-4 py-2.5 sm:py-3 px-3 sm:px-5 transition-all group/ep ${isWatched ? 'bg-green-500/5 opacity-90' : ''} ${!isLastEp ? `border-b border-dashed ${theme.border}` : ''}`}>
-                                                                        <div className="flex items-center flex-1 min-w-0 gap-2 sm:gap-3">
-                                                                            <button onClick={() => toggleEpisode(epNum)} className={`flex-shrink-0 transition-all ${isWatched ? 'text-green-500' : theme.muted}`}>
-                                                                                {isWatched ? <CheckCircle2 size={20} className="text-green-500 bg-white dark:bg-transparent rounded-full" /> : <Circle size={20} />}
-                                                                            </button>
-                                                                            <div className={`flex items-center justify-center px-1.5 sm:px-2 min-w-[30px] sm:min-w-[34px] h-[20px] sm:h-[22px] rounded-md border shadow-sm ${isWatched ? 'bg-green-50 border-green-200 text-green-600 dark:bg-green-900/30 dark:border-green-800 dark:text-green-400' : 'bg-white border-slate-200 text-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400'} font-black text-[9px] sm:text-[10px] tracking-tight`}>
-                                                                                {epNum}
-                                                                            </div>
-                                                                            <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleEpisode(epNum)}>
-                                                                                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                                                                                    <h5 className={`text-xs sm:text-[13px] font-bold leading-tight line-clamp-2 sm:line-clamp-none ${isWatched ? 'line-through decoration-green-500/30 text-slate-400' : ''}`}>
-                                                                                        {getEpisodeTitle(epNum)}
-                                                                                    </h5>
-                                                                                    {arc.type === 'Mixed' && (
-                                                                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest shrink-0 ${isFillerEpisode(epNum) 
-                                                                                            ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' 
-                                                                                            : 'bg-red-50 text-red-600 dark:bg-red-900/40 dark:text-red-400'}`}>
-                                                                                            {isFillerEpisode(epNum) ? 'Filler' : 'Canon'}
-                                                                                        </span>
-                                                                                    )}
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <a href={getBilibiliUrl(epNum)} target="_blank" rel="noopener noreferrer" className={`flex-shrink-0 flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] font-black uppercase transition-all border ${isDarkMode ? 'bg-slate-900 border-red-900/50 text-red-400 hover:bg-red-900/30' : 'bg-white border-slate-200 text-red-600 hover:bg-red-50 shadow-sm'} h-8 sm:h-auto`}>
-                                                                            <Play size={12} fill="currentColor" className="sm:mr-1" />
-                                                                            <span className="hidden sm:inline">Nonton</span>
-                                                                            <span className="hidden lg:inline ml-1">di Bilibili</span>
-                                                                            <ExternalLink size={10} className="hidden sm:inline ml-1.5" />
-                                                                        </a>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
+                                {activeTab === 'episodes' && (
+                                    <div className="hidden sm:flex p-0.5 rounded-lg border bg-neutral-100 dark:bg-neutral-900/50 dark:border-neutral-800">
+                                        <button onClick={() => setSagaViewMode('list')} className={`p-1 rounded-md transition-all ${sagaViewMode === 'list' ? 'bg-red-500 text-white shadow-sm' : 'opacity-50 hover:opacity-100'}`}><List size={14} /></button>
+                                        <button onClick={() => setSagaViewMode('card')} className={`p-1 rounded-md transition-all ${sagaViewMode === 'card' ? 'bg-red-500 text-white shadow-sm' : 'opacity-50 hover:opacity-100'}`}><LayoutGrid size={14} /></button>
                                     </div>
                                 )}
-                            </section>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {filteredMovies.map((movie) => (
-                            <div key={movie.id} className={`p-4 rounded-3xl border transition-all flex items-center justify-between group ${watchedMovies.includes(movie.id) ? 'border-green-500 bg-green-500/5' : `${theme.card} ${theme.hover}`}`}>
-                                <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0 pr-2 cursor-pointer" onClick={() => toggleMovie(movie.id)}>
-                                    <div className={`p-3 rounded-2xl flex-shrink-0 ${watchedMovies.includes(movie.id) ? 'bg-green-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
-                                        <Film size={20} />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className={`font-bold truncate text-sm sm:text-base ${watchedMovies.includes(movie.id) ? 'text-green-600 dark:text-green-400' : ''}`}> {movie.title} </h4>
-                                        <p className={`text-[10px] font-bold truncate ${theme.muted}`}> {movie.year} {movie.recommended && '• Rekomendasi'} </p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <a href={`https://www.bilibili.tv/id/search-result?q=One+Piece+${movie.title.replace(' ', '+')}`} target="_blank" rel="noopener noreferrer" className={`p-2 rounded-xl text-red-600 dark:text-red-400`}> <ExternalLink size={16} /></a>
-                                    <div className={watchedMovies.includes(movie.id) ? 'text-green-500' : 'text-slate-300'} onClick={() => toggleMovie(movie.id)}>
-                                        {watchedMovies.includes(movie.id) ? <CheckCircle2 size={24} className="text-green-500" /> : <Circle size={24} />}
-                                    </div>
-                                </div>
                             </div>
-                        ))}
-                    </div>
-                )}
+                        </div>
 
-                <div className="mt-12 flex flex-col items-center gap-4 border-t border-slate-200 dark:border-slate-800 pt-8">
-                    <button onClick={resetProgress} className="flex items-center gap-2 text-xs font-bold text-red-400 hover:text-red-500 transition-all active:scale-95">
-                        <Trash2 size={14} /> Reset Seluruh Log Progres
-                    </button>
-                    <p className="text-[10px] font-bold opacity-30 text-center">Data ini hanya ada di browser {deviceInfo.device} ini. <br /> Simpan file jika ingin pindah perangkat.</p>
+                        {/* Header Row 2: Search & Quick Actions */}
+                        <div className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={14} />
+                                <input type="text" placeholder="Cari Judul, Arc, Episode..." className={`w-full rounded-xl py-2 sm:py-2.5 pl-9 pr-4 text-[11px] sm:text-sm transition-all outline-none focus:ring-2 focus:ring-amber-500 shadow-none border ${isDarkMode ? 'bg-neutral-900 border-neutral-800 text-neutral-100' : 'bg-white border-neutral-200 text-neutral-900 shadow-sm'}`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                                {searchQuery && (
+                                    <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-red-500 transition-colors"><X size={14} strokeWidth={3} /></button>
+                                )}
+                            </div>
+
+                            <div className="flex items-center gap-1.5">
+                                {activeTab === 'episodes' && (
+                                    <>
+                                        <button onClick={() => setShowFiller(!showFiller)} title="Sembunyikan Filler" className={`p-2 rounded-xl border transition-all active:scale-95 ${!showFiller ? 'bg-red-500 border-red-400 text-white shadow-lg shadow-red-500/20' : 'bg-neutral-100 dark:bg-neutral-900 dark:border-neutral-800 text-neutral-400'}`}>
+                                            <Skull size={16} />
+                                        </button>
+                                        <button onClick={() => setHideWatched(!hideWatched)} title="Sembunyikan Selesai" className={`p-2 rounded-xl border transition-all active:scale-95 ${hideWatched ? 'bg-green-600 border-green-500 text-white shadow-lg shadow-green-500/20' : 'bg-neutral-100 dark:bg-neutral-900 dark:border-neutral-800 text-neutral-400'}`}>
+                                            <CheckCircle2 size={16} />
+                                        </button>
+                                        <button onClick={continueWatching} title="Lanjutkan Menonton" className="p-2 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 text-white border border-rose-400/20 active:scale-95 transition-all shadow-xl shadow-red-500/20">
+                                            <Play size={16} fill="currentColor" />
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="pb-10 pt-4 sm:pt-6">
+
+                    {activeTab === 'episodes' ? (
+                        filteredEps.length === 0 ? (
+                            <div className="text-center py-20 px-4">
+                                <Ship size={64} className="mx-auto mb-4 text-neutral-400 dark:text-neutral-600 opacity-50" />
+                                <h3 className="text-xl font-black uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-2">Pencarian Tidak Ditemukan</h3>
+                                <p className="text-sm font-medium text-neutral-400 dark:text-neutral-500 max-w-sm mx-auto">Coba gunakan kata kunci lain, atau hapus filter untuk melihat daftar episode lainnya.</p>
+                                <button onClick={() => { setSearchQuery(''); setShowFiller(true); setHideWatched(false); }} className="mt-8 px-8 py-3 rounded-2xl bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 font-bold uppercase tracking-widest text-xs hover:bg-red-200 transition-colors shadow-sm"> Reset Filter </button>
+                            </div>
+                        ) : (
+                            <div className={sagaViewMode === 'card' ? 'grid grid-cols-1 md:grid-cols-2 gap-4 items-start' : 'space-y-4'}>
+                                {filteredEps.map((saga) => (
+                                    <section key={saga.id} className={`rounded-[1.25rem] overflow-hidden border transition-all duration-300 ${theme.card} ${sagaViewMode === 'card' && expandedSagas.includes(saga.id) ? 'md:col-span-2' : ''}`}>
+                                        <div className={`cursor-pointer ${sagaViewMode === 'card' ? 'p-4 sm:p-5' : 'p-3 sm:px-4'} ${theme.hover}`} onClick={() => toggleSaga(saga.id)}>
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1 min-w-0 pr-3">
+                                                    <div className={sagaViewMode === 'list' ? 'flex items-center gap-3' : ''}>
+                                                        <div className="flex items-center gap-2 mb-0.5">
+                                                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"> Saga </span>
+                                                            <span className={`text-[10px] font-bold ${theme.muted} ${sagaViewMode === 'list' ? 'hidden sm:inline' : ''}`}> {getSagaRange(saga)} </span>
+                                                        </div>
+                                                        <h2 className={`${sagaViewMode === 'card' ? 'text-lg sm:text-xl' : 'text-[15px] sm:text-base'} font-black truncate`}>{saga.title}</h2>
+                                                        {sagaViewMode === 'card' && <p className={`text-[11px] font-medium leading-relaxed mt-1 line-clamp-2 ${theme.muted}`}> {saga.description} </p>}
+                                                    </div>
+                                                </div>
+
+                                                {/* Expand Toggle */}
+                                                <div className={`p-1.5 rounded-xl shrink-0 mt-0.5 ${isDarkMode ? 'bg-neutral-800' : 'bg-neutral-100'}`}>
+                                                    {expandedSagas.includes(saga.id) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                                                </div>
+                                            </div>
+
+                                            {/* Saga Progress Bar */}
+                                            {(() => {
+                                                const progress = getSagaProgress(saga);
+                                                const finished = progress.count === progress.total;
+                                                return (
+                                                    <div className={`flex items-center gap-3 ${sagaViewMode === 'card' ? 'mt-4 pt-4 border-t' : 'mt-2 pl-0 sm:pl-[72px]'} ${theme.border}`}>
+                                                        <button onClick={(e) => toggleSagaComplete(saga, e)} className={`flex-shrink-0 transition-all hover:scale-110 active:scale-95 ${finished ? 'text-green-500' : 'text-neutral-300'}`}>
+                                                            {finished ? <CheckCircle2 size={24} className="text-green-500 dark:bg-transparent rounded-full" /> : <Circle size={24} />}
+                                                        </button>
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center justify-between text-[9px] font-bold mb-1">
+                                                                <span className={theme.muted}>{progress.percent}% Selesai SAGA Ini</span>
+                                                                <span className={theme.muted}>{progress.count} / {progress.total} Misi</span>
+                                                            </div>
+                                                            <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-neutral-800' : 'bg-neutral-200'}`}>
+                                                                <div className="h-full bg-gradient-to-r from-red-500 to-amber-500 transition-all duration-1000" style={{ width: `${progress.percent}%` }} />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
+
+                                        <AnimatePresence initial={false}>
+                                            {expandedSagas.includes(saga.id) && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: 'auto', opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                                    className={`border-t overflow-hidden ${theme.border}`}
+                                                >
+                                                    {saga.arcs.map((arc, arcIdx) => {
+                                                        const finished = isArcFinished(arc);
+                                                        const progress = getArcProgress(arc);
+                                                        const isExpanded = expandedArcs.includes(arc.id);
+
+                                                        return (
+                                                            <div key={arc.id} className={`group ${arcIdx < saga.arcs.length - 1 ? `border-b ${theme.border}` : ''}`} ref={el => { arcRefs.current[arc.id] = el }}>
+                                                                <div className={`flex items-center py-2.5 px-3 sm:py-3 sm:px-4 transition-colors cursor-pointer ${theme.hover}`} onClick={() => toggleArcDropdown(arc.id)}>
+                                                                    <button onClick={(e) => toggleArcComplete(arc, e)} className={`flex-shrink-0 mr-3 sm:mr-3.5 transition-all hover:scale-110 active:scale-95 ${finished ? 'text-green-500' : 'text-neutral-300'}`}>
+                                                                        {finished ? <CheckCircle2 size={22} className="text-green-500" /> : <Circle size={22} />}
+                                                                    </button>
+
+                                                                    <div className="flex-1 min-w-0 pr-3 sm:pr-4">
+                                                                        <h4 className={`font-bold truncate text-sm sm:text-[15px] ${finished ? 'line-through text-neutral-400 decoration-green-500/50' : ''}`}> {arc.title} </h4>
+                                                                        <div className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-0.5 text-[9.5px] font-bold ${theme.muted}`}>
+                                                                            <span className="whitespace-nowrap">Ep {arc.start} - {arc.end}</span>
+                                                                            <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                                                                                <div className="flex-1 sm:w-16 sm:flex-none h-1 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden">
+                                                                                    <div className="h-full bg-red-500" style={{ width: `${(progress.count / progress.total) * 100}%` }} />
+                                                                                </div>
+                                                                                <span className="whitespace-nowrap">{progress.count} / {progress.total}</span>
+                                                                            </div>
+                                                                            <span className={`px-1 py-0.5 rounded text-[8px] uppercase tracking-tighter ${arc.type === 'Filler' ? 'bg-neutral-100 dark:bg-neutral-900/40 dark:text-neutral-400' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600'} whitespace-nowrap`}> {arc.type} </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className={`p-1 flex-shrink-0 rounded-lg transition-all ${isExpanded ? 'bg-red-500 text-white shadow-md' : theme.muted}`}>
+                                                                        {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                                                                    </div>
+                                                                </div>
+
+                                                                <AnimatePresence initial={false}>
+                                                                    {isExpanded && (
+                                                                        <motion.div
+                                                                            initial={{ height: 0, opacity: 0 }}
+                                                                            animate={{ height: 'auto', opacity: 1 }}
+                                                                            exit={{ height: 0, opacity: 0 }}
+                                                                            transition={{ duration: 0.25, ease: 'easeInOut' }}
+                                                                            className={`border-t overflow-hidden ${theme.border} ${theme.dropdownBg}`}
+                                                                        >
+                                                                            <div className="max-h-[300px] sm:max-h-[400px] overflow-y-auto custom-scrollbar pt-1 pb-2">
+                                                                                {Array.from({ length: arc.end - arc.start + 1 }, (_, i) => {
+                                                                                    const epNum = arc.start + i;
+                                                                                    const isWatched = watchedEpisodes.includes(`ep-${epNum}`);
+                                                                                    const isLastEp = i === (arc.end - arc.start);
+                                                                                    const epTitle = getEpisodeTitle(epNum).toLowerCase();
+                                                                                    const q = searchQuery.toLowerCase().trim();
+
+                                                                                    // Filter episodes by query if active
+                                                                                    if (q && !epNum.toString().includes(q) && !epTitle.includes(q)) {
+                                                                                        return null;
+                                                                                    }
+
+                                                                                    return (
+                                                                                        <div key={epNum} className={`flex items-center gap-2 sm:gap-4 py-2.5 sm:py-3 px-3 sm:px-5 transition-all group/ep ${isWatched ? 'bg-green-500/5 opacity-90' : ''} ${!isLastEp ? `border-b border-dashed ${isDarkMode ? 'border-neutral-800' : 'border-neutral-200'}` : ''}`}>
+                                                                                            <div className="flex items-center flex-1 min-w-0 gap-2 sm:gap-3">
+                                                                                                <button onClick={() => toggleEpisode(epNum)} className={`flex-shrink-0 transition-all ${isWatched ? 'text-green-500' : theme.muted}`}>
+                                                                                                    {isWatched ? <CheckCircle2 size={20} className="text-green-500 dark:bg-transparent rounded-full" /> : <Circle size={20} />}
+                                                                                                </button>
+                                                                                                <div className={`flex items-center justify-center px-1.5 sm:px-2 min-w-[30px] sm:min-w-[34px] h-[20px] sm:h-[22px] rounded-md border shadow-sm ${isWatched ? 'bg-green-50 border-green-200 text-green-600 dark:bg-green-900/30 dark:border-green-800 dark:text-green-400' : 'bg-white border-neutral-200 text-neutral-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400'} font-black text-[9px] sm:text-[10px] tracking-tight`}>
+                                                                                                    {epNum}
+                                                                                                </div>
+                                                                                                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleEpisode(epNum)}>
+                                                                                                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                                                                                                        <h5 className={`text-xs sm:text-[13px] font-bold leading-tight line-clamp-2 sm:line-clamp-none ${isWatched ? 'line-through decoration-green-500/30 text-neutral-400' : ''}`}>
+                                                                                                            {getEpisodeTitle(epNum)}
+                                                                                                        </h5>
+                                                                                                        {arc.type === 'Mixed' && (
+                                                                                                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest shrink-0 ${isFillerEpisode(epNum)
+                                                                                                                ? 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400'
+                                                                                                                : 'bg-red-50 text-red-600 dark:bg-red-900/40 dark:text-red-400'}`}>
+                                                                                                                {isFillerEpisode(epNum) ? 'Filler' : 'Canon'}
+                                                                                                            </span>
+                                                                                                        )}
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <a href={getBilibiliUrl(epNum)} target="_blank" rel="noopener noreferrer" className={`flex-shrink-0 flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] font-black uppercase transition-all border ${isDarkMode ? 'bg-neutral-900 border-red-900/50 text-red-400 hover:bg-neutral-800' : 'bg-white border-neutral-200 text-red-600 hover:bg-red-50 shadow-sm'} h-8 sm:h-auto`}>
+                                                                                                <Play size={12} fill="currentColor" className="sm:mr-1" />
+                                                                                                <span className="hidden sm:inline">Nonton</span>
+                                                                                                <span className="hidden lg:inline ml-1">di Bilibili</span>
+                                                                                                <ExternalLink size={10} className="hidden sm:inline ml-1.5" />
+                                                                                            </a>
+                                                                                        </div>
+                                                                                    );
+                                                                                })}
+                                                                            </div>
+                                                                        </motion.div>
+                                                                    )}
+                                                                </AnimatePresence>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </section>
+                                ))}
+                            </div>
+                        )
+                    ) : (
+                        filteredMovies.length === 0 ? (
+                            <div className="text-center py-20 px-4">
+                                <Film size={64} className="mx-auto mb-4 text-neutral-400 dark:text-neutral-600 opacity-50" />
+                                <h3 className="text-xl font-black uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-2">Film Tidak Ditemukan</h3>
+                                <p className="text-sm font-medium text-neutral-400 dark:text-neutral-500 max-w-sm mx-auto">Tidak ada judul film layar lebar yang cocok dengan pencarian Anda.</p>
+                                <button onClick={() => setSearchQuery('')} className="mt-8 px-8 py-3 rounded-2xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400 font-bold uppercase tracking-widest text-xs hover:bg-indigo-200 transition-colors shadow-sm"> Reset Pencarian </button>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {filteredMovies.map((movie) => (
+                                    <div key={movie.id} className={`p-4 rounded-3xl border transition-all flex items-center justify-between group ${watchedMovies.includes(movie.id) ? 'border-green-500 bg-green-500/5' : `${theme.card} ${theme.hover}`}`}>
+                                        <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0 pr-2 cursor-pointer" onClick={() => toggleMovie(movie.id)}>
+                                            <div className={`p-3 rounded-2xl flex-shrink-0 ${watchedMovies.includes(movie.id) ? 'bg-green-600 text-white' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400'}`}>
+                                                <Film size={20} />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className={`font-bold truncate text-sm sm:text-base ${watchedMovies.includes(movie.id) ? 'text-green-600 dark:text-green-400' : ''}`}> {movie.title} </h4>
+                                                <p className={`text-[10px] font-bold truncate ${theme.muted}`}> {movie.year} {movie.recommended && '• Rekomendasi'} </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <a href={`https://www.bilibili.tv/id/search-result?q=One+Piece+${movie.title.replace(' ', '+')}`} target="_blank" rel="noopener noreferrer" className={`p-2 rounded-xl text-red-600 dark:text-red-400`}> <ExternalLink size={16} /></a>
+                                            <div className={watchedMovies.includes(movie.id) ? 'text-green-500' : 'text-neutral-300'} onClick={() => toggleMovie(movie.id)}>
+                                                {watchedMovies.includes(movie.id) ? <CheckCircle2 size={24} className="text-green-500" /> : <Circle size={24} />}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )
+                    )}
+
+                    <div className="mt-12 flex flex-col items-center gap-4 border-t border-neutral-200 dark:border-neutral-800 pt-8">
+                        <button onClick={resetProgress} className="flex items-center gap-2 text-xs font-bold text-red-400 hover:text-red-500 transition-all active:scale-95">
+                            <Trash2 size={14} /> Reset Seluruh Log Progres
+                        </button>
+                        <p className="text-[10px] font-bold opacity-30 text-center">Data ini hanya ada di browser {deviceInfo.device} ini. <br /> Simpan file jika ingin pindah perangkat.</p>
+                    </div>
                 </div>
             </main>
-
-            {/* Popups */}
-            {copyFeedback && (
-                <div className="fixed bottom-10 left-1/2 lg:left-[calc(50%+160px)] -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-full text-xs font-bold animate-bounce z-50 shadow-2xl"> Progres disalin! 📋</div>
-            )}
         </div>
     );
 }
