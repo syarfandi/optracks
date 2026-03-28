@@ -201,12 +201,21 @@ const SAGA_DATA = [
 ];
 
 const MOVIE_DATA = [
-    { id: 'm1', title: 'One Piece: The Movie', year: 2000 },
-    { id: 'm10', title: 'Strong World', year: 2009, recommended: true },
-    { id: 'm12', title: 'Film: Z', year: 2012, recommended: true },
-    { id: 'm13', title: 'Film: Gold', year: 2016, recommended: true },
-    { id: 'm14', title: 'Stampede', year: 2019, recommended: true },
-    { id: 'm15', title: 'Film: Red', year: 2022, recommended: true },
+    { id: 'm1', title: 'One Piece: The Movie', year: 2000, imdbId: 'tt0258271', poster: 'https://image.tmdb.org/t/p/w500/u3w4f6974jB4jO9R5dGqN3aH7S0.jpg' },
+    { id: 'm2', title: 'Clockwork Island Adventure', year: 2001, imdbId: 'tt0290332', poster: 'https://image.tmdb.org/t/p/w500/6mN9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
+    { id: 'm3', title: "Chopper's Kingdom on the Island of Strange Animals", year: 2002, imdbId: 'tt0335235', poster: 'https://image.tmdb.org/t/p/w500/uR0RzV9kM9hFpQ.jpg' },
+    { id: 'm4', title: 'Dead End Adventure', year: 2003, imdbId: 'tt0378194', poster: 'https://image.tmdb.org/t/p/w500/v6N9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
+    { id: 'm5', title: 'The Cursed Holy Sword', year: 2004, imdbId: 'tt0418765', poster: 'https://image.tmdb.org/t/p/w500/w6N9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
+    { id: 'm6', title: 'Baron Omatsuri and the Secret Island', year: 2005, imdbId: 'tt0457630', poster: 'https://image.tmdb.org/t/p/w500/x6N9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
+    { id: 'm7', title: 'The Giant Mechanical Soldier of Karakuri Castle', year: 2006, imdbId: 'tt0493630', poster: 'https://image.tmdb.org/t/p/w500/y6N9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
+    { id: 'm8', title: 'Episode of Alabasta: The Desert Princess and the Pirates', year: 2007, imdbId: 'tt1059942', poster: 'https://image.tmdb.org/t/p/w500/z6N9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
+    { id: 'm9', title: 'Episode of Chopper Plus: Bloom in Winter, Miracle Sakura', year: 2008, imdbId: 'tt1210871', poster: 'https://image.tmdb.org/t/p/w500/q6N9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
+    { id: 'm10', title: 'One Piece Film: Strong World', year: 2009, imdbId: 'tt1460598', poster: 'https://image.tmdb.org/t/p/w500/r6N9p0a8i14jA9rT8dGqN3aH7S0.jpg', recommended: true },
+    { id: 'm11', title: 'One Piece 3D: Straw Hat Chase', year: 2011, imdbId: 'tt1833758', poster: 'https://image.tmdb.org/t/p/w500/s6N9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
+    { id: 'm12', title: 'One Piece Film: Z', year: 2012, imdbId: 'tt2330691', poster: 'https://image.tmdb.org/t/p/w500/t6N9p0a8i14jA9rT8dGqN3aH7S0.jpg', recommended: true },
+    { id: 'm13', title: 'One Piece Film: Gold', year: 2016, imdbId: 'tt5249446', poster: 'https://image.tmdb.org/t/p/w500/u6N9p0a8i14jA9rT8dGqN3aH7S0.jpg', recommended: true },
+    { id: 'm14', title: 'One Piece: Stampede', year: 2019, imdbId: 'tt9448358', poster: 'https://image.tmdb.org/t/p/w500/v6N9p0a8i14jA9rT8dGqN3aH7S0.jpg', recommended: true },
+    { id: 'm15', title: 'One Piece Film: Red', year: 2022, imdbId: 'tt16184462', poster: 'https://image.tmdb.org/t/p/w500/u6N9p0a8i14jA9rT8dGqN3aH7S0.jpg', recommended: true },
 ];
 
 const successSound = typeof Audio !== 'undefined' ? new Audio('/success.mp3') : null;
@@ -518,10 +527,17 @@ export default function App() {
 
     const continueWatching = () => {
         let firstUnwatchedArc: any = null;
+        let firstUnwatchedEp = 0;
         for (const saga of SAGA_DATA) {
             for (const arc of saga.arcs) {
                 if (!isArcFinished(arc)) {
                     firstUnwatchedArc = arc;
+                    for (let ep = arc.start; ep <= arc.end; ep++) {
+                        if (!watchedEpisodes.includes(`ep-${ep}`)) {
+                            firstUnwatchedEp = ep;
+                            break;
+                        }
+                    }
                     break;
                 }
             }
@@ -534,8 +550,17 @@ export default function App() {
             if (!expandedArcs.includes(firstUnwatchedArc.id)) setExpandedArcs(prev => [...prev, firstUnwatchedArc.id]);
 
             setTimeout(() => {
-                arcRefs.current[firstUnwatchedArc.id]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 100);
+                const epElement = document.getElementById(`episode-${firstUnwatchedEp}`);
+                if (epElement) {
+                    epElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    epElement.classList.add('ring-2', 'ring-amber-500', 'bg-amber-500/10');
+                    setTimeout(() => {
+                        epElement.classList.remove('ring-2', 'ring-amber-500', 'bg-amber-500/10');
+                    }, 2500);
+                } else {
+                    arcRefs.current[firstUnwatchedArc.id]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 350);
         }
     };
 
@@ -1053,49 +1078,75 @@ export default function App() {
                             </div>
                         ) : (
                             <div className={sagaViewMode === 'card' ? 'grid grid-cols-1 md:grid-cols-2 gap-4 items-start' : 'space-y-4'}>
-                                {filteredEps.map((saga) => (
-                                    <section key={saga.id} className={`rounded-[1.25rem] overflow-hidden border transition-all duration-300 ${theme.card} ${sagaViewMode === 'card' && expandedSagas.includes(saga.id) ? 'md:col-span-2' : ''}`}>
-                                        <div className={`cursor-pointer ${sagaViewMode === 'card' ? 'p-4 sm:p-5' : 'p-3 sm:px-4'} ${theme.hover}`} onClick={() => toggleSaga(saga.id)}>
-                                            <div className="flex items-start justify-between">
-                                                <div className="flex-1 min-w-0 pr-3">
-                                                    <div className={sagaViewMode === 'list' ? 'flex items-center gap-3' : ''}>
-                                                        <div className="flex items-center gap-2 mb-0.5">
-                                                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"> Saga </span>
-                                                            <span className={`text-[10px] font-bold ${theme.muted} ${sagaViewMode === 'list' ? 'hidden sm:inline' : ''}`}> {getSagaRange(saga)} </span>
+                                {filteredEps.map((saga) => {
+                                    const progress = getSagaProgress(saga);
+                                    const finished = progress.count === progress.total;
+
+                                    return (
+                                        <section key={saga.id} className={`rounded-[1.25rem] overflow-hidden border transition-all duration-300 ${theme.card} ${sagaViewMode === 'card' && expandedSagas.includes(saga.id) ? 'md:col-span-2' : ''}`}>
+                                            <div className={`cursor-pointer ${sagaViewMode === 'card' ? 'p-4 sm:p-5' : 'p-3 sm:px-4'} ${theme.hover}`} onClick={() => toggleSaga(saga.id)}>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className={sagaViewMode === 'list' ? 'flex flex-row items-center gap-3 sm:gap-5' : ''}>
+                                                            <div className={`flex ${sagaViewMode === 'list' ? 'flex-col items-center justify-center gap-0.5 shrink-0 min-w-[50px] sm:min-w-[56px]' : 'items-center gap-2 mb-0.5'}`}>
+                                                                <span className="text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-[0.05em] bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">Saga</span>
+                                                                <span className={`${sagaViewMode === 'list' ? 'text-[11px]' : 'text-[10px]'} font-bold ${theme.muted} whitespace-nowrap text-center`}> {getSagaRange(saga)} </span>
+                                                            </div>
+
+                                                            <div className={`flex-1 min-w-0 ${sagaViewMode === 'list' ? 'flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6' : ''}`}>
+                                                                <h2 className={`${sagaViewMode === 'card' ? 'text-lg sm:text-xl' : 'text-[15px] sm:text-base'} font-black truncate shrink-0`}>{saga.title}</h2>
+                                                                {sagaViewMode === 'card' && <p className={`text-[11px] font-medium leading-relaxed mt-1 line-clamp-2 ${theme.muted}`}> {saga.description} </p>}
+
+                                                                {sagaViewMode === 'list' && (
+                                                                    <div className="flex-1 flex items-center gap-3 sm:gap-4 lg:px-4" onClick={(e) => e.stopPropagation()}>
+                                                                        <button onClick={(e) => toggleSagaComplete(saga, e)} className={`flex-shrink-0 transition-all hover:scale-110 active:scale-95 ${finished ? 'text-green-500' : 'text-neutral-300'}`}>
+                                                                            {finished ? <CheckCircle2 size={20} className="text-green-500" /> : <Circle size={20} />}
+                                                                        </button>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <div className="flex items-center justify-between text-[8px] sm:text-[9px] font-bold mb-0.5 sm:mb-1">
+                                                                                <span className={theme.muted}>{progress.percent}%</span>
+                                                                                <span className={theme.muted}>{progress.count} / {progress.total} Misi</span>
+                                                                            </div>
+                                                                            <div className={`h-1 sm:h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-neutral-800' : 'bg-neutral-100'}`}>
+                                                                                <div
+                                                                                    className="h-full bg-gradient-to-r from-red-600 to-amber-500 transition-all duration-700 ease-out"
+                                                                                    style={{ width: `${progress.percent}%` }}
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                        <h2 className={`${sagaViewMode === 'card' ? 'text-lg sm:text-xl' : 'text-[15px] sm:text-base'} font-black truncate`}>{saga.title}</h2>
-                                                        {sagaViewMode === 'card' && <p className={`text-[11px] font-medium leading-relaxed mt-1 line-clamp-2 ${theme.muted}`}> {saga.description} </p>}
+                                                    </div>
+
+                                                    {/* Expand Toggle */}
+                                                    <div className={`p-1.5 rounded-xl shrink-0 ${isDarkMode ? 'bg-neutral-800' : 'bg-neutral-100'}`}>
+                                                        {expandedSagas.includes(saga.id) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                                                     </div>
                                                 </div>
 
-                                                {/* Expand Toggle */}
-                                                <div className={`p-1.5 rounded-xl shrink-0 mt-0.5 ${isDarkMode ? 'bg-neutral-800' : 'bg-neutral-100'}`}>
-                                                    {expandedSagas.includes(saga.id) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                                                </div>
-                                            </div>
-
-                                            {/* Saga Progress Bar */}
-                                            {(() => {
-                                                const progress = getSagaProgress(saga);
-                                                const finished = progress.count === progress.total;
-                                                return (
-                                                    <div className={`flex items-center gap-3 ${sagaViewMode === 'card' ? 'mt-4 pt-4 border-t' : 'mt-2 pl-0 sm:pl-[72px]'} ${theme.border}`}>
+                                                {/* Saga Progress Bar - Only for Card View or Mobile in List Mode */}
+                                                {sagaViewMode === 'card' && (
+                                                    <div className={`flex items-center gap-3 mt-4 pt-4 border-t ${theme.border}`}>
                                                         <button onClick={(e) => toggleSagaComplete(saga, e)} className={`flex-shrink-0 transition-all hover:scale-110 active:scale-95 ${finished ? 'text-green-500' : 'text-neutral-300'}`}>
-                                                            {finished ? <CheckCircle2 size={24} className="text-green-500 dark:bg-transparent rounded-full" /> : <Circle size={24} />}
+                                                            {finished ? <CheckCircle2 size={24} className="text-green-500" /> : <Circle size={24} />}
                                                         </button>
                                                         <div className="flex-1">
                                                             <div className="flex items-center justify-between text-[9px] font-bold mb-1">
                                                                 <span className={theme.muted}>{progress.percent}% Selesai SAGA Ini</span>
                                                                 <span className={theme.muted}>{progress.count} / {progress.total} Misi</span>
                                                             </div>
-                                                            <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-neutral-800' : 'bg-neutral-200'}`}>
-                                                                <div className="h-full bg-gradient-to-r from-red-500 to-amber-500 transition-all duration-1000" style={{ width: `${progress.percent}%` }} />
+                                                            <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-neutral-800' : 'bg-neutral-100'}`}>
+                                                                <div
+                                                                    className="h-full bg-gradient-to-r from-red-600 to-amber-500 transition-all duration-700 ease-out"
+                                                                    style={{ width: `${progress.percent}%` }}
+                                                                />
                                                             </div>
                                                         </div>
                                                     </div>
-                                                );
-                                            })()}
-                                        </div>
+                                                )}
+                                            </div>
 
                                         <AnimatePresence initial={false}>
                                             {expandedSagas.includes(saga.id) && (
@@ -1159,7 +1210,7 @@ export default function App() {
                                                                                     }
 
                                                                                     return (
-                                                                                        <div key={epNum} className={`flex items-center gap-2 sm:gap-4 py-2.5 sm:py-3 px-3 sm:px-5 transition-all group/ep ${isWatched ? 'bg-green-500/5 opacity-90' : ''} ${!isLastEp ? `border-b border-dashed ${isDarkMode ? 'border-neutral-800' : 'border-neutral-200'}` : ''}`}>
+                                                                                        <div id={`episode-${epNum}`} key={epNum} className={`flex items-center gap-2 sm:gap-4 py-2.5 sm:py-3 px-3 sm:px-5 transition-all duration-500 group/ep ${isWatched ? 'bg-green-500/5 opacity-90' : ''} ${!isLastEp ? `border-b border-dashed ${isDarkMode ? 'border-neutral-800' : 'border-neutral-200'}` : ''}`}>
                                                                                             <div className="flex items-center flex-1 min-w-0 gap-2 sm:gap-3">
                                                                                                 <button onClick={() => toggleEpisode(epNum)} className={`flex-shrink-0 transition-all ${isWatched ? 'text-green-500' : theme.muted}`}>
                                                                                                     {isWatched ? <CheckCircle2 size={20} className="text-green-500 dark:bg-transparent rounded-full" /> : <Circle size={20} />}
@@ -1202,7 +1253,8 @@ export default function App() {
                                             )}
                                         </AnimatePresence>
                                     </section>
-                                ))}
+                                );
+                            })}
                             </div>
                         )
                     ) : (
@@ -1218,8 +1270,12 @@ export default function App() {
                                 {filteredMovies.map((movie) => (
                                     <div key={movie.id} className={`p-4 rounded-3xl border transition-all flex items-center justify-between group ${watchedMovies.includes(movie.id) ? 'border-green-500 bg-green-500/5' : `${theme.card} ${theme.hover}`}`}>
                                         <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0 pr-2 cursor-pointer" onClick={() => toggleMovie(movie.id)}>
-                                            <div className={`p-3 rounded-2xl flex-shrink-0 ${watchedMovies.includes(movie.id) ? 'bg-green-600 text-white' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400'}`}>
-                                                <Film size={20} />
+                                            <div className="w-12 h-16 sm:w-14 sm:h-20 bg-neutral-100 dark:bg-neutral-800 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border border-neutral-200 dark:border-neutral-700">
+                                                {movie.poster ? (
+                                                    <img src={movie.poster} alt={movie.title} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <Film size={20} className="text-neutral-400" />
+                                                )}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <h4 className={`font-bold truncate text-sm sm:text-base ${watchedMovies.includes(movie.id) ? 'text-green-600 dark:text-green-400' : ''}`}> {movie.title} </h4>
@@ -1227,7 +1283,9 @@ export default function App() {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <a href={`https://www.bilibili.tv/id/search-result?q=One+Piece+${movie.title.replace(' ', '+')}`} target="_blank" rel="noopener noreferrer" className={`p-2 rounded-xl text-red-600 dark:text-red-400`}> <ExternalLink size={16} /></a>
+                                            <a href={`https://www.imdb.com/title/${movie.imdbId}/`} target="_blank" rel="noopener noreferrer" className={`p-2 rounded-xl text-amber-500 hover:bg-amber-500/10 transition-colors`} title="Lihat di IMDb">
+                                                <ExternalLink size={18} />
+                                            </a>
                                             <div className={watchedMovies.includes(movie.id) ? 'text-green-500' : 'text-neutral-300'} onClick={() => toggleMovie(movie.id)}>
                                                 {watchedMovies.includes(movie.id) ? <CheckCircle2 size={24} className="text-green-500" /> : <Circle size={24} />}
                                             </div>
