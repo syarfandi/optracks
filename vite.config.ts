@@ -16,7 +16,7 @@ export default defineConfig({
         short_name: 'OP Tracker',
         description: 'Catat Jejak Perjalanan Cerita One Piece',
         theme_color: '#dc2626',
-        background_color: '#ffffff',
+        background_color: '#fafafa',
         display: 'standalone',
         icons: [
           {
