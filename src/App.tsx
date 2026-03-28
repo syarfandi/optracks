@@ -26,7 +26,8 @@ import {
     Download,
     Upload,
     Camera,
-    CircleMinus
+    CircleMinus,
+    Bell
 } from 'lucide-react';
 
 // --- Konfigurasi & Data ---
@@ -221,6 +222,7 @@ export default function App() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
     const [sagaViewMode, setSagaViewMode] = useState<'card' | 'list'>('card');
     const [isExporting, setIsExporting] = useState(false);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
     const [expandedSagas, setExpandedSagas] = useState<string[]>([]);
     const [expandedArcs, setExpandedArcs] = useState<string[]>([]);
@@ -269,6 +271,33 @@ export default function App() {
         }
         setLoading(false);
     }, []);
+
+    useEffect(() => {
+        if (!loading && 'Notification' in window) {
+            setNotificationsEnabled(Notification.permission === 'granted');
+            
+            if (Notification.permission === 'granted') {
+                const keys = Object.keys(EPISODE_DB).map(Number).filter(n => !isNaN(n));
+                const maxEp = keys.length > 0 ? Math.max(...keys) : 0;
+                const savedMaxEpStr = localStorage.getItem(`gl-tracker-${appId}-lastep`);
+                const savedMaxEp = savedMaxEpStr ? parseInt(savedMaxEpStr, 10) : maxEp;
+
+                if (maxEp > savedMaxEp) {
+                    const n = new Notification('Episode Baru Telah Rilis! 🏴‍☠️', {
+                        body: `One Piece Episode ${maxEp} sekarang tersedia. Siap Berlayar!`,
+                        icon: '/mugiwara-logo.png'
+                    });
+                    n.onclick = () => {
+                        window.focus();
+                        n.close();
+                    };
+                    localStorage.setItem(`gl-tracker-${appId}-lastep`, maxEp.toString());
+                } else if (!savedMaxEpStr) {
+                    localStorage.setItem(`gl-tracker-${appId}-lastep`, maxEp.toString());
+                }
+            }
+        }
+    }, [loading]);
 
     const saveLocally = (updates: any) => {
         const currentData = JSON.parse(localStorage.getItem(`gl-tracker-${appId}`) || '{}');
@@ -467,6 +496,22 @@ export default function App() {
             }
         };
         reader.readAsText(file);
+    };
+
+    const requestNotification = () => {
+        if (!('Notification' in window)) {
+            alert("Browser Anda tidak mendukung notifikasi desktop.");
+            return;
+        }
+        Notification.requestPermission().then(permission => {
+            setNotificationsEnabled(permission === 'granted');
+            if (permission === 'granted') {
+                alert("Notifikasi untuk episode baru telah diaktifkan!");
+                const keys = Object.keys(EPISODE_DB).map(Number).filter(n => !isNaN(n));
+                const maxEp = keys.length > 0 ? Math.max(...keys) : 0;
+                localStorage.setItem(`gl-tracker-${appId}-lastep`, maxEp.toString());
+            }
+        });
     };
 
     const deviceInfo = useMemo(() => getDeviceInfo(), []);
@@ -915,6 +960,11 @@ export default function App() {
                                         <input type="file" className="hidden" accept=".json" onChange={(e) => { importProgress(e); setIsSidebarOpen(false); }} />
                                     </label>
                                 </div>
+
+                                <button onClick={requestNotification} disabled={notificationsEnabled} className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-95 shadow-sm border ${notificationsEnabled ? (isDarkMode ? 'bg-green-900/20 border-green-800/50 text-green-500 opacity-80' : 'bg-green-50 border-green-200 text-green-600 opacity-80') : (isDarkMode ? 'bg-neutral-800 border-neutral-700 text-blue-400 hover:bg-neutral-700' : 'bg-neutral-50 border-neutral-200 text-blue-600 hover:bg-neutral-100')}`}>
+                                    <Bell size={14} strokeWidth={3} className={notificationsEnabled ? "" : "animate-pulse"} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest pt-0.5">{notificationsEnabled ? "Notifikasi Aktif" : "Aktifkan Notifikasi"}</span>
+                                </button>
 
                                 <div className="text-center">
                                     <p className={`text-[8px] font-bold uppercase ${isDarkMode ? 'text-neutral-500' : 'text-neutral-400'} leading-relaxed tracking-wider opacity-80`}>
