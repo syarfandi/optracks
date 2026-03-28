@@ -739,11 +739,11 @@ export default function App() {
 
             {/* Mobile Overlay */}
             {isSidebarOpen && (
-                <div className="fixed inset-0 bg-black/80 z-40 lg:hidden backdrop-blur-md transition-all duration-300" onClick={() => setIsSidebarOpen(false)} />
+                <div className="fixed inset-0 z-40 lg:hidden" onClick={() => setIsSidebarOpen(false)} />
             )}
 
             {/* Sidebar / Header */}
-            <aside className={`fixed inset-y-0 right-0 z-50 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-l backdrop-blur-3xl shadow-2xl transition-all duration-500 overflow-hidden ${isSidebarOpen ? 'w-full lg:w-[380px] translate-x-0 opacity-100' : 'w-full lg:w-0 translate-x-full lg:translate-x-0 opacity-0 lg:border-none'} ${isDarkMode ? 'bg-neutral-950/90 border-neutral-800/50' : 'bg-white/95 border-neutral-200'}`}>
+            <aside className={`fixed inset-y-0 right-0 z-50 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-l backdrop-blur-3xl shadow-2xl transition-all duration-200 overflow-hidden ${isSidebarOpen ? 'w-full lg:w-[380px] translate-x-0 opacity-100' : 'w-full lg:w-0 translate-x-full lg:translate-x-0 opacity-0 lg:border-none'} ${isDarkMode ? 'bg-neutral-950/90 border-neutral-800/50' : 'bg-white/95 border-neutral-200'}`}>
                 <div className="w-[100vw] lg:w-[380px] p-5 sm:p-6 lg:p-8 flex flex-col min-h-full scrollbar-hidden overflow-y-auto">
                     {/* Brand & Theme */}
                     <div className="flex items-center justify-between mb-8 sm:mb-10">
