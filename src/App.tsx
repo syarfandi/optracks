@@ -233,6 +233,25 @@ export default function App() {
     useEffect(() => {
         // Apply dark mode class to root for Tailwind dark: variants
         document.documentElement.classList.toggle('dark', isDarkMode);
+
+        // Sync Browser Address Bar Color (theme-color)
+        const themeColor = isDarkMode ? '#0a0a0a' : '#fafafa';
+        let metaThemeColor = document.getElementById('theme-color-meta');
+        if (!metaThemeColor) {
+            metaThemeColor = document.querySelector('meta[name="theme-color"]') || document.createElement('meta');
+            (metaThemeColor as any).name = 'theme-color';
+            metaThemeColor.id = 'theme-color-meta';
+            if (!metaThemeColor.parentNode) document.head.appendChild(metaThemeColor);
+        }
+        metaThemeColor.setAttribute('content', themeColor);
+
+        // Remove duplicate theme-color tags if they exist (to prevent conflicts)
+        const allMetaThemes = document.querySelectorAll('meta[name="theme-color"]');
+        for (let i = 0; i < allMetaThemes.length; i++) {
+            if (allMetaThemes[i].id !== 'theme-color-meta') {
+                allMetaThemes[i].remove();
+            }
+        }
     }, [isDarkMode]);
 
     useEffect(() => {
@@ -867,7 +886,7 @@ export default function App() {
                         <div className={`p-4 rounded-[1.75rem] border transition-all relative overflow-hidden group ${isDarkMode ? 'bg-neutral-900/40 border-neutral-800/50 backdrop-blur-xl shadow-lg' : 'bg-white border-neutral-100 shadow-xl shadow-neutral-200/30'}`}>
                             {/* Decorative background element */}
                             <div className="absolute -top-10 -right-10 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-all duration-700" />
-                            
+
                             <div className="flex flex-col gap-4 relative z-10">
                                 <div className="flex items-center justify-between gap-3">
                                     <div className="flex-1 min-w-0">
@@ -910,7 +929,7 @@ export default function App() {
 
             {/* Main Content */}
             <main className="flex-1 w-full max-w-5xl mx-auto px-4 lg:px-10 pb-10 relative">
-                <div className={`sticky -top-0.5 z-40 pt-2 sm:pt-4 pb-2 sm:pb-4 -mx-4 px-4 lg:-mx-10 lg:px-10 transition-all duration-300 ${isDarkMode ? 'bg-neutral-950/90 backdrop-blur-xl' : 'bg-neutral-50/90 backdrop-blur-xl'}`}>
+                <div className={`sticky -top-0.5 z-40 pt-2 sm:pt-4 pb-2 sm:pb-4 -mx-4 px-4 lg:-mx-10 lg:px-10 transition-all duration-300 backdrop-blur-xl ${isDarkMode ? 'bg-neutral-950/75' : 'bg-neutral-50/50'}`}>
                     <div className="flex flex-col gap-2 sm:gap-4">
                         {/* Header Row 1: Brand & Switcher */}
                         <div className="flex items-center justify-between gap-2">
