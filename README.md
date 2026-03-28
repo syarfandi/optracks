@@ -1,14 +1,18 @@
-# One Piece Tracker
+# OP Tracker
+
+> **⚠️ Disclaimer Hukum / Legal Disclaimer**
+> 
+> *This is a fan-made, non-profit, open-source project. This project is not affiliated with, endorsed by, or sponsored by Eiichiro Oda, Shueisha, Toei Animation, or any of the official copyright holders of 'One Piece'. All trademarks, character names, and related images belong to their respective owners. No copyrighted media files are hosted on this repository.*
 
 [![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8.0-646CFF?logo=vite)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.2-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 
-**One Piece Tracker** adalah platform pelacakan progres episode One Piece paling modern dan premium. Dirancang khusus untuk Nakama yang menginginkan kemudahan tanpa hambatan login, aplikasi ini memastikan perjalanan Anda melewati ribuan episode tetap terorganisir, cepat, dan selalu sinkron.
+**OP Tracker** adalah platform pelacakan progres anime paling modern dan premium. Dirancang khusus untuk penggemar yang menginginkan kemudahan tanpa hambatan login, aplikasi ini memastikan perjalanan Anda melewati ribuan episode tetap terorganisir, cepat, dan selalu sinkron.
 
-> ### ⚓ Tracker One Piece untuk Nakama
-> Lupakan cara lama mencatat episode secara manual atau terjebak dalam episode filler yang panjang. **One Piece Tracker** dirancang untuk memudahkan perjalanan Anda tanpa hambatan teknis.
+> ### ⚓ Tracker Anime untuk Fans
+> Lupakan cara lama mencatat episode secara manual atau terjebak dalam episode filler yang panjang. **OP Tracker** dirancang untuk memudahkan perjalanan Anda tanpa hambatan teknis.
 > 
 > *   **Tanpa Login** - Mulai melacak progres Anda secara instan tanpa perlu akun.
 > *   **Filter Filler** - Lewati cerita tambahan dan fokus pada alur utama (canon).
@@ -60,7 +64,7 @@ Jadikan perjalanan menonton Anda lebih memuaskan:
 ### Instalasi Lokal
 1. Clone repositori ini:
    ```sh
-   git clone https://github.com/syarfandi/one-piece-tracker.git
+   git clone https://github.com/syarfandi/optracks.git
    ```
 2. Instal dependensi:
    ```sh

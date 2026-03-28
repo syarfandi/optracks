@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 
 // --- Konfigurasi & Data ---
-const appId = 'one-piece-tracker-v4';
+const appId = 'op-tracker-v4';
 
 const isFillerEpisode = (ep: number) => {
     // Rentang episode filler One Piece (Berdasarkan panduan umum)
@@ -496,7 +496,7 @@ export default function App() {
 
     const getEpisodeTitle = (num: number | string) => {
         const epData = (EPISODE_DB as any)[num];
-        return epData?.title || `Episode ${num}: Petualangan Menuju One Piece`;
+        return epData?.title || `Episode ${num}: Petualangan`;
     };
 
     // Auto-expand arcs and sagas when searching for a specific term
@@ -684,7 +684,7 @@ export default function App() {
                     style: { transform: 'scale(1)', transformOrigin: 'top left' }
                 });
                 const link = document.createElement('a');
-                link.download = `OnePieceTracker_${gamerRank.title.replace(/\s+/g, '_')}.png`;
+                link.download = `OPTracker_${gamerRank.title.replace(/\s+/g, '_')}.png`;
                 link.href = dataUrl;
                 link.click();
 
@@ -777,7 +777,7 @@ export default function App() {
                             <div className="flex items-center gap-4 mb-6 pb-4 border-b border-neutral-200 dark:border-neutral-800">
                                 <img src="/mugiwara-logo.png" className="w-12 h-12 object-contain drop-shadow-sm" alt="Logo" />
                                 <div className="flex-1">
-                                    <h3 className="text-[18px] font-black uppercase tracking-tight bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none pb-1">One Piece Tracker</h3>
+                                    <h3 className="text-[18px] font-black uppercase tracking-tight bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none pb-1">OP Tracker</h3>
                                     <div className="flex items-center gap-1.5 mt-0.5">
                                         <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${isDarkMode ? 'bg-neutral-800 text-neutral-400' : 'bg-neutral-200 text-neutral-500'}`}>Pangkat</span>
                                         <span className={`text-[11px] font-black uppercase tracking-widest pt-0.5 ${gamerRank.color}`}>{gamerRank.title}</span>

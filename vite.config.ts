@@ -12,9 +12,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       manifest: {
-        name: 'One Piece Tracker',
+        name: 'OP Tracker',
         short_name: 'OP Tracker',
-        description: 'Catat Jejak Perjalanan Cerita One Piece',
+        description: 'Logbook Perjalanan Anime',
         theme_color: '#dc2626',
         background_color: '#fafafa',
         display: 'standalone',
