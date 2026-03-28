@@ -5,82 +5,65 @@
 [![Vite](https://img.shields.io/badge/Vite-8.0-646CFF?logo=vite)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.2-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 
-**One Piece Tracker** adalah aplikasi web modern dan premium yang dirancang untuk membantu penggemar One Piece melacak perjalanan mereka melalui ribuan episode secara langsung tanpa perlu login.
+**One Piece Tracker** adalah platform pelacakan progres episode One Piece paling modern dan premium. Dirancang khusus untuk Nakama yang menginginkan kemudahan tanpa hambatan login, aplikasi ini memastikan perjalanan Anda melewati ribuan episode tetap terorganisir, cepat, dan selalu sinkron.
 
 ---
 
-## Filosofi Device-First (No Login)
+## ⚡ Nilai Utama (Essential)
 
-One Piece Tracker menggunakan pendekatan **Device-First**. Anda tidak perlu membuat akun. Semua data tersimpan aman di dalam browser perangkat Anda.
-
-- **Deteksi Otomatis**: Aplikasi mendeteksi perangkat (Mobile/Desktop) dan sistem operasi untuk memastikan antarmuka yang optimal.
-- **Penyimpanan Lokal**: Menggunakan `localStorage` browser untuk menyimpan progres secara instan.
-- **Migrasi Data**: Anda bisa menggunakan fitur **Ekspor/Impor** untuk memindahkan logbook antar perangkat melalui file JSON.
-
----
-
-## Fitur Utama
-
-- **Pangkat Bajak Laut**: Dapatkan gelar dari "Rookie" hingga "Yonko" berdasarkan jumlah episode yang telah diselesaikan.
-- **Lanjut Menonton**: Temukan episode terakhir yang belum ditonton secara otomatis dan langsung terhubung ke Bilibili.
-- **Filter Pintar**: Navigasi ribuan episode dengan mudah. Sembunyikan Filler atau episode yang sudah ditonton hanya dengan satu klik.
-- **Antarmuka Premium**: Animasi buka-tutup Arc yang elegan menggunakan Framer Motion.
-- **Logbook Lengkap**: Seluruh episode dikategorikan berdasarkan Saga dan Arc, lengkap dengan penanda Canon/Filler.
-- **Pencarian Presisi**: Temukan episode spesifik hanya dengan mengetik nomor atau judulnya.
-- **Sinkronisasi Otomatis**: Logbook episode diperbarui setiap hari secara otomatis melalui GitHub Actions.
+Aplikasi ini dibangun dengan filosofi **Device-First (Tanpa Login)**:
+- **Zero Friction**: Mulai melacak dalam hitungan detik. Tidak perlu email, password, atau akun pihak ketiga. Progres Anda otomatis tersimpan di browser.
+- **Privasi Mutlak**: Data Anda adalah milik Anda. Semua aktivitas tersimpan secara lokal di perangkat menggunakan `localStorage`.
+- **Migrasi Fleksibel**: Pindah perangkat? Cukup gunakan fitur **Ekspor/Impor** JSON untuk membawa seluruh sejarah tontonan Anda ke mana pun.
 
 ---
 
-## Stack Teknologi
+## 🧭 Fitur Navigasi & Interaksi
 
-- **Core**: [React 19](https://react.dev/)
-- **Logic**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Build Tool**: [Vite](https://vitejs.dev/)
+Didesain untuk menangani skala besar (1100+ episode) dengan presisi:
+- **Filter Pintar (Anti-Filler)**: Lewati episode filler hanya dengan satu klik. Fokus pada cerita canon atau tampilkan kembali saat Anda menginginkannya.
+- **Pencarian Kilat**: Cari ribuan episode berdasarkan nomor (misal: "1122") atau kata kunci judul secara instan.
+- **Integrasi Bilibili**: Terhubung langsung ke pemutar resmi Bstation/Bilibili SEA untuk pengalaman menonton yang legal dan berkualitas.
+- **Sembunyikan Selesai**: Bersihkan antarmuka dari episode yang sudah Anda tonton agar tetap fokus pada perjalanan yang tersisa.
 
 ---
 
-## Cara Memulai
+## 🏴‍☠️ Sistem Progres & Rank
 
-### Prasyarat
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+Jadikan perjalanan menonton Anda lebih memuaskan:
+- **Sistem Rank Bajak Laut**: Mulai sebagai "Rookie" dan naik kasta hingga menjadi "Yonko" atau bahkan "King of Pirates" seiring bertambahnya jumlah episode yang Anda selesaikan.
+- **Lanjut Menonton (Auto-Resume)**: Aplikasi secara cerdas mendeteksi episode terakhir yang belum Anda tonton dan menempatkannya di bagian atas untuk akses cepat.
+- **Pengelompokan Saga & Arc**: Struktur data yang rapi berdasarkan saga resmi memudahkan Anda mengidentifikasi fase cerita yang sedang diikuti.
 
-### Instalasi
-1. Clone repositori ini
+---
+
+## 🛠️ Keunggulan Teknis
+
+- **Premium UI & Animasi**: Pengalaman visual yang mengagumkan dengan animasi buka-tutup Arc menggunakan Framer Motion.
+- **Bstation Daily Sync**: Database episode diperbarui secara otomatis setiap hari melalui GitHub Actions menggunakan skrip sinkronisasi Bilibili.
+- **PWA Ready**: Install aplikasi ini ke layar utama ponsel Anda untuk akses layaknya aplikasi native.
+- **Responsive Adaptive**: Antarmuka yang berubah secara dinamis menyesuaikan penggunaan di Mobile, Tablet, atau Desktop.
+
+---
+
+## 🚀 Cara Menjalankan
+
+### Instalasi Lokal
+1. Clone repositori ini:
    ```sh
-   git clone https://github.com/syarfandi/grandline-tracker.git
+   git clone https://github.com/syarfandi/one-piece-tracker.git
    ```
-2. Instal paket NPM
+2. Instal dependensi:
    ```sh
    npm install
    ```
-3. Jalankan server pengembangan
+3. Jalankan server pengembangan:
    ```sh
    npm run dev
    ```
 
 ---
 
-## Penggunaan & Migrasi
-
-1. **Lacak Episode**: Centang lingkaran pada episode yang telah ditonton.
-2. **Pindah Perangkat**:
-    - Klik **Simpan File** di perangkat lama untuk mengunduh logbook.
-    - Di perangkat baru, klik **Muat File** dan pilih file JSON tersebut.
-3. **Pencarian**: Gunakan kotak pencarian untuk mencari nomor episode (misal: "1122") atau kata kunci judul.
-
----
-
-## Lisensi
-
-Didistribusikan di bawah Lisensi MIT. Lihat `LICENSE` untuk informasi lebih lanjut.
-
----
-
 <p align="center">
-  <i>Dibuat untuk para Nakama. Tanpa Login, Tanpa Ribet.</i>
+  <i>Dibuat dengan cinta untuk para Nakama. Tanpa Login, Tanpa Ribet.</i>
 </p>
