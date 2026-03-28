@@ -806,13 +806,6 @@ export default function App() {
                         </div>
                     </div>
 
-                    {/* Navigation / Search Controls */}
-                    <div className="flex flex-col mb-5 sm:mb-6">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -tranneutral-y-1/2 text-neutral-400" size={16} />
-                            <input type="text" placeholder="Temukan Arc/Saga..." className={`w-full rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-amber-500 transition-all outline-none ${theme.input}`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-                        </div>
-                    </div>
 
                     {/* Compact Stats Section / Poster Export */}
                     <div id="stats-poster" className={`transition-all duration-300 ${isExporting ? 'p-6 rounded-3xl bg-neutral-50 dark:bg-neutral-950 shadow-2xl min-w-[360px]' : ''}`}>
