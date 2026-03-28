@@ -28,6 +28,21 @@ import {
 // --- Konfigurasi & Data ---
 const appId = 'one-piece-tracker-v4';
 
+const isFillerEpisode = (ep: number) => {
+    // Rentang episode filler One Piece (Berdasarkan panduan umum)
+    const fillerRanges = [
+        [50, 51], [54, 61], [93, 93], [98, 99], [101, 102], [131, 143], [196, 206],
+        [213, 216], [220, 226], [279, 283], [291, 292], [303, 303], [317, 319],
+        [326, 336], [382, 384], [406, 407], [426, 429], [457, 458], [492, 492],
+        [542, 542], [575, 578], [590, 590], [626, 628], [747, 750], [775, 775],
+        [780, 782], [807, 807], [881, 881], [895, 896], [907, 907], [1029, 1030],
+        [1084, 1085]
+    ];
+    // Reverie mixed fillers that are heavily filler-leaning:
+    const reverieMixedFillers = [878, 879, 882, 883, 884, 885, 887, 888, 889];
+    return fillerRanges.some(([start, end]) => ep >= start && ep <= end) || reverieMixedFillers.includes(ep);
+};
+
 const getDeviceInfo = () => {
     const ua = navigator.userAgent;
     let device = "Dekstop";
@@ -393,7 +408,7 @@ export default function App() {
     };
 
     const shareProgress = () => {
-        const text = `Progres One Piece-ku: ${stats.canonPercent}% Tamat (Canon). Lacak progresmu di Grand Line Tracker!`;
+        const text = `Progres One Piece-ku: ${stats.canonPercent}% Tamat (Canon). Lacak progresmu di One Piece Tracker!`;
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text);
             setCopyFeedback(true);
@@ -518,8 +533,8 @@ export default function App() {
 
             {/* Mobile Menu FAB */}
             {!isSidebarOpen && (
-                <button 
-                    onClick={() => setIsSidebarOpen(true)} 
+                <button
+                    onClick={() => setIsSidebarOpen(true)}
                     className="lg:hidden fixed bottom-6 right-6 z-40 p-4 rounded-2xl bg-gradient-to-br from-red-600 to-amber-500 text-white shadow-2xl shadow-red-500/30 transition-transform hover:scale-110 active:scale-95 flex items-center justify-center border border-white/20"
                     title="Menu Utama"
                 >
@@ -657,12 +672,14 @@ export default function App() {
                                     <Compass size={16} className="text-amber-500 shrink-0" strokeWidth={2.5} />
                                     <span className="truncate">{deviceInfo.os}</span>
                                 </span>
-                                <div className={`flex items-center gap-3 border-l-[1.5px] pl-3 sm:pl-3.5 shrink-0 h-6 ${isDarkMode ? 'border-slate-700/50' : 'border-slate-800'}`}>
-                                    <button onClick={exportProgress} title="Cadangkan Data" className={`transition-all hover:scale-110 active:scale-95 ${isDarkMode ? 'text-amber-500 hover:text-amber-400' : 'text-amber-600 hover:text-amber-500'}`}>
-                                        <Download size={16} strokeWidth={2.5} />
+                                <div className={`flex items-center gap-3.5 border-l-[1.5px] pl-3 sm:pl-3.5 shrink-0 h-7 ${isDarkMode ? 'border-slate-700/50' : 'border-slate-800'}`}>
+                                    <button onClick={exportProgress} title="Cadangkan Data" className={`flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'text-amber-500 hover:text-amber-400' : 'text-amber-600 hover:text-amber-500'}`}>
+                                        <Download size={14} strokeWidth={2.5} />
+                                        <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">Export</span>
                                     </button>
-                                    <label title="Pulihkan Data" className={`cursor-pointer transition-all hover:scale-110 active:scale-95 ${isDarkMode ? 'text-amber-500 hover:text-amber-400' : 'text-amber-600 hover:text-amber-500'}`}>
-                                        <Upload size={16} strokeWidth={2.5} />
+                                    <label title="Pulihkan Data" className={`flex items-center gap-1.5 cursor-pointer transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'text-amber-500 hover:text-amber-400' : 'text-amber-600 hover:text-amber-500'}`}>
+                                        <Upload size={14} strokeWidth={2.5} />
+                                        <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">Import</span>
                                         <input type="file" className="hidden" accept=".json" onChange={(e) => { importProgress(e); setIsSidebarOpen(false); }} />
                                     </label>
                                 </div>
@@ -810,9 +827,18 @@ export default function App() {
                                                                                 {epNum}
                                                                             </div>
                                                                             <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleEpisode(epNum)}>
-                                                                                <h5 className={`text-xs sm:text-[13px] font-bold leading-tight line-clamp-2 sm:line-clamp-none ${isWatched ? 'line-through decoration-green-500/30 text-slate-400' : ''}`}>
-                                                                                    {getEpisodeTitle(epNum)}
-                                                                                </h5>
+                                                                                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                                                                                    <h5 className={`text-xs sm:text-[13px] font-bold leading-tight line-clamp-2 sm:line-clamp-none ${isWatched ? 'line-through decoration-green-500/30 text-slate-400' : ''}`}>
+                                                                                        {getEpisodeTitle(epNum)}
+                                                                                    </h5>
+                                                                                    {arc.type === 'Mixed' && (
+                                                                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest shrink-0 ${isFillerEpisode(epNum) 
+                                                                                            ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' 
+                                                                                            : 'bg-red-50 text-red-600 dark:bg-red-900/40 dark:text-red-400'}`}>
+                                                                                            {isFillerEpisode(epNum) ? 'Filler' : 'Canon'}
+                                                                                        </span>
+                                                                                    )}
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                         <a href={getBilibiliUrl(epNum)} target="_blank" rel="noopener noreferrer" className={`flex-shrink-0 flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] font-black uppercase transition-all border ${isDarkMode ? 'bg-slate-900 border-red-900/50 text-red-400 hover:bg-red-900/30' : 'bg-white border-slate-200 text-red-600 hover:bg-red-50 shadow-sm'} h-8 sm:h-auto`}>

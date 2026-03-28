@@ -1,17 +1,17 @@
-# 🏴‍☠️ Grand Line Tracker
+# 🏴‍☠️ One Piece Tracker
 
 [![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8.0-646CFF?logo=vite)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.2-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 
-**Grand Line Tracker** adalah aplikasi web modern dan premium yang dirancang khusus untuk para penggemar One Piece untuk melacak perjalanan mereka melalui dunia luas ciptaan Eiichiro Oda secara langsung di perangkat Anda tanpa perlu login.
+**One Piece Tracker** adalah aplikasi web modern dan premium yang dirancang khusus untuk para penggemar One Piece untuk melacak perjalanan mereka melalui dunia luas ciptaan Eiichiro Oda secara langsung di perangkat Anda tanpa perlu login.
 
 ---
 
 ## 📱 Pelacakan Berbasis Perangkat (No Login)
 
-Grand Line Tracker menggunakan filosofi **"Device-First"**. Anda tidak perlu membuat akun atau login. Semua data Anda aman tersimpan di dalam browser perangkat Anda sendiri.
+One Piece Tracker menggunakan filosofi **"Device-First"**. Anda tidak perlu membuat akun atau login. Semua data Anda aman tersimpan di dalam browser perangkat Anda sendiri.
 
 - **📍 Deteksi Otomatis**: Aplikasi mendeteksi perangkat (Mobile/Desktop) dan sistem operasi Anda untuk memastikan kompatibilitas.
 - **💾 Penyimpanan Lokal**: Menggunakan `localStorage` browser untuk menyimpan progres secara instan dan aman.
