@@ -937,9 +937,13 @@ export default function App() {
                                 <img src="/mugiwara-logo.png" alt="Logo" className="w-8 h-8 sm:w-12 sm:h-12 object-contain drop-shadow-sm shrink-0" />
                                 <div className="min-w-0">
                                     <h2 className={`text-xs sm:text-lg lg:text-3xl font-black uppercase tracking-tight bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none truncate`}>
-                                        {activeTab === 'episodes' ? 'One Piece Tracker' : 'Movie Archive'}
+                                        {activeTab === 'episodes' ? 'OP Tracker' : 'Movie Archive'}
                                     </h2>
                                     <div className="flex items-center gap-1.5 mt-0.5">
+                                        <span className={`text-[8px] sm:text-[10px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-neutral-400' : 'text-neutral-500'} shrink-0 hidden sm:block`}>
+                                            Pantau Jejak Petualanganmu
+                                        </span>
+                                        <div className="w-1 h-1 rounded-full bg-neutral-300 dark:bg-neutral-700 shrink-0 hidden sm:block"></div>
                                         <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-widest px-1 py-0.5 rounded border ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-neutral-400' : 'bg-neutral-100 border-neutral-200 text-neutral-500'} shrink-0`}>Rank</span>
                                         <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-widest pt-0.5 truncate ${gamerRank.color}`}>{gamerRank.title}</span>
                                     </div>
