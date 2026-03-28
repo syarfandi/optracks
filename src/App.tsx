@@ -262,16 +262,6 @@ export default function App() {
         );
     };
 
-    const toggleAllSaga = () => {
-        if (expandedSagas.length === SAGA_DATA.length) {
-            setExpandedSagas([]);
-            setExpandedArcs([]);
-        } else {
-            // Expand only the Sagas, keep individual Arcs collapsed
-            setExpandedSagas(SAGA_DATA.map(s => s.id));
-            setExpandedArcs([]);
-        }
-    };
 
     const resetProgress = () => {
         if (window.confirm("Hapus semua progres tontonan Anda secara lokal?")) {
@@ -324,28 +314,41 @@ export default function App() {
         let canonWatched = 0;
         let fillerTotal = 0;
         let fillerWatched = 0;
+        let sagasWatched = 0;
 
         SAGA_DATA.forEach(saga => {
+            let sagaAllWatched = true;
             saga.arcs.forEach(arc => {
                 const isCanon = arc.type === 'Canon' || arc.type === 'Mixed';
                 for (let i = arc.start; i <= arc.end; i++) {
+                    const watched = watchedEpisodes.includes(`ep-${i}`);
                     if (isCanon) {
                         canonTotal++;
-                        if (watchedEpisodes.includes(`ep-${i}`)) canonWatched++;
+                        if (watched) canonWatched++;
                     } else {
                         fillerTotal++;
-                        if (watchedEpisodes.includes(`ep-${i}`)) fillerWatched++;
+                        if (watched) fillerWatched++;
                     }
+                    if (!watched) sagaAllWatched = false;
                 }
             });
+            if (sagaAllWatched) sagasWatched++;
         });
 
         const moviePercent = Math.round((watchedMovies.length / MOVIE_DATA.length) * 100);
+        const sagasTotal = SAGA_DATA.length;
 
         return {
             canonPercent: canonTotal > 0 ? Math.round((canonWatched / canonTotal) * 100) : 0,
-            canonWatched, canonTotal, fillerPercent: fillerTotal > 0 ? Math.round((fillerWatched / fillerTotal) * 100) : 0,
-            fillerWatched, fillerTotal, moviePercent
+            canonWatched,
+            canonTotal,
+            fillerPercent: fillerTotal > 0 ? Math.round((fillerWatched / fillerTotal) * 100) : 0,
+            fillerWatched,
+            fillerTotal,
+            sagasPercent: Math.round((sagasWatched / sagasTotal) * 100),
+            sagasWatched,
+            sagasTotal,
+            moviePercent
         };
     }, [watchedEpisodes, watchedMovies]);
 
@@ -435,43 +438,45 @@ export default function App() {
                         </div>
                     </div>
 
-                    {/* Stats Section */}
-                    <div className="space-y-4 mb-10 hidden lg:block">
-                        <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-indigo-50/50 border-indigo-100'}`}>
-                            <div className="flex items-center justify-between text-[10px] font-black uppercase mb-2">
-                                <span className="text-indigo-600 flex items-center gap-1"> <Trophy size={14} className="text-amber-500" /> Logbook Progres</span>
-                                <span>{stats.canonPercent}%</span>
+                    {/* Compact Stats Section */}
+                    <div className="grid grid-cols-2 lg:grid-cols-1 gap-2 mb-8">
+                        {/* Canon Stats */}
+                        <div className={`p-3 rounded-xl border transition-all hover:scale-[1.01] ${isDarkMode ? 'bg-indigo-950/20 border-indigo-500/20' : 'bg-indigo-50/50 border-indigo-100'}`}>
+                            <div className="flex items-center justify-between text-[9px] font-black uppercase mb-1.5">
+                                <span className="text-indigo-600 flex items-center gap-1"> <Trophy size={12} className="text-amber-500" /> Canon</span>
+                                <span className="text-indigo-600">{stats.canonPercent}%</span>
                             </div>
-                            <div className="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
                                 <div className="h-full bg-indigo-600 transition-all duration-1000" style={{ width: `${stats.canonPercent}%` }} />
                             </div>
-                            <p className="text-[9px] mt-2 font-bold uppercase tracking-widest opacity-60">{stats.canonWatched} / {stats.canonTotal} Episode Tamat</p>
                         </div>
-                        <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
-                            <div className="flex items-center justify-between text-[10px] font-black uppercase mb-2">
-                                <span className={theme.muted}> <Film size={12} className="inline mr-1" /> Movies</span>
-                                <span>{stats.moviePercent}%</span>
-                            </div>
-                            <div className={`h-2 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-700' : 'bg-indigo-100'}`}>
-                                <div className="h-full bg-slate-500 transition-all duration-1000" style={{ width: `${stats.moviePercent}%` }} />
-                            </div>
-                        </div>
-                    </div>
 
-                    {/* Mobile Stats (Condensed) */}
-                    <div className="lg:hidden grid grid-cols-2 gap-4 mb-6">
-                        <div className={`p-3 rounded-2xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-indigo-50/50 border-indigo-100'}`}>
-                            <div className="flex items-center justify-between text-[10px] font-black uppercase mb-2">
-                                <span className="text-indigo-600 flex items-center gap-1"> <Compass size={12} /> Progres</span>
-                                <span>{stats.canonPercent}%</span>
+                        {/* Saga Stats */}
+                        <div className={`p-3 rounded-xl border transition-all hover:scale-[1.01] ${isDarkMode ? 'bg-amber-950/20 border-amber-500/20' : 'bg-amber-50/50 border-amber-100'}`}>
+                            <div className="flex items-center justify-between text-[9px] font-black uppercase mb-1.5">
+                                <span className="text-amber-600 flex items-center gap-1"> <Compass size={12} /> Saga</span>
+                                <span className="text-amber-600">{stats.sagasPercent}%</span>
                             </div>
-                            <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                <div className="h-full bg-indigo-600 transition-all duration-1000" style={{ width: `${stats.canonPercent}%` }} />
+                            <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
+                                <div className="h-full bg-amber-500 transition-all duration-1000" style={{ width: `${stats.sagasPercent}%` }} />
                             </div>
                         </div>
-                        <div className={`p-3 rounded-2xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
-                            <div className="flex items-center justify-between text-[10px] font-black uppercase mb-2">
-                                <span className={theme.muted}> <Film size={12} className="inline mr-1" /> Film</span>
+
+                        {/* Filler Stats */}
+                        <div className={`p-3 rounded-xl border transition-all hover:scale-[1.01] ${isDarkMode ? 'bg-rose-950/20 border-rose-500/20' : 'bg-rose-50/50 border-rose-100'}`}>
+                            <div className="flex items-center justify-between text-[9px] font-black uppercase mb-1.5">
+                                <span className="text-rose-600 flex items-center gap-1"> <Skull size={12} /> Filler</span>
+                                <span className="text-rose-600">{stats.fillerPercent}%</span>
+                            </div>
+                            <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
+                                <div className="h-full bg-rose-500 transition-all duration-1000" style={{ width: `${stats.fillerPercent}%` }} />
+                            </div>
+                        </div>
+
+                        {/* Movie Stats */}
+                        <div className={`p-3 rounded-xl border transition-all hover:scale-[1.01] ${isDarkMode ? 'bg-slate-800/30 border-slate-700' : 'bg-slate-100/50 border-slate-200'}`}>
+                            <div className="flex items-center justify-between text-[9px] font-black uppercase mb-1.5">
+                                <span className={`${theme.muted} flex items-center gap-1`}> <Film size={12} /> Movies</span>
                                 <span>{stats.moviePercent}%</span>
                             </div>
                             <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-700' : 'bg-indigo-100'}`}>
@@ -488,10 +493,6 @@ export default function App() {
                         </div>
                         <button onClick={continueWatching} className="bg-indigo-600 text-white flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-indigo-600/20 w-full">
                             <Ship size={18} /> <span>Lanjut Nonton</span>
-                        </button>
-                        <button onClick={toggleAllSaga} className={`w-full py-3 px-4 rounded-xl flex items-center justify-between text-sm font-bold transition-all ${isDarkMode ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
-                            <span>Toggle Semua Saga</span>
-                            {expandedSagas.length === SAGA_DATA.length ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                         </button>
                     </div>
 
