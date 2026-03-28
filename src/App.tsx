@@ -25,7 +25,8 @@ import {
     List,
     Download,
     Upload,
-    Camera
+    Camera,
+    CircleMinus
 } from 'lucide-react';
 
 // --- Konfigurasi & Data ---
@@ -688,6 +689,7 @@ export default function App() {
         muted: isDarkMode ? 'text-neutral-400' : 'text-neutral-500',
         border: isDarkMode ? 'border-neutral-700/60' : 'border-neutral-200',
         dropdownBg: isDarkMode ? 'bg-neutral-950/50' : 'bg-neutral-50',
+        buttonInactive: isDarkMode ? 'bg-neutral-900 border-neutral-800 text-neutral-400' : 'bg-neutral-100 border-neutral-200 text-neutral-500',
     };
 
     if (loading) {
@@ -860,29 +862,47 @@ export default function App() {
                         )}
                     </button>
 
-                    {/* Device Persistence Card */}
-                    <div className="mt-auto flex flex-col pt-3 sm:pt-4 pb-2 shrink-0">
-                        <div className={`p-4 rounded-[1.25rem] border transition-all flex flex-col gap-3.5 ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-neutral-50/50 border-neutral-200 shadow-sm'}`}>
-                            <div className="flex items-center justify-between gap-2">
-                                <span className={`flex-1 min-w-0 flex items-center gap-2.5 text-xs font-black uppercase tracking-[0.15em] ${isDarkMode ? 'text-neutral-300' : 'text-neutral-600'}`}>
-                                    <Compass size={16} className="text-amber-500 shrink-0" strokeWidth={2.5} />
-                                    <span className="truncate">{deviceInfo.os}</span>
-                                </span>
-                                <div className={`flex items-center gap-3.5 border-l-[1.5px] pl-3 sm:pl-3.5 shrink-0 h-7 ${isDarkMode ? 'border-neutral-700/50' : 'border-neutral-800'}`}>
-                                    <button onClick={exportProgress} title="Cadangkan Data" className={`flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'text-amber-500 hover:text-amber-400' : 'text-amber-600 hover:text-amber-500'}`}>
-                                        <Download size={14} strokeWidth={2.5} />
-                                        <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">Export</span>
+                    {/* Compact Sync & Backup Card */}
+                    <div className="mt-auto pt-4 pb-2">
+                        <div className={`p-4 rounded-[1.75rem] border transition-all relative overflow-hidden group ${isDarkMode ? 'bg-neutral-900/40 border-neutral-800/50 backdrop-blur-xl shadow-lg' : 'bg-white border-neutral-100 shadow-xl shadow-neutral-200/30'}`}>
+                            {/* Decorative background element */}
+                            <div className="absolute -top-10 -right-10 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-all duration-700" />
+                            
+                            <div className="flex flex-col gap-4 relative z-10">
+                                <div className="flex items-center justify-between gap-3">
+                                    <div className="flex-1 min-w-0">
+                                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] mb-1 block ${isDarkMode ? 'text-neutral-500' : 'text-neutral-400'}`}>Unit Perangkat</span>
+                                        <div className="flex items-center gap-2">
+                                            <div className={`p-1.5 rounded-lg scale-90 ${isDarkMode ? 'bg-amber-500/10 text-amber-500' : 'bg-amber-50 text-amber-600'}`}>
+                                                <Compass size={14} strokeWidth={2.5} />
+                                            </div>
+                                            <span className={`text-sm font-black uppercase tracking-tight truncate ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{deviceInfo.os}</span>
+                                        </div>
+                                    </div>
+                                    <div className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all ${isDarkMode ? 'bg-neutral-800/50 border-neutral-700/50 text-green-500' : 'bg-green-50 border-green-100 text-green-600'}`}>
+                                        <div className={`w-1 h-1 rounded-full animate-pulse ${isDarkMode ? 'bg-green-500' : 'bg-green-600'}`} />
+                                        <span className="text-[7px] font-black uppercase tracking-widest">Live Sync</span>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2.5">
+                                    <button onClick={exportProgress} className={`flex items-center justify-center gap-2 py-2.5 rounded-xl transition-all hover:scale-[1.03] active:scale-95 shadow-sm border ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-amber-500 hover:bg-neutral-700' : 'bg-neutral-50 border-neutral-200 text-amber-700 hover:bg-neutral-100'}`}>
+                                        <Download size={14} strokeWidth={3} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest pt-0.5">Export</span>
                                     </button>
-                                    <label title="Pulihkan Data" className={`flex items-center gap-1.5 cursor-pointer transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'text-amber-500 hover:text-amber-400' : 'text-amber-600 hover:text-amber-500'}`}>
-                                        <Upload size={14} strokeWidth={2.5} />
-                                        <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">Import</span>
+                                    <label className={`flex items-center justify-center gap-2 py-2.5 rounded-xl transition-all hover:scale-[1.03] active:scale-95 shadow-sm border cursor-pointer ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-amber-500 hover:bg-neutral-700' : 'bg-neutral-50 border-neutral-200 text-amber-700 hover:bg-neutral-100'}`}>
+                                        <Upload size={14} strokeWidth={3} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest pt-0.5">Import</span>
                                         <input type="file" className="hidden" accept=".json" onChange={(e) => { importProgress(e); setIsSidebarOpen(false); }} />
                                     </label>
                                 </div>
+
+                                <div className="text-center">
+                                    <p className={`text-[8px] font-bold uppercase ${isDarkMode ? 'text-neutral-500' : 'text-neutral-400'} leading-relaxed tracking-wider opacity-80`}>
+                                        Tersimpan di browser {deviceInfo.device}. <br /> Cadangkan berkala untuk keamanan.
+                                    </p>
+                                </div>
                             </div>
-                            <p className="text-[9px] font-black uppercase text-neutral-400 leading-relaxed tracking-wider">
-                                Data tersimpan otomatis di browser ini. Cadangkan ke .json jika ingin pindah perangkat.
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -915,35 +935,38 @@ export default function App() {
                                 </div>
 
                                 {activeTab === 'episodes' && (
-                                    <div className="hidden sm:flex p-0.5 rounded-lg border bg-neutral-100 dark:bg-neutral-900/50 dark:border-neutral-800">
-                                        <button onClick={() => setSagaViewMode('list')} className={`p-1 rounded-md transition-all ${sagaViewMode === 'list' ? 'bg-red-500 text-white shadow-sm' : 'opacity-50 hover:opacity-100'}`}><List size={14} /></button>
-                                        <button onClick={() => setSagaViewMode('card')} className={`p-1 rounded-md transition-all ${sagaViewMode === 'card' ? 'bg-red-500 text-white shadow-sm' : 'opacity-50 hover:opacity-100'}`}><LayoutGrid size={14} /></button>
+                                    <div className={`hidden sm:flex p-0.5 rounded-xl border transition-all ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-neutral-100 border-neutral-200 shadow-inner'}`}>
+                                        <button onClick={() => setSagaViewMode('list')} className={`p-1.5 rounded-lg transition-all ${sagaViewMode === 'list' ? 'bg-gradient-to-br from-red-600 to-amber-600 text-white shadow-md' : 'text-neutral-500 opacity-60 hover:opacity-100 hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50'}`}><List size={16} /></button>
+                                        <button onClick={() => setSagaViewMode('card')} className={`p-1.5 rounded-lg transition-all ${sagaViewMode === 'card' ? 'bg-gradient-to-br from-red-600 to-amber-600 text-white shadow-md' : 'text-neutral-500 opacity-60 hover:opacity-100 hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50'}`}><LayoutGrid size={16} /></button>
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         {/* Header Row 2: Search & Quick Actions */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2">
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={14} />
-                                <input type="text" placeholder="Cari Judul, Arc, Episode..." className={`w-full rounded-xl py-2 sm:py-2.5 pl-9 pr-4 text-[11px] sm:text-sm transition-all outline-none focus:ring-2 focus:ring-amber-500 shadow-none border ${isDarkMode ? 'bg-neutral-900 border-neutral-800 text-neutral-100' : 'bg-white border-neutral-200 text-neutral-900 shadow-sm'}`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                                <input type="text" placeholder="Cari Judul, Arc, Episode..." className={`w-full rounded-xl py-2.5 sm:py-2.5 pl-9 pr-4 text-[12px] sm:text-sm transition-all outline-none focus:ring-2 focus:ring-amber-500 shadow-none border ${isDarkMode ? 'bg-neutral-900 border-neutral-800 text-neutral-100' : 'bg-white border-neutral-200 text-neutral-900 shadow-sm'}`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                                 {searchQuery && (
                                     <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-red-500 transition-colors"><X size={14} strokeWidth={3} /></button>
                                 )}
                             </div>
 
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-2 pb-1 sm:pb-0">
                                 {activeTab === 'episodes' && (
                                     <>
-                                        <button onClick={() => setShowFiller(!showFiller)} title="Sembunyikan Filler" className={`p-2 rounded-xl border transition-all active:scale-95 ${!showFiller ? 'bg-red-500 border-red-400 text-white shadow-lg shadow-red-500/20' : 'bg-neutral-100 dark:bg-neutral-900 dark:border-neutral-800 text-neutral-400'}`}>
-                                            <Skull size={16} />
+                                        <button onClick={() => setShowFiller(!showFiller)} title="Sembunyikan Filler" className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all active:scale-95 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${!showFiller ? 'bg-gradient-to-r from-red-600 to-rose-600 border-rose-500 text-white shadow-lg shadow-red-500/20' : theme.buttonInactive}`}>
+                                            <CircleMinus size={14} strokeWidth={2.5} />
+                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest"><span className="hidden sm:inline">Tanpa </span>Filler</span>
                                         </button>
-                                        <button onClick={() => setHideWatched(!hideWatched)} title="Sembunyikan Selesai" className={`p-2 rounded-xl border transition-all active:scale-95 ${hideWatched ? 'bg-green-600 border-green-500 text-white shadow-lg shadow-green-500/20' : 'bg-neutral-100 dark:bg-neutral-900 dark:border-neutral-800 text-neutral-400'}`}>
-                                            <CheckCircle2 size={16} />
+                                        <button onClick={() => setHideWatched(!hideWatched)} title="Sembunyikan Selesai" className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all active:scale-95 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${hideWatched ? 'bg-gradient-to-r from-emerald-600 to-green-600 border-green-500 text-white shadow-lg shadow-green-500/20' : theme.buttonInactive}`}>
+                                            <CheckCircle2 size={14} strokeWidth={2.5} />
+                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest"><span className="hidden sm:inline">Sembunyikan </span>Selesai</span>
                                         </button>
-                                        <button onClick={continueWatching} title="Lanjutkan Menonton" className="p-2 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 text-white border border-rose-400/20 active:scale-95 transition-all shadow-xl shadow-red-500/20">
-                                            <Play size={16} fill="currentColor" />
+                                        <button onClick={continueWatching} title="Lanjutkan Menonton" className="flex-1 sm:flex-none px-2 py-2 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 text-white border border-rose-400/20 active:scale-95 transition-all shadow-xl shadow-red-500/20 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap">
+                                            <Play size={14} fill="currentColor" strokeWidth={2.5} />
+                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest">Lanjut</span>
                                         </button>
                                     </>
                                 )}
