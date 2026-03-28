@@ -7,6 +7,15 @@
 
 **One Piece Tracker** adalah platform pelacakan progres episode One Piece paling modern dan premium. Dirancang khusus untuk Nakama yang menginginkan kemudahan tanpa hambatan login, aplikasi ini memastikan perjalanan Anda melewati ribuan episode tetap terorganisir, cepat, dan selalu sinkron.
 
+> ### ⚓ Tracker One Piece untuk Nakama
+> Lupakan cara lama mencatat episode secara manual atau terjebak dalam episode filler yang panjang. **One Piece Tracker** dirancang untuk memudahkan perjalanan Anda tanpa hambatan teknis.
+> 
+> *   **Tanpa Login** - Mulai melacak progres Anda secara instan tanpa perlu akun.
+> *   **Filter Filler** - Lewati cerita tambahan dan fokus pada alur utama (canon).
+> *   **Sistem Rank** - Pantau kenaikan level Anda dari Rookie hingga Yonko.
+> *   **Multi-Device** - Tampilan optimal dan ringan di HP maupun Desktop.
+> *   **Update Rutin** - Sinkronisasi otomatis setiap hari dengan database terbaru.
+
 ---
 
 ## ⚡ Nilai Utama (Essential)
