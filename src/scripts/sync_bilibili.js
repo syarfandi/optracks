@@ -5,15 +5,15 @@ const SEASON_ID = '37976';
 const DATA_PATH = path.resolve('src/data/bilibili_episodes.json');
 
 async function sync() {
-    console.log('🔄 Menghubungkan ke Bilibili TV (SEA) untuk Sinkronisasi Episode...');
+    console.log('🔄 Menghubungkan ke Bilibili/Bstation (SEA) API...');
     
-    // Kita gunakan API v2/ogv/view/season?season_id=... yang lebih lengkap datanya
-    const url = `https://api.bilibili.tv/intl/gateway/v2/ogv/view/season?season_id=${SEASON_ID}&language=id_ID`;
+    // Gunakan host biliintl.com yang lebih stabil untuk versi internasional
+    const url = `https://api.biliintl.com/intl/gateway/v2/ogv/view/app/season?season_id=${SEASON_ID}&language=id_ID&s_locale=id_ID`;
     
     try {
         const response = await fetch(url, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
                 'Referer': 'https://www.bilibili.tv/',
                 'Accept': 'application/json'
             }
@@ -24,29 +24,35 @@ async function sync() {
         }
         
         const data = await response.json();
-        
-        // Cari daftar episode dalam struktur modul Bilibili SEA V2
+        const result = data.result || data.data;
+
+        if (!result) {
+            throw new Error('Gagal mendapatkan data result dari API.');
+        }
+
+        // Ambil daftar episode dari modul atau direct list
         let episodes = [];
-        if (data.data && data.data.modules) {
-            const epModule = data.data.modules.find(m => m.module_type === 'episode' || (m.data && m.data.episodes));
+        
+        // Cek modules (struktur V2)
+        if (result.modules) {
+            const epModule = result.modules.find(m => m.module_type === 'episode' || (m.data && m.data.episodes));
             if (epModule && epModule.data && epModule.data.episodes) {
                 episodes = epModule.data.episodes;
             }
         }
 
-        if (episodes.length === 0) {
-            console.error('⚠️ Tidak dapat menemukan daftar episode dalam respon API. Mencoba fallback script...');
-            // Fallback: Jika API modul gagal, coba API pages
-            const pagesUrl = `https://api.bilibili.tv/intl/gateway/v2/ogv/view/pages?season_id=${SEASON_ID}&language=id_ID`;
-            const pagesRes = await fetch(pagesUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-            const pagesData = await pagesRes.json();
-            if (pagesData.data && pagesData.data.episodes) {
-                episodes = pagesData.data.episodes;
-            }
+        // Fallback: Jika episode list terbatas (untuk guest), gunakan data 'new_ep'
+        if (episodes.length === 0 && result.new_ep) {
+            console.log(`ℹ️ Menggunakan data episode terbaru: ${result.new_ep.title}`);
+            episodes = [{
+                id: result.new_ep.id,
+                title: result.new_ep.title,
+                long_title: result.new_ep.long_title || `Episode ${result.new_ep.title}`
+            }];
         }
 
         if (episodes.length === 0) {
-            throw new Error('Gagal mendapatkan daftar episode dari semua API endpoint.');
+            throw new Error('Tidak ada data episode yang ditemukan dalam respon API.');
         }
 
         // Baca data lokal
