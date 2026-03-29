@@ -1376,7 +1376,7 @@ export default function App() {
                                 <button onClick={() => setSearchQuery('')} className="mt-8 px-8 py-3 rounded-2xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400 font-bold uppercase tracking-widest text-xs hover:bg-indigo-200 transition-colors shadow-sm"> Reset Pencarian </button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                                 {filteredMovies.map((movie) => (
                                     <div 
                                         key={movie.id} 
