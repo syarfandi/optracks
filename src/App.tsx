@@ -897,15 +897,51 @@ export default function App() {
 
 
             {/* Menu FAB */}
-            {!isSidebarOpen && (
-                <button
-                    onClick={() => setIsSidebarOpen(true)}
-                    className="fixed bottom-6 right-6 z-40 p-4 rounded-2xl bg-gradient-to-br from-red-600 to-amber-500 text-white shadow-2xl shadow-red-500/30 transition-transform hover:scale-110 active:scale-95 flex items-center justify-center border border-white/20"
-                    title="Buka Menu"
-                >
-                    <Menu size={26} strokeWidth={2.5} />
-                </button>
-            )}
+            <AnimatePresence>
+                {!isSidebarOpen && (
+                    <motion.div
+                        initial={{ scale: 0, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0, opacity: 0, y: 20 }}
+                        className="fixed bottom-6 right-6 z-40"
+                    >
+                        {/* Glowing Background Aura */}
+                        <motion.div 
+                            animate={{ 
+                                scale: [1, 1.2, 1],
+                                opacity: [0.2, 0.5, 0.2]
+                            }}
+                            transition={{ 
+                                duration: 4, 
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                            }}
+                            className="absolute inset-0 bg-gradient-to-br from-red-600 to-amber-500 rounded-3xl blur-2xl -z-10"
+                        />
+                        
+                        <motion.button
+                            onClick={() => setIsSidebarOpen(true)}
+                            whileHover={{ 
+                                scale: 1.1,
+                                boxShadow: "0 20px 40px -10px rgba(220, 38, 38, 0.5)"
+                            }}
+                            whileTap={{ scale: 0.9 }}
+                            className="relative group flex items-center justify-center p-4 rounded-[1.5rem] bg-gradient-to-br from-red-600 via-red-600 to-amber-500 text-white shadow-2xl border border-white/20 backdrop-blur-xl group overflow-hidden"
+                            title="Buka Menu Utama"
+                        >
+                            {/* Inner shine effect */}
+                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full" />
+                            
+                            <div className="flex items-center gap-0 group-hover:gap-3 transition-all duration-500 ease-out">
+                                <Menu size={24} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform duration-500" />
+                                <span className="max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-500 text-[11px] font-black uppercase tracking-[0.2em] pt-0.5">
+                                    Navigasi
+                                </span>
+                            </div>
+                        </motion.button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Mobile Overlay */}
             {isSidebarOpen && (
