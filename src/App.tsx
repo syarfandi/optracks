@@ -1125,7 +1125,7 @@ export default function App() {
     }
 
     return (
-        <div className={`min-h-screen font-sans selection:bg-amber-500/30 transition-colors duration-200 flex flex-col lg:flex-row-reverse ${theme.bg}`}>
+        <div className={`min-h-screen font-sans selection:bg-amber-500/30 transition-colors duration-150 flex flex-col lg:flex-row-reverse ${theme.bg}`}>
 
 
             {/* Menu FAB */}
@@ -1181,7 +1181,7 @@ export default function App() {
             )}
 
             {/* Sidebar / Header */}
-            <aside className={`fixed inset-y-0 right-0 z-50 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-l backdrop-blur-3xl shadow-2xl transition-all duration-200 overflow-hidden ${isSidebarOpen ? 'w-full lg:w-[380px] translate-x-0 opacity-100' : 'w-full lg:w-0 translate-x-full lg:translate-x-0 opacity-0 lg:border-none'} ${isDarkMode ? 'bg-neutral-950/90 border-neutral-800/30' : 'bg-white/80 border-neutral-200/50'}`}>
+            <aside className={`fixed inset-y-0 right-0 z-50 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-l backdrop-blur-2xl shadow-2xl transition-transform duration-200 will-change-transform overflow-hidden ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0 lg:w-0 lg:border-none'} w-full lg:w-[380px] ${isDarkMode ? 'bg-neutral-950/90 border-neutral-800/30' : 'bg-white/80 border-neutral-200/50'}`}>
                 <div className="w-[100vw] lg:w-[380px] p-5 sm:p-6 flex flex-col min-h-full scrollbar-hidden overflow-y-auto">
                     {/* Brand & Theme */}
                     <div className="flex items-center justify-between mb-6">
