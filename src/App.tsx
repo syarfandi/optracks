@@ -1193,18 +1193,44 @@ export default function App() {
                             <div className="flex items-center gap-2 pb-1 sm:pb-0">
                                 {activeTab === 'episodes' && (
                                     <>
-                                        <button onClick={() => setShowFiller(!showFiller)} title="Sembunyikan Filler" className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all active:scale-95 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${!showFiller ? 'bg-gradient-to-r from-red-600 to-rose-600 border-rose-500 text-white shadow-lg shadow-red-500/20' : theme.buttonInactive}`}>
+                                        <motion.button 
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => setShowFiller(!showFiller)} 
+                                            title="Sembunyikan Filler" 
+                                            className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${!showFiller ? 'bg-gradient-to-r from-red-600 to-rose-600 border-rose-500 text-white shadow-lg shadow-red-500/20' : theme.buttonInactive}`}
+                                        >
                                             <CircleMinus size={14} strokeWidth={2.5} />
                                             <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest"><span className="hidden sm:inline">Tanpa </span>Filler</span>
-                                        </button>
-                                        <button onClick={() => setHideWatched(!hideWatched)} title="Sembunyikan Selesai" className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all active:scale-95 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${hideWatched ? 'bg-gradient-to-r from-emerald-600 to-green-600 border-green-500 text-white shadow-lg shadow-green-500/20' : theme.buttonInactive}`}>
+                                        </motion.button>
+
+                                        <motion.button 
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => setHideWatched(!hideWatched)} 
+                                            title="Sembunyikan Selesai" 
+                                            className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${hideWatched ? 'bg-gradient-to-r from-emerald-600 to-green-600 border-green-500 text-white shadow-lg shadow-green-500/20' : theme.buttonInactive}`}
+                                        >
                                             <CheckCircle2 size={14} strokeWidth={2.5} />
                                             <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest"><span className="hidden sm:inline">Sembunyikan </span>Selesai</span>
-                                        </button>
-                                        <button onClick={continueWatching} title="Lanjutkan Menonton" className="flex-1 sm:flex-none px-2 py-2 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 text-white border border-rose-400/20 active:scale-95 transition-all shadow-xl shadow-red-500/20 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap">
-                                            <Play size={14} fill="currentColor" strokeWidth={2.5} />
-                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest">Lanjut</span>
-                                        </button>
+                                        </motion.button>
+
+                                        <motion.button 
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={continueWatching} 
+                                            title="Lanjutkan Menonton" 
+                                            className="relative overflow-hidden group/btn flex-1 sm:flex-none px-2 py-2 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 text-white border border-rose-400/20 transition-all shadow-xl shadow-red-500/20 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap"
+                                        >
+                                            {/* Shine Sweep Effect */}
+                                            <motion.div 
+                                                animate={{ x: ['-200%', '200%'] }}
+                                                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 2 }}
+                                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -skew-x-12"
+                                            />
+                                            <Play size={14} fill="currentColor" strokeWidth={2.5} className="relative z-10" />
+                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest relative z-10">Lanjut</span>
+                                        </motion.button>
                                     </>
                                 )}
                             </div>
