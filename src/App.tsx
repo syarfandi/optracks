@@ -1563,7 +1563,7 @@ export default function App() {
                                             className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${!showFiller ? 'bg-gradient-to-r from-red-600 to-rose-600 border-rose-500 text-white shadow-lg shadow-red-500/20' : theme.buttonInactive}`}
                                         >
                                             <CircleMinus size={14} strokeWidth={2.5} />
-                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest hidden md:inline">{t('filter_no_filler')}</span>
+                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest">{t('filter_no_filler')}</span>
                                         </motion.button>
 
                                         <motion.button
@@ -1574,7 +1574,7 @@ export default function App() {
                                             className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${hideWatched ? 'bg-gradient-to-r from-emerald-600 to-green-600 border-green-500 text-white shadow-lg shadow-green-500/20' : theme.buttonInactive}`}
                                         >
                                             <CheckCircle2 size={14} strokeWidth={2.5} />
-                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest hidden md:inline">{t('filter_hide_watched')}</span>
+                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest">{t('filter_hide_watched')}</span>
                                         </motion.button>
 
                                         <motion.button
@@ -1591,7 +1591,7 @@ export default function App() {
                                                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -skew-x-12"
                                             />
                                             <Play size={14} fill="currentColor" strokeWidth={2.5} className="relative z-10" />
-                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest relative z-10 hidden md:inline">{t('filter_continue')}</span>
+                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest relative z-10">{t('filter_continue')}</span>
                                         </motion.button>
                                     </>
                                 )}
@@ -1611,13 +1611,13 @@ export default function App() {
                                 <button onClick={() => { setSearchQuery(''); setShowFiller(true); setHideWatched(false); }} className="mt-8 px-8 py-3 rounded-2xl bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 font-bold uppercase tracking-widest text-xs hover:bg-red-200 transition-colors shadow-sm"> {t('btn_reset_filter')} </button>
                             </div>
                         ) : (
-                            <div className={sagaViewMode === 'card' ? 'grid grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4 items-start' : 'space-y-4'}>
+                            <div className={sagaViewMode === 'card' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4 items-start' : 'space-y-4'}>
                                 {filteredEps.map((saga) => {
                                     const progress = getSagaProgress(saga);
                                     const finished = progress.count === progress.total;
 
                                     return (
-                                        <section key={saga.id} className={`rounded-[1.25rem] overflow-hidden border transition-all duration-300 ${theme.card} ${sagaViewMode === 'card' && expandedSagas.includes(saga.id) ? 'col-span-2' : ''}`}>
+                                        <section key={saga.id} className={`rounded-[1.25rem] overflow-hidden border transition-all duration-300 ${theme.card} ${sagaViewMode === 'card' && expandedSagas.includes(saga.id) ? 'sm:col-span-2' : ''}`}>
                                             <div className={`cursor-pointer ${sagaViewMode === 'card' ? 'p-2.5 sm:p-4' : 'p-3 sm:px-4'} ${theme.hover}`} onClick={() => toggleSaga(saga.id)}>
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex-1 min-w-0">
