@@ -27,7 +27,8 @@ import {
     Upload,
     Camera,
     CircleMinus,
-    Bell
+    Bell,
+    ArrowUpDown
 } from 'lucide-react';
 
 // --- Konfigurasi & Data ---
@@ -201,24 +202,105 @@ const SAGA_DATA = [
 ];
 
 const MOVIE_DATA = [
-    { id: 'm1', title: 'One Piece: The Movie', year: 2000, imdbId: 'tt0258271', poster: 'https://image.tmdb.org/t/p/w500/u3w4f6974jB4jO9R5dGqN3aH7S0.jpg' },
-    { id: 'm2', title: 'Clockwork Island Adventure', year: 2001, imdbId: 'tt0290332', poster: 'https://image.tmdb.org/t/p/w500/6mN9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
-    { id: 'm3', title: "Chopper's Kingdom on the Island of Strange Animals", year: 2002, imdbId: 'tt0335235', poster: 'https://image.tmdb.org/t/p/w500/uR0RzV9kM9hFpQ.jpg' },
-    { id: 'm4', title: 'Dead End Adventure', year: 2003, imdbId: 'tt0378194', poster: 'https://image.tmdb.org/t/p/w500/v6N9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
-    { id: 'm5', title: 'The Cursed Holy Sword', year: 2004, imdbId: 'tt0418765', poster: 'https://image.tmdb.org/t/p/w500/w6N9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
-    { id: 'm6', title: 'Baron Omatsuri and the Secret Island', year: 2005, imdbId: 'tt0457630', poster: 'https://image.tmdb.org/t/p/w500/x6N9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
-    { id: 'm7', title: 'The Giant Mechanical Soldier of Karakuri Castle', year: 2006, imdbId: 'tt0493630', poster: 'https://image.tmdb.org/t/p/w500/y6N9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
-    { id: 'm8', title: 'Episode of Alabasta: The Desert Princess and the Pirates', year: 2007, imdbId: 'tt1059942', poster: 'https://image.tmdb.org/t/p/w500/z6N9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
-    { id: 'm9', title: 'Episode of Chopper Plus: Bloom in Winter, Miracle Sakura', year: 2008, imdbId: 'tt1210871', poster: 'https://image.tmdb.org/t/p/w500/q6N9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
-    { id: 'm10', title: 'One Piece Film: Strong World', year: 2009, imdbId: 'tt1460598', poster: 'https://image.tmdb.org/t/p/w500/r6N9p0a8i14jA9rT8dGqN3aH7S0.jpg', recommended: true },
-    { id: 'm11', title: 'One Piece 3D: Straw Hat Chase', year: 2011, imdbId: 'tt1833758', poster: 'https://image.tmdb.org/t/p/w500/s6N9p0a8i14jA9rT8dGqN3aH7S0.jpg' },
-    { id: 'm12', title: 'One Piece Film: Z', year: 2012, imdbId: 'tt2330691', poster: 'https://image.tmdb.org/t/p/w500/t6N9p0a8i14jA9rT8dGqN3aH7S0.jpg', recommended: true },
-    { id: 'm13', title: 'One Piece Film: Gold', year: 2016, imdbId: 'tt5249446', poster: 'https://image.tmdb.org/t/p/w500/u6N9p0a8i14jA9rT8dGqN3aH7S0.jpg', recommended: true },
-    { id: 'm14', title: 'One Piece: Stampede', year: 2019, imdbId: 'tt9448358', poster: 'https://image.tmdb.org/t/p/w500/v6N9p0a8i14jA9rT8dGqN3aH7S0.jpg', recommended: true },
-    { id: 'm15', title: 'One Piece Film: Red', year: 2022, imdbId: 'tt16184462', poster: 'https://image.tmdb.org/t/p/w500/u6N9p0a8i14jA9rT8dGqN3aH7S0.jpg', recommended: true },
+    { id: 'm1', title: 'One Piece: The Movie', year: 2000, imdbId: 'tt0814243', poster: 'https://m.media-amazon.com/images/M/MV5BOWNhMDU3NDQtYWViMC00M2Y4LTk4YTUtYjI2M2ZmN2Q5NDViXkEyXkFqcGc@._V1_.jpg' },
+    { id: 'm2', title: 'One Piece: Clockwork Island Adventure', year: 2001, imdbId: 'tt0832449', poster: 'https://m.media-amazon.com/images/M/MV5BNDRjN2NmNDAtZDE3Mi00ZDJlLTkwODktMmNkMTBkYTRjMTY3XkEyXkFqcGc@._V1_.jpg' },
+    { id: 'm3', title: "One Piece: Chopper's Kingdom in the Strange Animal Island", year: 2002, imdbId: 'tt0997084', poster: 'https://m.media-amazon.com/images/M/MV5BMWM2NzE5NTMtNGMyZi00ODRiLTljOGUtZWEzOTE2ZWUxNzdlXkEyXkFqcGc@._V1_.jpg' },
+    { id: 'm4', title: 'One Piece: Dead End Adventure', year: 2003, imdbId: 'tt1006926', poster: 'https://m.media-amazon.com/images/M/MV5BNmU5ZjU1ZGMtMTM0YS00NTZjLWI1NjctMjIzNDVmNTI0ZGQ4XkEyXkFqcGc@._V1_.jpg' },
+    { id: 'm5', title: 'One Piece: The Cursed Holy Sword', year: 2004, imdbId: 'tt1010435', poster: 'https://m.media-amazon.com/images/M/MV5BNjkwYjdhNzktZWMyZS00MjBkLTg0NzgtZDRkNzQ2ODY5ZTUxXkEyXkFqcGc@._V1_.jpg' },
+    { id: 'm6', title: 'One Piece: Baron Omatsuri and the Secret Island', year: 2005, imdbId: 'tt1018764', poster: 'https://m.media-amazon.com/images/M/MV5BMTU4ZDkwMDMtYmFkMS00ODIyLTgxYTQtNzA3M2QyOTQ5ODMzXkEyXkFqcGc@._V1_.jpg' },
+    { id: 'm7', title: 'One Piece: The Giant Mechanical Soldier of Karakuri Castle', year: 2006, imdbId: 'tt1059950', poster: 'https://m.media-amazon.com/images/M/MV5BMmI3OWU1MjktMzc0YS00ZDdlLWFkZjktNjM1YTM1OGZiZDRkXkEyXkFqcGc@._V1_.jpg' },
+    { id: 'm8', title: 'One Piece: Episode of Alabasta - The Desert Princess and the Pirates', year: 2007, imdbId: 'tt1037116', poster: 'https://m.media-amazon.com/images/M/MV5BMTc2MGRkZTgtYmI2My00M2VjLTlmNTItYmJiNTY3ZmNkNTIyXkEyXkFqcGc@._V1_.jpg' },
+    { id: 'm9', title: 'One Piece: Episode of Chopper Plus - Bloom in the Winter, Miracle Sakura', year: 2008, imdbId: 'tt1206326', poster: 'https://m.media-amazon.com/images/M/MV5BYTY2YzBhMTktOTc3Yi00OGZiLWE1ZTQtNjM3NTJjOTFiYTRkXkEyXkFqcGc@._V1_.jpg' },
+    { id: 'm10', title: 'One Piece: Strong World', year: 2009, imdbId: 'tt1485763', poster: 'https://m.media-amazon.com/images/M/MV5BMTA5MTM5YWQtNzE1Yi00OWUyLTk1MWItMWVkODM4ZGM5OWUzXkEyXkFqcGc@._V1_.jpg', recommended: true },
+    { id: 'm11', title: 'One Piece 3D: Straw Hat Chase', year: 2011, imdbId: 'tt1865467', poster: 'https://m.media-amazon.com/images/M/MV5BNjUyZjJkNWMtMDU5YS00MGZiLWE2OTMtYjkzMjZlNGViZjkyXkEyXkFqcGc@._V1_.jpg' },
+    { id: 'm12', title: 'One Piece Film Z', year: 2012, imdbId: 'tt2375379', poster: 'https://m.media-amazon.com/images/M/MV5BNjY3ODNiZjgtY2RmNS00MjAyLWIwMzUtNTE0ZWIxNDU3YThhXkEyXkFqcGc@._V1_.jpg', recommended: true },
+    { id: 'm13', title: 'One Piece Film: Gold', year: 2016, imdbId: 'tt5251328', poster: 'https://m.media-amazon.com/images/M/MV5BYjRlNmY2ZmUtNTZjMS00Y2ZlLThkN2ItMmY5MTBiZDJhZTE5XkEyXkFqcGc@._V1_.jpg', recommended: true },
+    { id: 'm14', title: 'One Piece: Stampede', year: 2019, imdbId: 'tt9430698', poster: 'https://m.media-amazon.com/images/M/MV5BY2FlYzRmZGMtM2Y5OC00NzFhLTgyNDAtZDk1YjdkZTlmMjE3XkEyXkFqcGc@._V1_.jpg', recommended: true },
+    { id: 'm15', title: 'One Piece Film: Red', year: 2022, imdbId: 'tt15933454', poster: 'https://m.media-amazon.com/images/M/MV5BNTdjY2YxYTQtNjIzYy00ZDczLThhNTUtNmY2ZWNkZjZiMTYzXkEyXkFqcGc@._V1_.jpg', recommended: true },
 ];
 
 const successSound = typeof Audio !== 'undefined' ? new Audio('/success.mp3') : null;
+
+// --- Helper Components for Circular Progress ---
+const StatCircle = ({ percent, color, isDarkMode, isExporting }: { percent: number, color: string, isDarkMode: boolean, isExporting?: boolean }) => {
+    const size = 56;
+    const strokeWidth = 5;
+    const radius = (size - strokeWidth) / 2;
+    const circumference = radius * 2 * Math.PI;
+    const offset = circumference - (percent / 100) * circumference;
+
+    const colorClasses: Record<string, string> = {
+        red: isDarkMode ? '#ef4444' : '#dc2626',
+        amber: isDarkMode ? '#f59e0b' : '#d97706',
+        neutral: isDarkMode ? '#a3a3a3' : '#737373',
+        indigo: isDarkMode ? '#818cf8' : '#4f46e5',
+    };
+
+    return (
+        <div className="relative flex items-center justify-center shrink-0">
+            <svg width={size} height={size} className="transform -rotate-90" style={{ overflow: 'visible' }}>
+                <circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    stroke={isDarkMode ? '#262626' : '#f5f5f5'}
+                    strokeWidth={strokeWidth}
+                    fill="transparent"
+                />
+                <circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    stroke={colorClasses[color] || '#ef4444'}
+                    strokeWidth={strokeWidth}
+                    fill="transparent"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={offset}
+                    className={!isExporting ? 'transition-all duration-1000 ease-out' : ''}
+                    strokeLinecap="round"
+                />
+            </svg>
+        </div>
+    );
+};
+
+const StatCard = ({ title, icon, current, total, percent, color, isDarkMode, isExporting }: any) => {
+    const bgClasses: Record<string, string> = {
+        red: isDarkMode ? 'bg-red-500/5 border-red-500/10' : 'bg-red-50/50 border-red-100 shadow-sm',
+        amber: isDarkMode ? 'bg-amber-500/5 border-amber-500/10' : 'bg-amber-50/50 border-amber-100 shadow-sm',
+        neutral: isDarkMode ? 'bg-neutral-500/5 border-neutral-500/10' : 'bg-white border-neutral-100 shadow-sm',
+        indigo: isDarkMode ? 'bg-indigo-500/5 border-indigo-500/10' : 'bg-indigo-50/50 border-indigo-100 shadow-sm',
+    };
+
+    const textClasses: Record<string, string> = {
+        red: isDarkMode ? 'text-red-400' : 'text-red-700',
+        amber: isDarkMode ? 'text-amber-400' : 'text-amber-700',
+        neutral: isDarkMode ? 'text-neutral-400' : 'text-neutral-600',
+        indigo: isDarkMode ? 'text-indigo-400' : 'text-indigo-700',
+    };
+
+    return (
+        <div className={`p-3.5 sm:p-4 rounded-[2rem] border transition-all hover:scale-[1.03] flex flex-col items-center text-center gap-2 active:scale-95 group ${bgClasses[color]}`}>
+            <div className="relative shrink-0 flex items-center justify-center p-0.5 rounded-full">
+                <StatCircle percent={percent} color={color} isDarkMode={isDarkMode} isExporting={isExporting} />
+                <div className={`absolute inset-0 flex items-center justify-center ${textClasses[color]} transition-transform duration-500 group-hover:scale-110`}>
+                    {icon}
+                </div>
+            </div>
+            <div className="w-full space-y-0.5">
+                <h4 className={`text-[9px] font-black uppercase tracking-[0.15em] leading-tight ${textClasses[color]} opacity-90`}>
+                    {title}
+                </h4>
+                <div className="flex flex-col items-center leading-none">
+                    <span className={`text-[15px] font-black tracking-tight ${textClasses[color]}`}>{percent}%</span>
+                    <span className={`text-[7px] font-black uppercase tracking-[0.1em] mt-0.5 opacity-40 ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>
+                        {current} / {total}
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export default function App() {
     const [watchedEpisodes, setWatchedEpisodes] = useState<string[]>([]);
@@ -232,11 +314,18 @@ export default function App() {
     const [sagaViewMode, setSagaViewMode] = useState<'card' | 'list'>('card');
     const [isExporting, setIsExporting] = useState(false);
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+    const [movieSortOrder, setMovieSortOrder] = useState<'asc' | 'desc'>('desc');
 
     const [expandedSagas, setExpandedSagas] = useState<string[]>([]);
     const [expandedArcs, setExpandedArcs] = useState<string[]>([]);
 
     const [loading, setLoading] = useState(true);
+    const [userName, setUserName] = useState<string>(localStorage.getItem('op-tracker-username') || '');
+    const [isEnteringName, setIsEnteringName] = useState(false);
+
+    useEffect(() => {
+        localStorage.setItem('op-tracker-username', userName);
+    }, [userName]);
 
     const arcRefs = useRef<any>({});
 
@@ -380,12 +469,17 @@ export default function App() {
     };
 
     const toggleMovie = (movieId: string) => {
-        const newWatched = watchedMovies.includes(movieId)
+        const isWatched = watchedMovies.includes(movieId);
+        const newWatched = isWatched
             ? watchedMovies.filter(id => id !== movieId)
             : [...watchedMovies, movieId];
 
         setWatchedMovies(newWatched);
         saveLocally({ watchedMovies: newWatched });
+
+        if (!isWatched) {
+            fireConfetti();
+        }
     };
 
     const toggleArcComplete = (arc: any, e: React.MouseEvent) => {
@@ -711,8 +805,9 @@ export default function App() {
     }, [searchQuery, showFiller, hideWatched, watchedEpisodes]);
 
     const filteredMovies = useMemo(() => {
-        return MOVIE_DATA.filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase()));
-    }, [searchQuery]);
+        const filtered = MOVIE_DATA.filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase()));
+        return [...filtered].sort((a, b) => movieSortOrder === 'desc' ? b.year - a.year : a.year - b.year);
+    }, [searchQuery, movieSortOrder]);
 
     const isArcFinished = (arc: any) => {
         for (let i = arc.start; i <= arc.end; i++) {
@@ -737,8 +832,13 @@ export default function App() {
     };
 
     const exportImage = async () => {
+        if (!userName.trim()) {
+            setIsEnteringName(true);
+            return;
+        }
+        
         setIsExporting(true);
-        // Beri waktu sebentar agar flag isExporting memicu re-render judul di poster
+        // Beri waktu lebih lama agar flag isExporting memicu re-render judul di poster dan mematikan animasi
         setTimeout(async () => {
             const element = document.getElementById('stats-poster');
             if (!element) {
@@ -754,7 +854,7 @@ export default function App() {
                     style: { transform: 'scale(1)', transformOrigin: 'top left' }
                 });
                 const link = document.createElement('a');
-                link.download = `OPTracker_${gamerRank.title.replace(/\s+/g, '_')}.png`;
+                link.download = `OPTracker_${userName.replace(/\s+/g, '_')}_${gamerRank.title.replace(/\s+/g, '_')}.png`;
                 link.href = dataUrl;
                 link.click();
 
@@ -834,13 +934,12 @@ export default function App() {
 
                     {/* Compact Stats Section / Poster Export */}
                     <div id="stats-poster" className={`transition-all duration-300 ${isExporting ? 'p-6 rounded-3xl bg-neutral-50 dark:bg-neutral-950 shadow-2xl min-w-[360px]' : ''}`}>
-
                         {/* Judul & Pangkat Khusus untuk Hasil Export Poster */}
                         {isExporting && (
                             <div className="flex items-center gap-4 mb-6 pb-4 border-b border-neutral-200 dark:border-neutral-800">
                                 <img src="/mugiwara-logo.png" className="w-12 h-12 object-contain drop-shadow-sm" alt="Logo" />
                                 <div className="flex-1">
-                                    <h3 className="text-[18px] font-black uppercase tracking-tight bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none pb-1">OP Tracker</h3>
+                                    <h3 className="text-[18px] font-black uppercase tracking-tight bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none pb-1">{userName || 'OP Tracker'}</h3>
                                     <div className="flex items-center gap-1.5 mt-0.5">
                                         <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${isDarkMode ? 'bg-neutral-800 text-neutral-400' : 'bg-neutral-200 text-neutral-500'}`}>Pangkat</span>
                                         <span className={`text-[11px] font-black uppercase tracking-widest pt-0.5 ${gamerRank.color}`}>{gamerRank.title}</span>
@@ -849,100 +948,96 @@ export default function App() {
                             </div>
                         )}
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 sm:gap-2.5 mb-2">
+                        <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-3 px-1">
                             {/* Canon Stats */}
-                            <div className={`p-3 sm:p-3.5 rounded-[1.25rem] border transition-all hover:scale-[1.02] shadow-sm ${isDarkMode ? 'bg-red-950/20 border-red-500/20 shadow-red-500/5' : 'bg-red-50/80 border-red-100 shadow-red-500/5'}`}>
-                                <div className="flex items-center gap-3 mb-2 sm:mb-2.5">
-                                    <div className={`p-1.5 sm:p-2 rounded-xl shrink-0 ${isDarkMode ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-600'}`}>
-                                        <Trophy size={14} strokeWidth={2.5} />
-                                    </div>
-                                    <div className="flex-1 min-w-0 flex flex-wrap items-center justify-between gap-y-0.5 gap-x-2">
-                                        <h4 className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider leading-tight ${isDarkMode ? 'text-red-400' : 'text-red-700'}`}>
-                                            Cerita Utama
-                                        </h4>
-                                        <div className="flex flex-col items-end shrink-0 ml-auto">
-                                            <span className={`text-[13px] sm:text-sm font-black leading-none ${isDarkMode ? 'text-red-500' : 'text-red-700'}`}>{stats.canonPercent}%</span>
-                                            <span className={`text-[8px] font-bold tracking-widest uppercase mt-1 ${isDarkMode ? 'text-red-500/80' : 'text-red-700/60'}`}>{stats.canonWatched} / {stats.canonTotal} Ep</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-red-950/50 shadow-inner border border-red-900/30' : 'bg-red-200/50'}`}>
-                                    <div className="h-full rounded-full bg-gradient-to-r from-red-400 to-red-600 transition-all duration-1000" style={{ width: `${stats.canonPercent}%` }} />
-                                </div>
-                            </div>
+                            <StatCard 
+                                title="Cerita Utama" 
+                                icon={<Trophy size={20} strokeWidth={2.5} />}
+                                current={stats.canonWatched}
+                                total={stats.canonTotal}
+                                percent={stats.canonPercent}
+                                color="red"
+                                isDarkMode={isDarkMode}
+                                isExporting={isExporting}
+                            />
 
                             {/* Saga Stats */}
-                            <div className={`p-3 sm:p-3.5 rounded-[1.25rem] border transition-all hover:scale-[1.02] shadow-sm ${isDarkMode ? 'bg-amber-950/20 border-amber-500/20 shadow-amber-500/5' : 'bg-amber-50/80 border-amber-100 shadow-amber-500/5'}`}>
-                                <div className="flex items-center gap-3 mb-2 sm:mb-2.5">
-                                    <div className={`p-1.5 sm:p-2 rounded-xl shrink-0 ${isDarkMode ? 'bg-amber-900/40 text-amber-400' : 'bg-amber-100 text-amber-600'}`}>
-                                        <Compass size={14} strokeWidth={2.5} />
-                                    </div>
-                                    <div className="flex-1 min-w-0 flex flex-wrap items-center justify-between gap-y-0.5 gap-x-2">
-                                        <h4 className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider leading-tight ${isDarkMode ? 'text-amber-400' : 'text-amber-700'}`}>
-                                            Saga Tamat
-                                        </h4>
-                                        <div className="flex flex-col items-end shrink-0 ml-auto">
-                                            <span className={`text-[13px] sm:text-sm font-black leading-none ${isDarkMode ? 'text-amber-500' : 'text-amber-700'}`}>{stats.sagasPercent}%</span>
-                                            <span className={`text-[8px] font-bold tracking-widest uppercase mt-1 ${isDarkMode ? 'text-amber-500/80' : 'text-amber-700/60'}`}>{stats.sagasWatched} / {stats.sagasTotal} Saga</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-amber-950/50 shadow-inner border border-amber-900/30' : 'bg-amber-200/50'}`}>
-                                    <div className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500 transition-all duration-1000" style={{ width: `${stats.sagasPercent}%` }} />
-                                </div>
-                            </div>
+                            <StatCard 
+                                title="Saga Selesai" 
+                                icon={<Compass size={20} strokeWidth={2.5} />}
+                                current={stats.sagasWatched}
+                                total={stats.sagasTotal}
+                                percent={stats.sagasPercent}
+                                color="amber"
+                                isDarkMode={isDarkMode}
+                                isExporting={isExporting}
+                            />
 
                             {/* Filler Stats */}
-                            <div className={`p-3 sm:p-3.5 rounded-[1.25rem] border transition-all hover:scale-[1.02] shadow-sm ${isDarkMode ? 'bg-neutral-800/20 border-neutral-700 shadow-black/10' : 'bg-neutral-50 border-neutral-200 shadow-neutral-500/5'}`}>
-                                <div className="flex items-center gap-3 mb-2 sm:mb-2.5">
-                                    <div className={`p-1.5 sm:p-2 rounded-xl shrink-0 ${isDarkMode ? 'bg-neutral-800 text-neutral-400' : 'bg-neutral-200 text-neutral-500'}`}>
-                                        <Skull size={14} strokeWidth={2.5} />
-                                    </div>
-                                    <div className="flex-1 min-w-0 flex flex-wrap items-center justify-between gap-y-0.5 gap-x-2">
-                                        <h4 className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider leading-tight ${isDarkMode ? 'text-neutral-400' : 'text-neutral-700'}`}>
-                                            Filler Tontonan
-                                        </h4>
-                                        <div className="flex flex-col items-end shrink-0 ml-auto">
-                                            <span className={`text-[13px] sm:text-sm font-black leading-none ${isDarkMode ? 'text-neutral-400' : 'text-neutral-700'}`}>{stats.fillerPercent}%</span>
-                                            <span className={`text-[8px] font-bold tracking-widest uppercase mt-1 ${isDarkMode ? 'text-neutral-500/80' : 'text-neutral-600/60'}`}>{stats.fillerWatched} / {stats.fillerTotal} Ep</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-neutral-900/50 shadow-inner border border-neutral-800/30' : 'bg-neutral-200/60'}`}>
-                                    <div className="h-full rounded-full bg-neutral-400 transition-all duration-1000" style={{ width: `${stats.fillerPercent}%` }} />
-                                </div>
-                            </div>
+                            <StatCard 
+                                title="Filler Tontonan" 
+                                icon={<Skull size={20} strokeWidth={2.5} />}
+                                current={stats.fillerWatched}
+                                total={stats.fillerTotal}
+                                percent={stats.fillerPercent}
+                                color="neutral"
+                                isDarkMode={isDarkMode}
+                                isExporting={isExporting}
+                            />
 
                             {/* Movie Stats */}
-                            <div className={`p-3 sm:p-3.5 rounded-[1.25rem] border transition-all hover:scale-[1.02] shadow-sm ${isDarkMode ? 'bg-indigo-950/20 border-indigo-500/20 shadow-indigo-500/5' : 'bg-indigo-50/80 border-indigo-100 shadow-indigo-500/5'}`}>
-                                <div className="flex items-center gap-3 mb-2 sm:mb-2.5">
-                                    <div className={`p-1.5 sm:p-2 rounded-xl shrink-0 ${isDarkMode ? 'bg-indigo-900/40 text-indigo-400' : 'bg-indigo-100 text-indigo-600'}`}>
-                                        <Film size={14} strokeWidth={2.5} />
-                                    </div>
-                                    <div className="flex-1 min-w-0 flex flex-wrap items-center justify-between gap-y-0.5 gap-x-2">
-                                        <h4 className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider leading-tight ${isDarkMode ? 'text-indigo-400' : 'text-indigo-700'}`}>
-                                            Film Layar Lebar
-                                        </h4>
-                                        <div className="flex flex-col items-end shrink-0 ml-auto">
-                                            <span className={`text-[13px] sm:text-sm font-black leading-none ${isDarkMode ? 'text-indigo-500' : 'text-indigo-700'}`}>{stats.moviePercent}%</span>
-                                            <span className={`text-[8px] font-bold tracking-widest uppercase mt-1 ${isDarkMode ? 'text-indigo-500/80' : 'text-indigo-700/60'}`}>{stats.movieWatched} / {stats.movieTotal} Film</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-indigo-950/50 shadow-inner border border-indigo-900/30' : 'bg-indigo-200/50'}`}>
-                                    <div className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600 transition-all duration-1000" style={{ width: `${stats.moviePercent}%` }} />
-                                </div>
-                            </div>
+                            <StatCard 
+                                title="Film Layar Lebar" 
+                                icon={<Film size={20} strokeWidth={2.5} />}
+                                current={stats.movieWatched}
+                                total={stats.movieTotal}
+                                percent={stats.moviePercent}
+                                color="indigo"
+                                isDarkMode={isDarkMode}
+                                isExporting={isExporting}
+                            />
                         </div>
                     </div>
 
-                    <button onClick={exportImage} disabled={isExporting} className="mt-1 mb-4 w-full flex items-center justify-center gap-2 p-3.5 rounded-2xl bg-gradient-to-r from-orange-500/10 to-red-500/10 hover:from-orange-500/20 hover:to-red-500/20 text-orange-600 dark:text-orange-500 transition-all font-black text-[11px] uppercase tracking-widest border border-orange-500/20 hover:border-orange-500/40 hover:scale-[1.02] active:scale-95 shadow-sm">
-                        {isExporting ? (
-                            <div className="w-4 h-4 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
-                        ) : (
-                            <><Camera size={18} strokeWidth={2.5} /> Pamer Hasil!</>
-                        )}
-                    </button>
+                    {isEnteringName ? (
+                        <div className="mt-1 mb-4 w-full relative group">
+                            <input 
+                                autoFocus
+                                type="text" 
+                                placeholder="Masukkan Nama Anda..." 
+                                className={`w-full p-3.5 pr-12 rounded-2xl font-black uppercase tracking-widest text-[11px] outline-none transition-all border ${isDarkMode ? 'bg-neutral-900 border-orange-500/40 text-white focus:border-orange-500' : 'bg-white border-orange-500/40 text-neutral-900 focus:border-orange-500 shadow-sm'}`}
+                                value={userName}
+                                onChange={(e) => setUserName(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && userName.trim()) {
+                                        setIsEnteringName(false);
+                                        setTimeout(exportImage, 100);
+                                    }
+                                    if (e.key === 'Escape') setIsEnteringName(false);
+                                }}
+                                onBlur={() => { if (!userName.trim()) setIsEnteringName(false); }}
+                            />
+                            <button 
+                                onClick={() => {
+                                    if (userName.trim()) {
+                                        setIsEnteringName(false);
+                                        setTimeout(exportImage, 100);
+                                    }
+                                }}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-orange-500 hover:scale-110 transition-transform"
+                            >
+                                <CheckCircle2 size={20} strokeWidth={3} />
+                            </button>
+                        </div>
+                    ) : (
+                        <button onClick={exportImage} disabled={isExporting} className="mt-1 mb-4 w-full flex items-center justify-center gap-2 p-3.5 rounded-2xl bg-gradient-to-r from-orange-500/10 to-red-500/10 hover:from-orange-500/20 hover:to-red-500/20 text-orange-600 dark:text-orange-500 transition-all font-black text-[11px] uppercase tracking-widest border border-orange-500/20 hover:border-orange-500/40 hover:scale-[1.02] active:scale-95 shadow-sm">
+                            {isExporting ? (
+                                <div className="w-4 h-4 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+                            ) : (
+                                <><Camera size={18} strokeWidth={2.5} /> {userName ? 'Pamer Hasil!' : 'Input Nama & Pamer!'}</>
+                            )}
+                        </button>
+                    )}
 
                     {/* Compact Sync & Backup Card */}
                     <div className="mt-auto pt-4 pb-2">
@@ -1005,7 +1100,7 @@ export default function App() {
                                 <img src="/mugiwara-logo.png" alt="Logo" className="w-8 h-8 sm:w-12 sm:h-12 object-contain drop-shadow-sm shrink-0" />
                                 <div className="min-w-0">
                                     <h2 className={`text-xs sm:text-lg lg:text-3xl font-black uppercase tracking-tight bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none truncate`}>
-                                        {activeTab === 'episodes' ? 'OP Tracker' : 'Movie Archive'}
+                                        {activeTab === 'episodes' ? 'OP Tracker' : 'OP Movie Archive'}
                                     </h2>
                                     <div className="flex items-center gap-1.5 mt-0.5">
                                         <span className={`text-[8px] sm:text-[10px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-neutral-400' : 'text-neutral-500'} shrink-0 hidden sm:block`}>
@@ -1021,7 +1116,7 @@ export default function App() {
                             <div className="flex items-center gap-2">
                                 {/* Compact Tab Switcher */}
                                 <div className={`flex p-0.5 rounded-lg border transition-all ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-neutral-200/50 border-neutral-300'}`}>
-                                    <button onClick={() => setActiveTab('episodes')} className={`px-2 py-1 text-[9px] sm:text-xs font-bold uppercase rounded-md transition-all ${activeTab === 'episodes' ? (isDarkMode ? 'bg-neutral-800 text-red-500 shadow-lg' : 'bg-white text-red-600 shadow-sm') : 'opacity-50 text-neutral-500'}`}>Saga</button>
+                                    <button onClick={() => setActiveTab('episodes')} className={`px-2 py-1 text-[9px] sm:text-xs font-bold uppercase rounded-md transition-all ${activeTab === 'episodes' ? (isDarkMode ? 'bg-neutral-800 text-red-500 shadow-lg' : 'bg-white text-red-600 shadow-sm') : 'opacity-50 text-neutral-500'}`}>Anime</button>
                                     <button onClick={() => setActiveTab('movies')} className={`px-2 py-1 text-[9px] sm:text-xs font-bold uppercase rounded-md transition-all ${activeTab === 'movies' ? (isDarkMode ? 'bg-neutral-800 text-indigo-400 shadow-lg' : 'bg-white text-indigo-600 shadow-sm') : 'opacity-50 text-neutral-500'}`}>Movie</button>
                                 </div>
 
@@ -1036,11 +1131,26 @@ export default function App() {
 
                         {/* Header Row 2: Search & Quick Actions */}
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={14} />
-                                <input type="text" placeholder="Cari Judul, Arc, Episode..." className={`w-full rounded-xl py-2.5 sm:py-2.5 pl-9 pr-4 text-[12px] sm:text-sm transition-all outline-none focus:ring-2 focus:ring-amber-500 shadow-none border ${isDarkMode ? 'bg-neutral-900 border-neutral-800 text-neutral-100' : 'bg-white border-neutral-200 text-neutral-900 shadow-sm'}`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-                                {searchQuery && (
-                                    <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-red-500 transition-colors"><X size={14} strokeWidth={3} /></button>
+                            <div className="relative flex-1 flex gap-2">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={14} />
+                                    <input type="text" placeholder="Cari Judul, Arc, Episode..." className={`w-full rounded-xl py-2.5 sm:py-2.5 pl-9 pr-4 text-[12px] sm:text-sm transition-all outline-none focus:ring-2 focus:ring-amber-500 shadow-none border ${isDarkMode ? 'bg-neutral-900 border-neutral-800 text-neutral-100' : 'bg-white border-neutral-200 text-neutral-900 shadow-sm'}`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                                    {searchQuery && (
+                                        <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-red-500 transition-colors"><X size={14} strokeWidth={3} /></button>
+                                    )}
+                                </div>
+
+                                {activeTab === 'movies' && (
+                                    <button 
+                                        onClick={() => setMovieSortOrder(movieSortOrder === 'desc' ? 'asc' : 'desc')}
+                                        className={`px-3 rounded-xl border flex items-center gap-2 transition-all active:scale-95 ${isDarkMode ? 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white' : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50 shadow-sm'}`}
+                                        title={`Urutkan: ${movieSortOrder === 'desc' ? 'Terbaru' : 'Terlama'}`}
+                                    >
+                                        <ArrowUpDown size={14} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">
+                                            {movieSortOrder === 'desc' ? 'Terbaru' : 'Terlama'}
+                                        </span>
+                                    </button>
                                 )}
                             </div>
 
@@ -1266,29 +1376,81 @@ export default function App() {
                                 <button onClick={() => setSearchQuery('')} className="mt-8 px-8 py-3 rounded-2xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400 font-bold uppercase tracking-widest text-xs hover:bg-indigo-200 transition-colors shadow-sm"> Reset Pencarian </button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
                                 {filteredMovies.map((movie) => (
-                                    <div key={movie.id} className={`p-4 rounded-3xl border transition-all flex items-center justify-between group ${watchedMovies.includes(movie.id) ? 'border-green-500 bg-green-500/5' : `${theme.card} ${theme.hover}`}`}>
-                                        <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0 pr-2 cursor-pointer" onClick={() => toggleMovie(movie.id)}>
-                                            <div className="w-12 h-16 sm:w-14 sm:h-20 bg-neutral-100 dark:bg-neutral-800 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border border-neutral-200 dark:border-neutral-700">
-                                                {movie.poster ? (
-                                                    <img src={movie.poster} alt={movie.title} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <Film size={20} className="text-neutral-400" />
-                                                )}
+                                    <div 
+                                        key={movie.id} 
+                                        className={`flex flex-col rounded-[2rem] overflow-hidden transition-all duration-500 group border h-full ${watchedMovies.includes(movie.id) ? 'border-green-500/50 bg-green-500/[0.02]' : `${theme.card} hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1`}`}
+                                    >
+                                        {/* Poster Section */}
+                                        <div className="relative aspect-[2/3] overflow-hidden cursor-pointer" onClick={() => toggleMovie(movie.id)}>
+                                            {movie.poster ? (
+                                                <img 
+                                                    src={movie.poster} 
+                                                    alt={movie.title} 
+                                                    className={`w-full h-full object-cover transition-transform duration-700 ${watchedMovies.includes(movie.id) ? 'opacity-60 scale-100' : 'group-hover:scale-110'}`}
+                                                    referrerPolicy="no-referrer"
+                                                    loading="lazy"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-neutral-100 dark:bg-neutral-800">
+                                                    <Film size={40} className="text-neutral-400" />
+                                                </div>
+                                            )}
+                                            
+                                            {/* Overlays */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                            
+                                            {/* Top Actions */}
+                                            <div className="absolute top-3 right-3 flex flex-col gap-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                                                <a 
+                                                    href={`https://www.imdb.com/title/${movie.imdbId}/`} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer" 
+                                                    className="p-2.5 rounded-xl bg-black/60 backdrop-blur-md text-amber-500 border border-white/10 hover:bg-amber-500 hover:text-white transition-all shadow-xl"
+                                                    title="Lihat di IMDb"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    <ExternalLink size={18} strokeWidth={2.5} />
+                                                </a>
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h4 className={`font-bold truncate text-sm sm:text-base ${watchedMovies.includes(movie.id) ? 'text-green-600 dark:text-green-400' : ''}`}> {movie.title} </h4>
-                                                <p className={`text-[10px] font-bold truncate ${theme.muted}`}> {movie.year} {movie.recommended && '• Rekomendasi'} </p>
-                                            </div>
+
+                                            {/* Status Badge */}
+                                            {watchedMovies.includes(movie.id) && (
+                                                <div className="absolute inset-0 flex items-center justify-center bg-green-500/10 backdrop-blur-[2px]">
+                                                    <div className="bg-green-500 text-white p-3 rounded-full shadow-2xl scale-110 ring-4 ring-green-500/30">
+                                                        <CheckCircle2 size={32} strokeWidth={3} />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Recommended Badge */}
+                                            {movie.recommended && (
+                                                <div className="absolute top-3 left-3 px-3 py-1 rounded-lg bg-amber-500 text-black text-[10px] font-black uppercase tracking-tighter shadow-lg">
+                                                    HOT
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            <a href={`https://www.imdb.com/title/${movie.imdbId}/`} target="_blank" rel="noopener noreferrer" className={`p-2 rounded-xl text-amber-500 hover:bg-amber-500/10 transition-colors`} title="Lihat di IMDb">
-                                                <ExternalLink size={18} />
-                                            </a>
-                                            <div className={watchedMovies.includes(movie.id) ? 'text-green-500' : 'text-neutral-300'} onClick={() => toggleMovie(movie.id)}>
-                                                {watchedMovies.includes(movie.id) ? <CheckCircle2 size={24} className="text-green-500" /> : <Circle size={24} />}
+
+                                        {/* Info Section */}
+                                        <div className="p-4 flex flex-col flex-1 justify-between gap-3">
+                                            <div className="cursor-pointer" onClick={() => toggleMovie(movie.id)}>
+                                                <h4 className={`font-black leading-tight mb-1 text-sm sm:text-base line-clamp-2 transition-colors ${watchedMovies.includes(movie.id) ? 'text-green-600 dark:text-green-400' : 'group-hover:text-red-600'}`}> 
+                                                    {movie.title} 
+                                                </h4>
+                                                <p className={`text-[10px] font-bold uppercase tracking-widest ${theme.muted}`}> 
+                                                    {movie.year} 
+                                                </p>
                                             </div>
+
+                                            <button 
+                                                onClick={() => toggleMovie(movie.id)}
+                                                className={`w-full py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${watchedMovies.includes(movie.id) 
+                                                    ? 'bg-green-500/10 text-green-500 border border-green-500/20' 
+                                                    : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-red-600 hover:text-white border border-transparent'}`}
+                                            >
+                                                {watchedMovies.includes(movie.id) ? 'Selesai Ditonton' : 'Tandai Tonton'}
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
