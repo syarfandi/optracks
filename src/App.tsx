@@ -1214,14 +1214,13 @@ export default function App() {
                                     <img src="/mugiwara-logo.png" className="w-14 h-14 object-contain shrink-0" alt="Logo" />
                                     <div className="flex-1 min-w-0 pr-12 overflow-hidden">
                                         <div className="flex flex-col justify-center">
-                                            <h3 className={`font-black uppercase tracking-tighter text-red-600 dark:text-red-500 leading-tight whitespace-nowrap ${
-                                                (userName?.length || 0) > 35 ? 'text-[10px]' :
-                                                (userName?.length || 0) > 28 ? 'text-[14px]' :
-                                                (userName?.length || 0) > 22 ? 'text-[18px]' :
-                                                (userName?.length || 0) > 18 ? 'text-[24px]' : 
-                                                (userName?.length || 0) > 14 ? 'text-[30px]' : 
-                                                'text-[42px]'
-                                            }`}>
+                                            <h3 className={`font-black uppercase tracking-tighter text-red-600 dark:text-red-500 leading-tight whitespace-nowrap ${(userName?.length || 0) > 35 ? 'text-[10px]' :
+                                                    (userName?.length || 0) > 28 ? 'text-[14px]' :
+                                                        (userName?.length || 0) > 22 ? 'text-[18px]' :
+                                                            (userName?.length || 0) > 18 ? 'text-[24px]' :
+                                                                (userName?.length || 0) > 14 ? 'text-[30px]' :
+                                                                    'text-[42px]'
+                                                }`}>
                                                 {userName || 'OP Tracker'}
                                             </h3>
                                             <div className="flex items-center gap-2 mt-0.5 opacity-60">
@@ -1255,13 +1254,12 @@ export default function App() {
                                         <div className="flex-1 min-w-0 pr-6">
                                             <div className="flex items-center gap-2 mb-1.5 min-w-0 overflow-visible">
                                                 <span className={`${isExporting ? 'text-[10px]' : 'text-[8px]'} font-black uppercase tracking-[0.2em] text-white/60 leading-none whitespace-nowrap shrink-0`}>{t('stats_rank')} •</span>
-                                                <span className={`font-black uppercase tracking-widest text-white whitespace-nowrap ${
-                                                    !isExporting ? 'text-[9px]' :
-                                                    gamerRank.title.length > 35 ? 'text-[9px]' :
-                                                    gamerRank.title.length > 25 ? 'text-[11px]' :
-                                                    gamerRank.title.length > 15 ? 'text-[14px]' :
-                                                    'text-[18px]'
-                                                }`}>
+                                                <span className={`font-black uppercase tracking-widest text-white whitespace-nowrap ${!isExporting ? 'text-[9px]' :
+                                                        gamerRank.title.length > 35 ? 'text-[9px]' :
+                                                            gamerRank.title.length > 25 ? 'text-[11px]' :
+                                                                gamerRank.title.length > 15 ? 'text-[14px]' :
+                                                                    'text-[18px]'
+                                                    }`}>
                                                     {gamerRank.title}
                                                 </span>
                                             </div>
@@ -1463,18 +1461,24 @@ export default function App() {
                             <div className="flex items-center gap-2 sm:gap-4 min-w-0">
                                 <img src="/mugiwara-logo.png" alt="Logo" className="w-8 h-8 sm:w-12 sm:h-12 object-contain drop-shadow-sm shrink-0" />
                                 <div className="min-w-0">
-                                    <h2 className={`text-xs sm:text-lg lg:text-3xl font-black uppercase tracking-tight bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none truncate`}>
+                                    <h2 className={`text-xs sm:text-base lg:text-xl xl:text-3xl font-black uppercase tracking-tight bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none truncate shrink-0`}>
                                         {activeTab === 'episodes' ? t('app_title') : t('movie_archive')}
                                     </h2>
-                                    <div className="flex items-center gap-1.5 mt-0.5">
-                                        <span className={`text-[8px] sm:text-[10px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-neutral-400' : 'text-neutral-500'} shrink-0 hidden sm:block`}>
+                                    <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5 overflow-hidden">
+                                        <span className={`text-[8px] sm:text-[10px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-neutral-400' : 'text-neutral-500'} shrink-0 hidden xl:block`}>
                                             {t('header_subtitle')}
                                         </span>
-                                        <div className="w-1 h-1 rounded-full bg-neutral-300 dark:bg-neutral-700 shrink-0 hidden sm:block"></div>
-                                        <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-widest px-1 py-0.5 rounded border ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-neutral-400' : 'bg-neutral-100 border-neutral-200 text-neutral-500'} shrink-0`}>{t('rank_label')}</span>
-                                        <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-widest pt-0.5 mt-px truncate ${gamerRank.color}`}>{gamerRank.title}</span>
+                                        <div className="w-1 h-1 rounded-full bg-neutral-300 dark:bg-neutral-700 shrink-0 hidden xl:block"></div>
+
+                                        <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full border ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-neutral-100 border-neutral-200'} shrink-0`}>
+                                            <span className={`text-[6px] sm:text-[8px] font-black uppercase tracking-widest text-neutral-500`}>{t('rank_label')}</span>
+                                            <div className="w-px h-2 bg-neutral-300 dark:bg-neutral-700 mx-0.5"></div>
+                                            <span className={`text-[7px] sm:text-[9px] font-black uppercase tracking-widest truncate sm:max-w-none ${gamerRank.color}`}>{gamerRank.title}</span>
+                                        </div>
+
                                         <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 rounded-full bg-neutral-300 dark:bg-neutral-700 shrink-0"></div>
-                                        <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-widest pt-0.5 mt-px shrink-0 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
+
+                                        <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-widest shrink-0 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
                                             ฿ {playerBounty.toLocaleString()} -
                                         </span>
                                     </div>
@@ -1548,7 +1552,7 @@ export default function App() {
                                 )}
                             </div>
 
-                            <div className="flex items-center gap-2 pb-1 sm:pb-0">
+                            <div className="flex items-center gap-2 pb-1 sm:pb-0 flex-wrap sm:flex-nowrap justify-end">
                                 {activeTab === 'episodes' && (
                                     <>
                                         <motion.button
@@ -1559,7 +1563,7 @@ export default function App() {
                                             className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${!showFiller ? 'bg-gradient-to-r from-red-600 to-rose-600 border-rose-500 text-white shadow-lg shadow-red-500/20' : theme.buttonInactive}`}
                                         >
                                             <CircleMinus size={14} strokeWidth={2.5} />
-                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest">{t('filter_no_filler')}</span>
+                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest hidden md:inline">{t('filter_no_filler')}</span>
                                         </motion.button>
 
                                         <motion.button
@@ -1570,7 +1574,7 @@ export default function App() {
                                             className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${hideWatched ? 'bg-gradient-to-r from-emerald-600 to-green-600 border-green-500 text-white shadow-lg shadow-green-500/20' : theme.buttonInactive}`}
                                         >
                                             <CheckCircle2 size={14} strokeWidth={2.5} />
-                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest">{t('filter_hide_watched')}</span>
+                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest hidden md:inline">{t('filter_hide_watched')}</span>
                                         </motion.button>
 
                                         <motion.button
@@ -1587,7 +1591,7 @@ export default function App() {
                                                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -skew-x-12"
                                             />
                                             <Play size={14} fill="currentColor" strokeWidth={2.5} className="relative z-10" />
-                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest relative z-10">{t('filter_continue')}</span>
+                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest relative z-10 hidden md:inline">{t('filter_continue')}</span>
                                         </motion.button>
                                     </>
                                 )}
@@ -1607,14 +1611,14 @@ export default function App() {
                                 <button onClick={() => { setSearchQuery(''); setShowFiller(true); setHideWatched(false); }} className="mt-8 px-8 py-3 rounded-2xl bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 font-bold uppercase tracking-widest text-xs hover:bg-red-200 transition-colors shadow-sm"> {t('btn_reset_filter')} </button>
                             </div>
                         ) : (
-                            <div className={sagaViewMode === 'card' ? 'grid grid-cols-1 md:grid-cols-2 gap-4 items-start' : 'space-y-4'}>
+                            <div className={sagaViewMode === 'card' ? 'grid grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4 items-start' : 'space-y-4'}>
                                 {filteredEps.map((saga) => {
                                     const progress = getSagaProgress(saga);
                                     const finished = progress.count === progress.total;
 
                                     return (
-                                        <section key={saga.id} className={`rounded-[1.25rem] overflow-hidden border transition-all duration-300 ${theme.card} ${sagaViewMode === 'card' && expandedSagas.includes(saga.id) ? 'md:col-span-2' : ''}`}>
-                                            <div className={`cursor-pointer ${sagaViewMode === 'card' ? 'p-4 sm:p-5' : 'p-3 sm:px-4'} ${theme.hover}`} onClick={() => toggleSaga(saga.id)}>
+                                        <section key={saga.id} className={`rounded-[1.25rem] overflow-hidden border transition-all duration-300 ${theme.card} ${sagaViewMode === 'card' && expandedSagas.includes(saga.id) ? 'col-span-2' : ''}`}>
+                                            <div className={`cursor-pointer ${sagaViewMode === 'card' ? 'p-2.5 sm:p-4' : 'p-3 sm:px-4'} ${theme.hover}`} onClick={() => toggleSaga(saga.id)}>
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex-1 min-w-0">
                                                         <div className={sagaViewMode === 'list' ? 'flex flex-row items-center gap-3 sm:gap-5' : ''}>
@@ -1796,7 +1800,7 @@ export default function App() {
                                 <button onClick={() => setSearchQuery('')} className="mt-8 px-8 py-3 rounded-2xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400 font-bold uppercase tracking-widest text-xs hover:bg-indigo-200 transition-colors shadow-sm"> {t('btn_reset_search')} </button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                                 {filteredMovies.map((movie) => (
                                     <div
                                         key={movie.id}
