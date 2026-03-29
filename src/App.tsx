@@ -1342,7 +1342,7 @@ export default function App() {
                                                                     </button>
 
                                                                     <div className="flex-1 min-w-0 pr-3 sm:pr-4">
-                                                                        <h4 className={`font-bold truncate text-sm sm:text-[15px] ${finished ? 'line-through text-neutral-400 decoration-green-500/80 decoration-2' : ''}`}> {arc.title} </h4>
+                                                                        <h4 className={`font-bold truncate text-sm sm:text-[15px] ${finished ? 'line-through text-neutral-400 decoration-neutral-400/50 decoration-2' : ''}`}> {arc.title} </h4>
                                                                         <div className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-0.5 text-[9.5px] font-bold ${theme.muted}`}>
                                                                             <span className="whitespace-nowrap">Ep {arc.start} - {arc.end}</span>
                                                                             <div className="flex items-center gap-1.5 w-full sm:w-auto">
@@ -1392,7 +1392,7 @@ export default function App() {
                                                                                                 </div>
                                                                                                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleEpisode(epNum)}>
                                                                                                     <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                                                                                                        <h5 className={`text-xs sm:text-[13px] font-bold leading-tight line-clamp-2 sm:line-clamp-none ${isWatched ? 'line-through decoration-green-500/80 decoration-[2px] text-neutral-400' : ''}`}>
+                                                                                                        <h5 className={`text-xs sm:text-[13px] font-bold leading-tight line-clamp-2 sm:line-clamp-none ${isWatched ? 'line-through decoration-neutral-400/50 decoration-[2px] text-neutral-400' : ''}`}>
                                                                                                             {getEpisodeTitle(epNum)}
                                                                                                         </h5>
                                                                                                         {arc.type === 'Mixed' && (
