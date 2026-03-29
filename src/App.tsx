@@ -29,7 +29,8 @@ import {
     Camera,
     CircleMinus,
     Bell,
-    ArrowUpDown
+    ArrowUpDown,
+    Coins
 } from 'lucide-react';
 
 // --- Konfigurasi & Data ---
@@ -117,26 +118,29 @@ const StatCircle = ({ percent, color, isDarkMode, isExporting }: { percent: numb
 
     return (
         <div className="relative flex items-center justify-center shrink-0">
-            <svg width={size} height={size} className="transform -rotate-90" style={{ overflow: 'visible' }}>
+            <svg width={size} height={size} className="transform -rotate-90 origin-center" style={{ overflow: 'visible' }}>
                 <circle
                     cx={size / 2}
                     cy={size / 2}
                     r={radius}
-                    stroke={isDarkMode ? '#262626' : '#f5f5f5'}
-                    strokeWidth={strokeWidth}
+                    stroke={isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'}
+                    strokeWidth={strokeWidth * 0.8}
                     fill="transparent"
                 />
                 <circle
                     cx={size / 2}
                     cy={size / 2}
                     r={radius}
-                    stroke={colorClasses[color] || '#ef4444'}
+                    stroke={color === 'white' ? '#fff' : (colorClasses[color] || '#ef4444')}
                     strokeWidth={strokeWidth}
                     fill="transparent"
                     strokeDasharray={circumference}
                     strokeDashoffset={offset}
                     className={!isExporting ? 'transition-all duration-1000 ease-out' : ''}
                     strokeLinecap="round"
+                    style={{
+                        filter: !isExporting ? `drop-shadow(0 0 3px ${color === 'white' ? 'rgba(255,255,255,0.5)' : (colorClasses[color] + '66')})` : 'none'
+                    }}
                 />
             </svg>
         </div>
@@ -144,13 +148,6 @@ const StatCircle = ({ percent, color, isDarkMode, isExporting }: { percent: numb
 };
 
 const StatCard = ({ title, icon, current, total, percent, color, isDarkMode, isExporting }: any) => {
-    const bgClasses: Record<string, string> = {
-        red: isDarkMode ? 'bg-red-500/5 border-red-500/10' : 'bg-red-50/50 border-red-100 shadow-sm',
-        amber: isDarkMode ? 'bg-amber-500/5 border-amber-500/10' : 'bg-amber-50/50 border-amber-100 shadow-sm',
-        neutral: isDarkMode ? 'bg-neutral-500/5 border-neutral-500/10' : 'bg-white border-neutral-100 shadow-sm',
-        indigo: isDarkMode ? 'bg-indigo-500/5 border-indigo-500/10' : 'bg-indigo-50/50 border-indigo-100 shadow-sm',
-    };
-
     const textClasses: Record<string, string> = {
         red: isDarkMode ? 'text-red-400' : 'text-red-700',
         amber: isDarkMode ? 'text-amber-400' : 'text-amber-700',
@@ -159,20 +156,20 @@ const StatCard = ({ title, icon, current, total, percent, color, isDarkMode, isE
     };
 
     return (
-        <div className={`p-3.5 sm:p-4 rounded-[2rem] border transition-all hover:scale-[1.03] flex flex-col items-center text-center gap-2 active:scale-95 group ${bgClasses[color]}`}>
+        <div className={`p-4 rounded-[1.75rem] flex flex-col items-center text-center gap-1.5 group transition-all ${!isExporting ? `glass glass-card ${isDarkMode ? 'drop-shadow-2xl' : 'drop-shadow-sm'}` : 'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 !shadow-none !drop-shadow-none'}`}>
             <div className="relative shrink-0 flex items-center justify-center p-0.5 rounded-full">
                 <StatCircle percent={percent} color={color} isDarkMode={isDarkMode} isExporting={isExporting} />
-                <div className={`absolute inset-0 flex items-center justify-center ${textClasses[color]} transition-transform duration-500 group-hover:scale-110`}>
-                    {icon}
+                <div className={`absolute inset-0 flex items-center justify-center ${textClasses[color]} transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6`}>
+                    {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<{ size: number }>, { size: 18 }) : icon}
                 </div>
             </div>
             <div className="w-full space-y-0.5">
-                <h4 className={`text-[9px] font-black uppercase tracking-[0.15em] leading-tight ${textClasses[color]} opacity-90`}>
+                <h4 className={`text-[8px] font-black uppercase tracking-[0.2em] leading-tight ${textClasses[color]} opacity-70 group-hover:opacity-100 transition-opacity`}>
                     {title}
                 </h4>
-                <div className="flex flex-col items-center leading-none">
-                    <span className={`text-[15px] font-black tracking-tight ${textClasses[color]}`}>{percent}%</span>
-                    <span className={`text-[7px] font-black uppercase tracking-[0.1em] mt-0.5 opacity-40 ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>
+                <div className={`flex flex-col items-center leading-none ${isExporting ? 'gap-1.5 mt-1' : 'gap-0.5'}`}>
+                    <span className={`${isExporting ? 'text-[24px]' : 'text-[14px]'} font-black tracking-tight ${textClasses[color]} tabular-nums`}>{percent}%</span>
+                    <span className={`${isExporting ? 'text-[10px]' : 'text-[7px]'} font-bold uppercase tracking-[0.15em] opacity-40 ${isDarkMode ? 'text-white' : 'text-neutral-900'} tabular-nums`}>
                         {current} / {total}
                     </span>
                 </div>
@@ -194,19 +191,19 @@ export default function App() {
             const data = JSON.parse(saved);
             if (data.language) return data.language;
         }
-        
+
         // Auto-detect location/language
         try {
             const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
             const isID = tz.includes('Jakarta') || tz.includes('Makassar') || tz.includes('Jayapura');
             if (isID) return 'id';
-            
+
             const navLang = navigator.language.toLowerCase();
             if (navLang.startsWith('id')) return 'id';
         } catch (e) {
             console.log("Location detection failed, defaulting to EN");
         }
-        
+
         return 'en';
     });
     const [searchQuery, setSearchQuery] = useState('');
@@ -229,7 +226,8 @@ export default function App() {
             stats_rank_supernova: 'Supernova',
             stats_rank_warlord: 'Shichibukai',
             stats_rank_commander: 'Komandan Yonko',
-            stats_rank_emperor: 'Yonko / Raja Bajak Laut',
+            stats_rank_emperor: 'Yonko',
+            stats_rank_king: 'Raja Bajak Laut',
             btn_show_off: 'Pamer Hasil!',
             btn_input_name: 'Input Nama & Pamer!',
             placeholder_name: 'Masukkan Nama Anda...',
@@ -274,6 +272,7 @@ export default function App() {
             sort_oldest: 'Terlama',
             rank_label: 'Rank',
             watch_label: 'Nonton',
+            stats_bounty: 'Nilai Buruan',
             saga_east_blue_desc: 'Perjalanan Luffy mencari kru pertama: Zoro, Nami, Usopp, dan Sanji.',
             saga_alabasta_desc: 'Membantu Putri Vivi menyelamatkan Alabasta dari Baroque Works.',
             saga_sky_island_desc: 'Petualangan ke langit untuk mencari Kota Emas legendaris Shandora.',
@@ -313,7 +312,8 @@ export default function App() {
             stats_rank_supernova: 'Supernova',
             stats_rank_warlord: 'Seven Warlords',
             stats_rank_commander: 'Emperor Commander',
-            stats_rank_emperor: 'Emperor / Pirate King',
+            stats_rank_emperor: 'Emperor (Yonko)',
+            stats_rank_king: 'King of Pirates',
             btn_show_off: 'Show Off Results!',
             btn_input_name: 'Enter Name & Share!',
             placeholder_name: 'Enter Your Name...',
@@ -358,6 +358,7 @@ export default function App() {
             sort_oldest: 'Oldest',
             rank_label: 'Rank',
             watch_label: 'Watch',
+            stats_bounty: 'Bounty Value',
             saga_east_blue_desc: 'Luffy\'s journey to find his first crew: Zoro, Nami, Usopp, and Sanji.',
             saga_alabasta_desc: 'Helping Princess Vivi save Alabasta from Baroque Works.',
             saga_sky_island_desc: 'Adventure to the sky to find the legendary Golden City of Shandora.',
@@ -571,7 +572,7 @@ export default function App() {
     useEffect(() => {
         if (!loading && 'Notification' in window) {
             setNotificationsEnabled(Notification.permission === 'granted');
-            
+
             if (Notification.permission === 'granted') {
                 const keys = Object.keys(EPISODE_DB).map(Number).filter(n => !isNaN(n));
                 const maxEp = keys.length > 0 ? Math.max(...keys) : 0;
@@ -949,12 +950,34 @@ export default function App() {
             sagasTotal,
             moviePercent,
             movieWatched: watchedMovies.length,
-            movieTotal: MOVIE_DATA.length
+            movieTotal: MOVIE_DATA.length,
+            totalWatched: canonWatched + fillerWatched + watchedMovies.length
         };
     }, [watchedEpisodes, watchedMovies, SAGA_DATA]);
 
+    const calculateBounty = (total: number) => {
+        if (total === 0) return 0;
+
+        // Balanced milestone segments without hard cap
+        if (total <= 100) return total * 300000; // 30M at 100
+        if (total <= 300) return 30000000 + (total - 100) * 600000; // 150M at 300
+        if (total <= 500) return 150000000 + (total - 300) * 1750000; // 500M at 500
+        if (total <= 800) return 500000000 + (total - 500) * 3333333; // 1.5B at 800
+        if (total <= 1000) return 1500000000 + (total - 800) * 10000000; // 3.5B at 1000
+        return 3500000000 + (total - 1000) * 15000000; // Natural scaling beyond 5.6B
+    };
+
+    const playerBounty = useMemo(() => {
+        return calculateBounty(stats.totalWatched);
+    }, [stats]);
+
     const gamerRank = useMemo(() => {
-        const total = stats.canonWatched + stats.fillerWatched;
+        const total = stats.totalWatched;
+        const isComplete = stats.canonWatched === stats.canonTotal &&
+            stats.fillerWatched === stats.fillerTotal &&
+            stats.movieWatched === stats.movieTotal;
+
+        if (isComplete) return { title: t('stats_rank_king'), color: 'text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)] font-black animate-pulse' };
         if (total === 0) return { title: t('stats_rank_rookie'), color: 'text-neutral-500' };
         if (total < 100) return { title: t('stats_rank_cadet'), color: 'text-blue-500' };
         if (total < 300) return { title: t('stats_rank_captain'), color: 'text-green-500' };
@@ -1039,7 +1062,7 @@ export default function App() {
             setIsEnteringName(true);
             return;
         }
-        
+
         setIsExporting(true);
         // Beri waktu lebih lama agar flag isExporting memicu re-render judul di poster dan mematikan animasi
         setTimeout(async () => {
@@ -1057,7 +1080,7 @@ export default function App() {
                     style: { transform: 'scale(1)', transformOrigin: 'top left' }
                 });
                 const link = document.createElement('a');
-                link.download = `OPTracker_${userName.replace(/\s+/g, '_')}_${gamerRank.title.replace(/\s+/g, '_')}.png`;
+                link.download = `OPTracker_${userName.replace(/\s+/g, '_')}_${gamerRank.title.replace(/\s+/g, '_')}_${playerBounty}.png`;
                 link.href = dataUrl;
                 link.click();
 
@@ -1109,22 +1132,22 @@ export default function App() {
                         className="fixed bottom-6 right-6 z-40"
                     >
                         {/* Glowing Background Aura */}
-                        <motion.div 
-                            animate={{ 
+                        <motion.div
+                            animate={{
                                 scale: [1, 1.2, 1],
                                 opacity: [0.2, 0.5, 0.2]
                             }}
-                            transition={{ 
-                                duration: 4, 
+                            transition={{
+                                duration: 4,
                                 repeat: Infinity,
                                 ease: "easeInOut"
                             }}
                             className="absolute inset-0 bg-gradient-to-br from-red-600 to-amber-500 rounded-3xl blur-2xl -z-10"
                         />
-                        
+
                         <motion.button
                             onClick={() => setIsSidebarOpen(true)}
-                            whileHover={{ 
+                            whileHover={{
                                 scale: 1.1,
                                 boxShadow: "0 20px 40px -10px rgba(220, 38, 38, 0.5)"
                             }}
@@ -1134,7 +1157,7 @@ export default function App() {
                         >
                             {/* Inner shine effect */}
                             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full" />
-                            
+
                             <div className="flex items-center gap-0 group-hover:gap-3 transition-all duration-500 ease-out">
                                 <Menu size={24} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform duration-500" />
                                 <span className="max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-500 text-[11px] font-black uppercase tracking-[0.2em] pt-0.5">
@@ -1152,45 +1175,112 @@ export default function App() {
             )}
 
             {/* Sidebar / Header */}
-            <aside className={`fixed inset-y-0 right-0 z-50 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-l backdrop-blur-3xl shadow-2xl transition-all duration-200 overflow-hidden ${isSidebarOpen ? 'w-full lg:w-[380px] translate-x-0 opacity-100' : 'w-full lg:w-0 translate-x-full lg:translate-x-0 opacity-0 lg:border-none'} ${isDarkMode ? 'bg-neutral-950/90 border-neutral-800/50' : 'bg-white/95 border-neutral-200'}`}>
-                <div className="w-[100vw] lg:w-[380px] p-5 sm:p-6 lg:p-8 flex flex-col min-h-full scrollbar-hidden overflow-y-auto">
+            <aside className={`fixed inset-y-0 right-0 z-50 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-l backdrop-blur-3xl shadow-2xl transition-all duration-500 overflow-hidden ${isSidebarOpen ? 'w-full lg:w-[380px] translate-x-0 opacity-100' : 'w-full lg:w-0 translate-x-full lg:translate-x-0 opacity-0 lg:border-none'} ${isDarkMode ? 'bg-neutral-950/90 border-neutral-800/30' : 'bg-white/80 border-neutral-200/50'}`}>
+                <div className="w-[100vw] lg:w-[380px] p-5 sm:p-6 flex flex-col min-h-full scrollbar-hidden overflow-y-auto">
                     {/* Brand & Theme */}
-                    <div className="flex items-center justify-between mb-8 sm:mb-10">
-                        <div>
-                            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.3em] text-neutral-400 dark:text-neutral-500 mb-1 block">{t('nav_logbook')}</span>
-                            <span className={`text-xl sm:text-2xl font-black uppercase tracking-tight drop-shadow-sm transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-neutral-800'}`}>{t('nav_menu')}</span>
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="relative">
+                            <span className="text-[8px] font-black uppercase tracking-[0.4em] text-neutral-500/70 mb-1 block leading-none">{t('nav_logbook')}</span>
+                            <h2 className={`text-xl sm:text-2xl font-black uppercase tracking-tighter transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{t('nav_menu')}</h2>
+                            <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-1 h-6 bg-orange-500 rounded-full blur-[2px]" />
                         </div>
                         <div className="flex items-center gap-2">
-                            <button onClick={toggleDarkMode} className={`p-3 rounded-[1.25rem] transition-all duration-300 hover:scale-110 active:scale-95 ${isDarkMode ? 'bg-neutral-800/80 border border-neutral-700/50 text-yellow-400 shadow-lg shadow-yellow-500/5' : 'bg-neutral-100 border border-neutral-200 text-neutral-600 shadow-sm'}`}>
-                                {isDarkMode ? <Sun size={20} strokeWidth={2.5} /> : <Moon size={20} strokeWidth={2.5} />}
-                            </button>
-                            <button onClick={() => setIsSidebarOpen(false)} className={`p-3 rounded-[1.25rem] transition-all duration-300 hover:scale-110 active:scale-95 ${isDarkMode ? 'bg-red-900/30 border border-red-800/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 border border-red-100 text-red-600'}`}>
-                                <X size={20} strokeWidth={2.5} />
-                            </button>
+                            <motion.button
+                                whileHover={{ scale: 1.1, rotate: 15 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={toggleDarkMode}
+                                className={`p-2.5 rounded-xl glass transition-all ${isDarkMode ? 'text-yellow-400' : 'text-neutral-600'}`}
+                            >
+                                {isDarkMode ? <Sun size={18} strokeWidth={2.5} /> : <Moon size={18} strokeWidth={2.5} />}
+                            </motion.button>
+                            <motion.button
+                                whileHover={{ scale: 1.1, rotate: -90 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => setIsSidebarOpen(false)}
+                                className={`p-2.5 rounded-xl glass transition-all ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}
+                            >
+                                <X size={18} strokeWidth={2.5} />
+                            </motion.button>
                         </div>
                     </div>
 
 
                     {/* Compact Stats Section / Poster Export */}
-                    <div id="stats-poster" className={`transition-all duration-300 ${isExporting ? 'p-6 rounded-3xl bg-neutral-50 dark:bg-neutral-950 shadow-2xl min-w-[360px]' : ''}`}>
+                    <div id="stats-poster" className={`transition-all duration-300 ${isExporting ? 'p-10 rounded-[2.5rem] bg-white dark:bg-neutral-950 !shadow-none min-w-[400px]' : ''}`}>
                         {/* Judul & Pangkat Khusus untuk Hasil Export Poster */}
                         {isExporting && (
-                            <div className="flex items-center gap-4 mb-6 pb-4 border-b border-neutral-200 dark:border-neutral-800">
-                                <img src="/mugiwara-logo.png" className="w-12 h-12 object-contain drop-shadow-sm" alt="Logo" />
-                                <div className="flex-1">
-                                    <h3 className="text-[18px] font-black uppercase tracking-tight bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none pb-1">{userName || 'OP Tracker'}</h3>
-                                    <div className="flex items-center gap-1.5 mt-0.5">
-                                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${isDarkMode ? 'bg-neutral-800 text-neutral-400' : 'bg-neutral-200 text-neutral-500'}`}>{t('stats_rank')}</span>
-                                        <span className={`text-[11px] font-black uppercase tracking-widest pt-0.5 ${gamerRank.color}`}>{gamerRank.title}</span>
+                            <div className="flex flex-col gap-4 mb-4 pb-4 border-b-2 border-neutral-100 dark:border-neutral-900">
+                                <div className="flex items-center gap-4 min-w-0">
+                                    <img src="/mugiwara-logo.png" className="w-14 h-14 object-contain shrink-0" alt="Logo" />
+                                    <div className="flex-1 min-w-0 pr-12 overflow-hidden">
+                                        <div className="flex flex-col justify-center">
+                                            <h3 className={`font-black uppercase tracking-tighter text-red-600 dark:text-red-500 leading-tight whitespace-nowrap ${
+                                                (userName?.length || 0) > 35 ? 'text-[10px]' :
+                                                (userName?.length || 0) > 28 ? 'text-[14px]' :
+                                                (userName?.length || 0) > 22 ? 'text-[18px]' :
+                                                (userName?.length || 0) > 18 ? 'text-[24px]' : 
+                                                (userName?.length || 0) > 14 ? 'text-[30px]' : 
+                                                'text-[42px]'
+                                            }`}>
+                                                {userName || 'OP Tracker'}
+                                            </h3>
+                                            <div className="flex items-center gap-2 mt-0.5 opacity-60">
+                                                <span className="text-[8px] font-black uppercase tracking-[0.2em] whitespace-nowrap">Generated On</span>
+                                                <div className="w-1 h-1 rounded-full bg-neutral-300 dark:bg-neutral-700" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+                                                    {new Date().toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-3 px-1">
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                            {/* Rank & Bounty Card */}
+                            <motion.div
+                                initial={isExporting ? {} : { opacity: 0, y: 20 }}
+                                animate={isExporting ? {} : { opacity: 1, y: 0 }}
+                                className="col-span-2"
+                            >
+                                <div className={`relative p-5 rounded-[2rem] overflow-hidden transition-all ${isDarkMode ? 'bg-amber-500' : 'bg-amber-500'} !shadow-none border border-white/40`}>
+                                    <div className="relative z-10 flex items-center gap-6">
+                                        <div className={`relative shrink-0 flex items-center justify-center p-0.5 rounded-full bg-white/20 border border-white/30 ${isExporting ? 'scale-110' : ''}`}>
+                                            <StatCircle percent={stats.canonPercent} color="white" isDarkMode={true} isExporting={isExporting} />
+                                            <div className="absolute inset-0 flex items-center justify-center text-white">
+                                                <Coins size={isExporting ? 28 : 24} strokeWidth={2.5} />
+                                            </div>
+                                        </div>
+                                        <div className="flex-1 min-w-0 pr-6">
+                                            <div className="flex items-center gap-2 mb-1.5 min-w-0 overflow-visible">
+                                                <span className={`${isExporting ? 'text-[10px]' : 'text-[8px]'} font-black uppercase tracking-[0.2em] text-white/60 leading-none whitespace-nowrap shrink-0`}>{t('stats_rank')} •</span>
+                                                <span className={`font-black uppercase tracking-widest text-white whitespace-nowrap ${
+                                                    !isExporting ? 'text-[9px]' :
+                                                    gamerRank.title.length > 35 ? 'text-[9px]' :
+                                                    gamerRank.title.length > 25 ? 'text-[11px]' :
+                                                    gamerRank.title.length > 15 ? 'text-[14px]' :
+                                                    'text-[18px]'
+                                                }`}>
+                                                    {gamerRank.title}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <div className="flex items-center text-white tabular-nums tracking-tighter overflow-visible">
+                                                    <span className={`${isExporting ? 'text-[30px]' : 'text-xl sm:text-2xl'} font-black leading-none whitespace-nowrap`}>฿ {playerBounty.toLocaleString()} -</span>
+                                                </div>
+                                                <span className={`${isExporting ? 'text-[10px]' : 'text-[9px]'} font-black uppercase tracking-[0.2em] mt-2 text-white/50 leading-none`}>
+                                                    {t('stats_bounty')}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+
                             {/* Canon Stats */}
-                            <StatCard 
-                                title={t('stats_main_story')} 
+                            <StatCard
+                                title={t('stats_main_story')}
                                 icon={<Trophy size={20} strokeWidth={2.5} />}
                                 current={stats.canonWatched}
                                 total={stats.canonTotal}
@@ -1201,8 +1291,8 @@ export default function App() {
                             />
 
                             {/* Saga Stats */}
-                            <StatCard 
-                                title={t('stats_sagas')} 
+                            <StatCard
+                                title={t('stats_sagas')}
                                 icon={<Compass size={20} strokeWidth={2.5} />}
                                 current={stats.sagasWatched}
                                 total={stats.sagasTotal}
@@ -1213,8 +1303,8 @@ export default function App() {
                             />
 
                             {/* Filler Stats */}
-                            <StatCard 
-                                title={t('stats_filler')} 
+                            <StatCard
+                                title={t('stats_filler')}
                                 icon={<Skull size={20} strokeWidth={2.5} />}
                                 current={stats.fillerWatched}
                                 total={stats.fillerTotal}
@@ -1225,8 +1315,8 @@ export default function App() {
                             />
 
                             {/* Movie Stats */}
-                            <StatCard 
-                                title={t('stats_movies')} 
+                            <StatCard
+                                title={t('stats_movies')}
                                 icon={<Film size={20} strokeWidth={2.5} />}
                                 current={stats.movieWatched}
                                 total={stats.movieTotal}
@@ -1236,15 +1326,28 @@ export default function App() {
                                 isExporting={isExporting}
                             />
                         </div>
+
+                        {isExporting && (
+                            <div className="mt-8 pt-6 border-t border-neutral-100 dark:border-neutral-900 flex items-center justify-between opacity-30">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1 h-1 rounded-full bg-red-500" />
+                                    <span className="text-[9px] font-black uppercase tracking-[0.3em]">OP Tracker</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {isEnteringName ? (
-                        <div className="mt-1 mb-4 w-full relative group">
-                            <input 
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="mt-1 mb-3 w-full relative group"
+                        >
+                            <input
                                 autoFocus
-                                type="text" 
-                                placeholder={t('placeholder_name')} 
-                                className={`w-full p-3.5 pr-12 rounded-2xl font-black uppercase tracking-widest text-[11px] outline-none transition-all border ${isDarkMode ? 'bg-neutral-900 border-orange-500/40 text-white focus:border-orange-500' : 'bg-white border-orange-500/40 text-neutral-900 focus:border-orange-500 shadow-sm'}`}
+                                type="text"
+                                placeholder={t('placeholder_name')}
+                                className={`w-full p-3 pr-10 rounded-xl font-black uppercase tracking-widest text-[10px] outline-none transition-all glass hover:bg-white focus:bg-white focus:shadow-lg focus:shadow-orange-500/10 ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}
                                 value={userName}
                                 onChange={(e) => setUserName(e.target.value)}
                                 onKeyDown={(e) => {
@@ -1256,70 +1359,92 @@ export default function App() {
                                 }}
                                 onBlur={() => { if (!userName.trim()) setIsEnteringName(false); }}
                             />
-                            <button 
+                            <button
                                 onClick={() => {
                                     if (userName.trim()) {
                                         setIsEnteringName(false);
                                         setTimeout(exportImage, 100);
                                     }
                                 }}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-orange-500 hover:scale-110 transition-transform"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-orange-500 hover:scale-125 transition-transform"
                             >
-                                <CheckCircle2 size={20} strokeWidth={3} />
+                                <CheckCircle2 size={18} strokeWidth={3} />
                             </button>
-                        </div>
+                        </motion.div>
                     ) : (
-                        <button onClick={exportImage} disabled={isExporting} className="mt-1 mb-4 w-full flex items-center justify-center gap-2 p-3.5 rounded-2xl bg-gradient-to-r from-orange-500/10 to-red-500/10 hover:from-orange-500/20 hover:to-red-500/20 text-orange-600 dark:text-orange-500 transition-all font-black text-[11px] uppercase tracking-widest border border-orange-500/20 hover:border-orange-500/40 hover:scale-[1.02] active:scale-95 shadow-sm">
+                        <motion.button
+                            whileHover={{ scale: 1.02, y: -1 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={exportImage}
+                            disabled={isExporting}
+                            className={`mt-1 mb-3 w-full flex items-center justify-center gap-2 p-3 rounded-2xl bg-gradient-to-r from-orange-500 to-red-600 text-white transition-all font-black text-[11px] uppercase tracking-[0.2em] shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 relative overflow-hidden group`}
+                        >
+                            <div className="absolute inset-0 bg-white/10 translate-x-full group-hover:translate-x-0 transition-transform duration-500 skew-x-12" />
                             {isExporting ? (
-                                <div className="w-4 h-4 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+                                <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                             ) : (
-                                <><Camera size={18} strokeWidth={2.5} /> {userName ? t('btn_show_off') : t('btn_input_name')}</>
+                                <><Camera size={18} strokeWidth={2.5} className="group-hover:rotate-12 transition-transform" /> {userName ? t('btn_show_off') : t('btn_input_name')}</>
                             )}
-                        </button>
+                        </motion.button>
                     )}
 
                     {/* Compact Sync & Backup Card */}
-                    <div className="mt-auto pt-4 pb-2">
-                        <div className={`p-4 rounded-[1.75rem] border transition-all relative overflow-hidden group ${isDarkMode ? 'bg-neutral-900/40 border-neutral-800/50 backdrop-blur-xl shadow-lg' : 'bg-white border-neutral-100 shadow-xl shadow-neutral-200/30'}`}>
+                    <div className="mt-auto pt-4 border-t border-neutral-500/10">
+                        <div className={`p-6 rounded-[2.5rem] ${isDarkMode ? 'bg-neutral-900/60 border-neutral-800/50 shadow-black/40' : 'bg-white/70 border-neutral-200/50 shadow-neutral-200/30'} border shadow-2xl backdrop-blur-xl transition-all relative overflow-hidden group`}>
                             {/* Decorative background element */}
-                            <div className="absolute -top-10 -right-10 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-all duration-700" />
+                            <div className="absolute -top-10 -right-10 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl group-hover:bg-orange-500/10 transition-all duration-700" />
 
-                            <div className="flex flex-col gap-2.5 relative z-10">
-                                <div className="flex items-center justify-between gap-3">
+                            <div className="flex flex-col gap-3 relative z-10">
+                                <div className="flex items-center justify-between gap-2">
                                     <div className="flex-1 min-w-0">
-                                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] mb-1 block ${isDarkMode ? 'text-neutral-500' : 'text-neutral-400'}`}>{t('device_unit')}</span>
+                                        <span className={`text-[7px] font-black uppercase tracking-[0.3em] mb-1 block leading-none ${isDarkMode ? 'text-neutral-500' : 'text-neutral-400'}`}>{t('device_unit')}</span>
                                         <div className="flex items-center gap-2">
-                                            <div className={`p-1.5 rounded-lg scale-90 ${isDarkMode ? 'bg-amber-500/10 text-amber-500' : 'bg-amber-50 text-amber-600'}`}>
-                                                <Compass size={14} strokeWidth={2.5} />
+                                            <div className={`p-1.5 rounded-lg glass scale-90 ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`}>
+                                                <Compass size={12} strokeWidth={2.5} />
                                             </div>
-                                            <span className={`text-sm font-black uppercase tracking-tight truncate ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{deviceInfo.os}</span>
+                                            <span className={`text-[10px] font-black uppercase tracking-widest truncate ${isDarkMode ? 'text-white/90' : 'text-neutral-900'}`}>{deviceInfo.os}</span>
                                         </div>
                                     </div>
-                                    <div className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all ${isDarkMode ? 'bg-neutral-800/50 border-neutral-700/50 text-green-500' : 'bg-green-50 border-green-100 text-green-600'}`}>
-                                        <div className={`w-1 h-1 rounded-full animate-pulse ${isDarkMode ? 'bg-green-500' : 'bg-green-600'}`} />
+                                    <div className={`shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-full border transition-all ${isDarkMode ? 'bg-neutral-800/30 border-neutral-700/30 text-green-400' : 'bg-green-500/10 border-green-500/20 text-green-600'}`}>
+                                        <div className={`w-1 h-1 rounded-full animate-pulse ${isDarkMode ? 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]' : 'bg-green-600'}`} />
                                         <span className="text-[7px] font-black uppercase tracking-widest">{t('sync_live')}</span>
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-2">
-                                    <button onClick={exportProgress} className={`flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all hover:scale-[1.03] active:scale-95 shadow-sm border ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-amber-500 hover:bg-neutral-700' : 'bg-neutral-50 border-neutral-200 text-amber-700 hover:bg-neutral-100'}`}>
-                                        <Download size={13} strokeWidth={3} />
-                                        <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">{t('sync_export')}</span>
-                                    </button>
-                                    <label className={`flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all hover:scale-[1.03] active:scale-95 shadow-sm border cursor-pointer ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-amber-500 hover:bg-neutral-700' : 'bg-neutral-50 border-neutral-200 text-amber-700 hover:bg-neutral-100'}`}>
-                                        <Upload size={13} strokeWidth={3} />
-                                        <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">{t('sync_import')}</span>
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={exportProgress}
+                                        className={`flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all glass shadow-sm ${isDarkMode ? 'text-orange-400 hover:bg-white/5' : 'text-orange-700 hover:bg-black/5'}`}
+                                    >
+                                        <Download size={12} strokeWidth={3} />
+                                        <span className="text-[8px] font-black uppercase tracking-widest pt-0.5">{t('sync_export')}</span>
+                                    </motion.button>
+                                    <motion.label
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        className={`flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all glass shadow-sm cursor-pointer ${isDarkMode ? 'text-orange-400 hover:bg-white/5' : 'text-orange-700 hover:bg-black/5'}`}
+                                    >
+                                        <Upload size={12} strokeWidth={3} />
+                                        <span className="text-[8px] font-black uppercase tracking-widest pt-0.5">{t('sync_import')}</span>
                                         <input type="file" className="hidden" accept=".json" onChange={(e) => { importProgress(e); setIsSidebarOpen(false); }} />
-                                    </label>
+                                    </motion.label>
                                 </div>
 
-                                <button onClick={requestNotification} disabled={notificationsEnabled} className={`w-full flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all hover:scale-[1.02] active:scale-95 shadow-sm border ${notificationsEnabled ? (isDarkMode ? 'bg-green-900/20 border-green-800/50 text-green-500 opacity-80' : 'bg-green-50 border-green-200 text-green-600 opacity-80') : (isDarkMode ? 'bg-neutral-800 border-neutral-700 text-blue-400 hover:bg-neutral-700' : 'bg-neutral-50 border-neutral-200 text-blue-600 hover:bg-neutral-100')}`}>
-                                    <Bell size={13} strokeWidth={3} className={notificationsEnabled ? "" : "animate-pulse"} />
-                                    <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">{notificationsEnabled ? t('sync_notif_active') : t('sync_notif_enable')}</span>
-                                </button>
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={requestNotification}
+                                    disabled={notificationsEnabled}
+                                    className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded-xl transition-all shadow-sm ${notificationsEnabled ? (isDarkMode ? 'text-green-400 bg-green-500/10 border-green-500/20 opacity-60' : 'text-green-600 bg-green-50 border-green-200 opacity-60') : (isDarkMode ? 'bg-neutral-800/50 text-blue-400 border-neutral-700/50 hover:bg-neutral-800/80' : 'bg-white/80 text-blue-600 border-neutral-200 hover:bg-white')} border`}
+                                >
+                                    <Bell size={12} strokeWidth={3} className={notificationsEnabled ? "" : "animate-pulse"} />
+                                    <span className="text-[8px] font-black uppercase tracking-widest pt-0.5">{notificationsEnabled ? t('sync_notif_active') : t('sync_notif_enable')}</span>
+                                </motion.button>
 
-                                <div className="text-center">
-                                    <p className={`text-[8px] font-bold uppercase ${isDarkMode ? 'text-neutral-500' : 'text-neutral-400'} leading-relaxed tracking-wider opacity-80`}>
+                                <div className="text-center mt-1">
+                                    <p className={`text-[7px] font-bold uppercase ${isDarkMode ? 'text-neutral-600' : 'text-neutral-400'} leading-relaxed tracking-widest opacity-80`}>
                                         {t('sync_footer').replace('{device}', deviceInfo.os)}
                                     </p>
                                 </div>
@@ -1347,7 +1472,11 @@ export default function App() {
                                         </span>
                                         <div className="w-1 h-1 rounded-full bg-neutral-300 dark:bg-neutral-700 shrink-0 hidden sm:block"></div>
                                         <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-widest px-1 py-0.5 rounded border ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-neutral-400' : 'bg-neutral-100 border-neutral-200 text-neutral-500'} shrink-0`}>{t('rank_label')}</span>
-                                        <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-widest pt-0.5 truncate ${gamerRank.color}`}>{gamerRank.title}</span>
+                                        <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-widest pt-0.5 mt-px truncate ${gamerRank.color}`}>{gamerRank.title}</span>
+                                        <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 rounded-full bg-neutral-300 dark:bg-neutral-700 shrink-0"></div>
+                                        <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-widest pt-0.5 mt-px shrink-0 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
+                                            ฿ {playerBounty.toLocaleString()} -
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -1355,14 +1484,14 @@ export default function App() {
                             <div className="flex items-center gap-2">
                                 {activeTab === 'episodes' && (
                                     <div className={`hidden sm:flex p-0.5 rounded-lg border transition-all ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-neutral-200/50 border-neutral-300'}`}>
-                                        <button 
-                                            onClick={() => setSagaViewMode('list')} 
+                                        <button
+                                            onClick={() => setSagaViewMode('list')}
                                             className={`p-1 rounded-md transition-all ${sagaViewMode === 'list' ? (isDarkMode ? 'bg-neutral-800 text-white shadow-lg' : 'bg-white text-neutral-900 shadow-sm') : 'text-neutral-500 opacity-50'}`}
                                         >
                                             <List size={14} />
                                         </button>
-                                        <button 
-                                            onClick={() => setSagaViewMode('card')} 
+                                        <button
+                                            onClick={() => setSagaViewMode('card')}
                                             className={`p-1 rounded-md transition-all ${sagaViewMode === 'card' ? (isDarkMode ? 'bg-neutral-800 text-white shadow-lg' : 'bg-white text-neutral-900 shadow-sm') : 'text-neutral-500 opacity-50'}`}
                                         >
                                             <LayoutGrid size={14} />
@@ -1372,14 +1501,14 @@ export default function App() {
 
                                 {/* Language Switcher Toggle */}
                                 <div className={`flex p-0.5 rounded-lg border transition-all ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-neutral-200/50 border-neutral-300'}`}>
-                                    <button 
-                                        onClick={() => { setLanguage('id'); saveLocally({ language: 'id' }); }} 
+                                    <button
+                                        onClick={() => { setLanguage('id'); saveLocally({ language: 'id' }); }}
                                         className={`px-2 py-1 text-[9px] sm:text-xs font-bold uppercase rounded-md transition-all flex items-center gap-1.5 ${language === 'id' ? (isDarkMode ? 'bg-neutral-800 text-white shadow-lg' : 'bg-white text-neutral-900 shadow-sm') : 'opacity-50 text-neutral-500'}`}
                                     >
                                         <span>🇮🇩</span> <span className="hidden sm:inline">ID</span>
                                     </button>
-                                    <button 
-                                        onClick={() => { setLanguage('en'); saveLocally({ language: 'en' }); }} 
+                                    <button
+                                        onClick={() => { setLanguage('en'); saveLocally({ language: 'en' }); }}
                                         className={`px-2 py-1 text-[9px] sm:text-xs font-bold uppercase rounded-md transition-all flex items-center gap-1.5 ${language === 'en' ? (isDarkMode ? 'bg-neutral-800 text-white shadow-lg' : 'bg-white text-neutral-900 shadow-sm') : 'opacity-50 text-neutral-500'}`}
                                     >
                                         <span>🇺🇸</span> <span className="hidden sm:inline">EN</span>
@@ -1406,7 +1535,7 @@ export default function App() {
                                 </div>
 
                                 {activeTab === 'movies' && (
-                                    <button 
+                                    <button
                                         onClick={() => setMovieSortOrder(movieSortOrder === 'desc' ? 'asc' : 'desc')}
                                         className={`px-3 rounded-xl border flex items-center gap-2 transition-all active:scale-95 ${isDarkMode ? 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white' : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50 shadow-sm'}`}
                                         title={`${t('sort_label')}: ${movieSortOrder === 'desc' ? t('sort_newest') : t('sort_oldest')}`}
@@ -1422,37 +1551,37 @@ export default function App() {
                             <div className="flex items-center gap-2 pb-1 sm:pb-0">
                                 {activeTab === 'episodes' && (
                                     <>
-                                        <motion.button 
+                                        <motion.button
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
-                                            onClick={() => setShowFiller(!showFiller)} 
-                                            title={t('filter_no_filler')} 
+                                            onClick={() => setShowFiller(!showFiller)}
+                                            title={t('filter_no_filler')}
                                             className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${!showFiller ? 'bg-gradient-to-r from-red-600 to-rose-600 border-rose-500 text-white shadow-lg shadow-red-500/20' : theme.buttonInactive}`}
                                         >
                                             <CircleMinus size={14} strokeWidth={2.5} />
                                             <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest">{t('filter_no_filler')}</span>
                                         </motion.button>
 
-                                        <motion.button 
+                                        <motion.button
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
-                                            onClick={() => setHideWatched(!hideWatched)} 
-                                            title={t('filter_hide_watched')} 
+                                            onClick={() => setHideWatched(!hideWatched)}
+                                            title={t('filter_hide_watched')}
                                             className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${hideWatched ? 'bg-gradient-to-r from-emerald-600 to-green-600 border-green-500 text-white shadow-lg shadow-green-500/20' : theme.buttonInactive}`}
                                         >
                                             <CheckCircle2 size={14} strokeWidth={2.5} />
                                             <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest">{t('filter_hide_watched')}</span>
                                         </motion.button>
 
-                                        <motion.button 
+                                        <motion.button
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
-                                            onClick={continueWatching} 
-                                            title="Lanjutkan Menonton" 
+                                            onClick={continueWatching}
+                                            title="Lanjutkan Menonton"
                                             className="relative overflow-hidden group/btn flex-1 sm:flex-none px-2 py-2 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 text-white border border-rose-400/20 transition-all shadow-xl shadow-red-500/20 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap"
                                         >
                                             {/* Shine Sweep Effect */}
-                                            <motion.div 
+                                            <motion.div
                                                 animate={{ x: ['-200%', '200%'] }}
                                                 transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 2 }}
                                                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -skew-x-12"
@@ -1549,113 +1678,113 @@ export default function App() {
                                                 )}
                                             </div>
 
-                                        <AnimatePresence initial={false}>
-                                            {expandedSagas.includes(saga.id) && (
-                                                <motion.div
-                                                    initial={{ height: 0, opacity: 0 }}
-                                                    animate={{ height: 'auto', opacity: 1 }}
-                                                    exit={{ height: 0, opacity: 0 }}
-                                                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                                                    className={`border-t overflow-hidden ${theme.border}`}
-                                                >
-                                                    {saga.arcs.map((arc, arcIdx) => {
-                                                        const finished = isArcFinished(arc);
-                                                        const progress = getArcProgress(arc);
-                                                        const isExpanded = expandedArcs.includes(arc.id);
+                                            <AnimatePresence initial={false}>
+                                                {expandedSagas.includes(saga.id) && (
+                                                    <motion.div
+                                                        initial={{ height: 0, opacity: 0 }}
+                                                        animate={{ height: 'auto', opacity: 1 }}
+                                                        exit={{ height: 0, opacity: 0 }}
+                                                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                                        className={`border-t overflow-hidden ${theme.border}`}
+                                                    >
+                                                        {saga.arcs.map((arc, arcIdx) => {
+                                                            const finished = isArcFinished(arc);
+                                                            const progress = getArcProgress(arc);
+                                                            const isExpanded = expandedArcs.includes(arc.id);
 
-                                                        return (
-                                                            <div key={arc.id} className={`group ${arcIdx < saga.arcs.length - 1 ? `border-b ${theme.border}` : ''}`} ref={el => { arcRefs.current[arc.id] = el }}>
-                                                                <div className={`flex items-center py-2.5 px-3 sm:py-3 sm:px-4 transition-colors cursor-pointer ${theme.hover}`} onClick={() => toggleArcDropdown(arc.id)}>
-                                                                    <button onClick={(e) => toggleArcComplete(arc, e)} className={`flex-shrink-0 mr-3 sm:mr-3.5 transition-all hover:scale-110 active:scale-95 ${finished ? 'text-green-500' : 'text-neutral-300'}`}>
-                                                                        {finished ? <CheckCircle2 size={22} className="text-green-500" /> : <Circle size={22} />}
-                                                                    </button>
+                                                            return (
+                                                                <div key={arc.id} className={`group ${arcIdx < saga.arcs.length - 1 ? `border-b ${theme.border}` : ''}`} ref={el => { arcRefs.current[arc.id] = el }}>
+                                                                    <div className={`flex items-center py-2.5 px-3 sm:py-3 sm:px-4 transition-colors cursor-pointer ${theme.hover}`} onClick={() => toggleArcDropdown(arc.id)}>
+                                                                        <button onClick={(e) => toggleArcComplete(arc, e)} className={`flex-shrink-0 mr-3 sm:mr-3.5 transition-all hover:scale-110 active:scale-95 ${finished ? 'text-green-500' : 'text-neutral-300'}`}>
+                                                                            {finished ? <CheckCircle2 size={22} className="text-green-500" /> : <Circle size={22} />}
+                                                                        </button>
 
-                                                                    <div className="flex-1 min-w-0 pr-3 sm:pr-4">
-                                                                        <h4 className={`font-bold truncate text-sm sm:text-[15px] ${finished ? 'line-through text-neutral-400 decoration-neutral-400/50 decoration-2' : ''}`}> {arc.title} </h4>
-                                                                        <div className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-0.5 text-[9.5px] font-bold ${theme.muted}`}>
-                                                                            <span className="whitespace-nowrap">Ep {arc.start} - {arc.end}</span>
-                                                                            <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                                                                                <div className="flex-1 sm:w-16 sm:flex-none h-1 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden">
-                                                                                    <div className="h-full bg-red-500" style={{ width: `${(progress.count / progress.total) * 100}%` }} />
+                                                                        <div className="flex-1 min-w-0 pr-3 sm:pr-4">
+                                                                            <h4 className={`font-bold truncate text-sm sm:text-[15px] ${finished ? 'line-through text-neutral-400 decoration-neutral-400/50 decoration-2' : ''}`}> {arc.title} </h4>
+                                                                            <div className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-0.5 text-[9.5px] font-bold ${theme.muted}`}>
+                                                                                <span className="whitespace-nowrap">Ep {arc.start} - {arc.end}</span>
+                                                                                <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                                                                                    <div className="flex-1 sm:w-16 sm:flex-none h-1 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden">
+                                                                                        <div className="h-full bg-red-500" style={{ width: `${(progress.count / progress.total) * 100}%` }} />
+                                                                                    </div>
+                                                                                    <span className="whitespace-nowrap">{progress.count} / {progress.total}</span>
                                                                                 </div>
-                                                                                <span className="whitespace-nowrap">{progress.count} / {progress.total}</span>
+                                                                                <span className={`px-1 py-0.5 rounded text-[8px] uppercase tracking-tighter ${arc.type === 'Filler' ? 'bg-neutral-100 dark:bg-neutral-900/40 dark:text-neutral-400' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600'} whitespace-nowrap`}> {arc.type} </span>
                                                                             </div>
-                                                                            <span className={`px-1 py-0.5 rounded text-[8px] uppercase tracking-tighter ${arc.type === 'Filler' ? 'bg-neutral-100 dark:bg-neutral-900/40 dark:text-neutral-400' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600'} whitespace-nowrap`}> {arc.type} </span>
+                                                                        </div>
+                                                                        <div className={`p-1 flex-shrink-0 rounded-lg transition-all ${isExpanded ? 'bg-red-500 text-white shadow-md' : theme.muted}`}>
+                                                                            {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                                                                         </div>
                                                                     </div>
-                                                                    <div className={`p-1 flex-shrink-0 rounded-lg transition-all ${isExpanded ? 'bg-red-500 text-white shadow-md' : theme.muted}`}>
-                                                                        {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                                                                    </div>
-                                                                </div>
 
-                                                                <AnimatePresence initial={false}>
-                                                                    {isExpanded && (
-                                                                        <motion.div
-                                                                            initial={{ height: 0, opacity: 0 }}
-                                                                            animate={{ height: 'auto', opacity: 1 }}
-                                                                            exit={{ height: 0, opacity: 0 }}
-                                                                            transition={{ duration: 0.25, ease: 'easeInOut' }}
-                                                                            className={`border-t overflow-hidden ${theme.border} ${theme.dropdownBg}`}
-                                                                        >
-                                                                            <div className="max-h-[300px] sm:max-h-[400px] overflow-y-auto custom-scrollbar pt-1 pb-2">
-                                                                                {Array.from({ length: arc.end - arc.start + 1 }, (_, i) => {
-                                                                                    const epNum = arc.start + i;
-                                                                                    const isWatched = watchedEpisodes.includes(`ep-${epNum}`);
-                                                                                    const isLastEp = i === (arc.end - arc.start);
-                                                                                    const epTitle = getEpisodeTitle(epNum).toLowerCase();
-                                                                                    const q = searchQuery.toLowerCase().trim();
+                                                                    <AnimatePresence initial={false}>
+                                                                        {isExpanded && (
+                                                                            <motion.div
+                                                                                initial={{ height: 0, opacity: 0 }}
+                                                                                animate={{ height: 'auto', opacity: 1 }}
+                                                                                exit={{ height: 0, opacity: 0 }}
+                                                                                transition={{ duration: 0.25, ease: 'easeInOut' }}
+                                                                                className={`border-t overflow-hidden ${theme.border} ${theme.dropdownBg}`}
+                                                                            >
+                                                                                <div className="max-h-[300px] sm:max-h-[400px] overflow-y-auto custom-scrollbar pt-1 pb-2">
+                                                                                    {Array.from({ length: arc.end - arc.start + 1 }, (_, i) => {
+                                                                                        const epNum = arc.start + i;
+                                                                                        const isWatched = watchedEpisodes.includes(`ep-${epNum}`);
+                                                                                        const isLastEp = i === (arc.end - arc.start);
+                                                                                        const epTitle = getEpisodeTitle(epNum).toLowerCase();
+                                                                                        const q = searchQuery.toLowerCase().trim();
 
-                                                                                    // Filter episodes by query if active
-                                                                                    if (q && !epNum.toString().includes(q) && !epTitle.includes(q)) {
-                                                                                        return null;
-                                                                                    }
+                                                                                        // Filter episodes by query if active
+                                                                                        if (q && !epNum.toString().includes(q) && !epTitle.includes(q)) {
+                                                                                            return null;
+                                                                                        }
 
-                                                                                    return (
-                                                                                        <div id={`episode-${epNum}`} key={epNum} className={`flex items-center gap-2 sm:gap-4 py-2.5 sm:py-3 px-3 sm:px-5 transition-all duration-500 group/ep ${isWatched ? 'bg-green-500/5 opacity-90' : ''} ${!isLastEp ? `border-b border-dashed ${isDarkMode ? 'border-neutral-800' : 'border-neutral-200'}` : ''}`}>
-                                                                                            <div className="flex items-center flex-1 min-w-0 gap-2 sm:gap-3">
-                                                                                                <button onClick={() => toggleEpisode(epNum)} className={`flex-shrink-0 transition-all ${isWatched ? 'text-green-500' : theme.muted}`}>
-                                                                                                    {isWatched ? <CheckCircle2 size={20} className="text-green-500 dark:bg-transparent rounded-full" /> : <Circle size={20} />}
-                                                                                                </button>
-                                                                                                <div className={`flex items-center justify-center px-1.5 sm:px-2 min-w-[30px] sm:min-w-[34px] h-[20px] sm:h-[22px] rounded-md border shadow-sm ${isWatched ? 'bg-green-50 border-green-200 text-green-600 dark:bg-green-900/30 dark:border-green-800 dark:text-green-400' : 'bg-white border-neutral-200 text-neutral-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400'} font-black text-[9px] sm:text-[10px] tracking-tight`}>
-                                                                                                    {epNum}
-                                                                                                </div>
-                                                                                                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleEpisode(epNum)}>
-                                                                                                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                                                                                                        <h5 className={`text-xs sm:text-[13px] font-bold leading-tight line-clamp-2 sm:line-clamp-none ${isWatched ? 'line-through decoration-neutral-400/50 decoration-[2px] text-neutral-400' : ''}`}>
-                                                                                                            {getEpisodeTitle(epNum)}
-                                                                                                        </h5>
-                                                                                                        {arc.type === 'Mixed' && (
-                                                                                                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest shrink-0 ${isFillerEpisode(epNum)
-                                                                                                                ? 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400'
-                                                                                                                : 'bg-red-50 text-red-600 dark:bg-red-900/40 dark:text-red-400'}`}>
-                                                                                                                {isFillerEpisode(epNum) ? 'Filler' : 'Canon'}
-                                                                                                            </span>
-                                                                                                        )}
+                                                                                        return (
+                                                                                            <div id={`episode-${epNum}`} key={epNum} className={`flex items-center gap-2 sm:gap-4 py-2.5 sm:py-3 px-3 sm:px-5 transition-all duration-500 group/ep ${isWatched ? 'bg-green-500/5 opacity-90' : ''} ${!isLastEp ? `border-b border-dashed ${isDarkMode ? 'border-neutral-800' : 'border-neutral-200'}` : ''}`}>
+                                                                                                <div className="flex items-center flex-1 min-w-0 gap-2 sm:gap-3">
+                                                                                                    <button onClick={() => toggleEpisode(epNum)} className={`flex-shrink-0 transition-all ${isWatched ? 'text-green-500' : theme.muted}`}>
+                                                                                                        {isWatched ? <CheckCircle2 size={20} className="text-green-500 dark:bg-transparent rounded-full" /> : <Circle size={20} />}
+                                                                                                    </button>
+                                                                                                    <div className={`flex items-center justify-center px-1.5 sm:px-2 min-w-[30px] sm:min-w-[34px] h-[20px] sm:h-[22px] rounded-md border shadow-sm ${isWatched ? 'bg-green-50 border-green-200 text-green-600 dark:bg-green-900/30 dark:border-green-800 dark:text-green-400' : 'bg-white border-neutral-200 text-neutral-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400'} font-black text-[9px] sm:text-[10px] tracking-tight`}>
+                                                                                                        {epNum}
+                                                                                                    </div>
+                                                                                                    <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleEpisode(epNum)}>
+                                                                                                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                                                                                                            <h5 className={`text-xs sm:text-[13px] font-bold leading-tight line-clamp-2 sm:line-clamp-none ${isWatched ? 'line-through decoration-neutral-400/50 decoration-[2px] text-neutral-400' : ''}`}>
+                                                                                                                {getEpisodeTitle(epNum)}
+                                                                                                            </h5>
+                                                                                                            {arc.type === 'Mixed' && (
+                                                                                                                <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest shrink-0 ${isFillerEpisode(epNum)
+                                                                                                                    ? 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400'
+                                                                                                                    : 'bg-red-50 text-red-600 dark:bg-red-900/40 dark:text-red-400'}`}>
+                                                                                                                    {isFillerEpisode(epNum) ? 'Filler' : 'Canon'}
+                                                                                                                </span>
+                                                                                                            )}
+                                                                                                        </div>
                                                                                                     </div>
                                                                                                 </div>
+                                                                                                <a href={getBilibiliUrl(epNum)} target="_blank" rel="noopener noreferrer" className={`flex-shrink-0 flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] font-black uppercase transition-all border ${isDarkMode ? 'bg-neutral-900 border-red-900/50 text-red-400 hover:bg-neutral-800' : 'bg-white border-neutral-200 text-red-600 hover:bg-red-50 shadow-sm'} h-8 sm:h-auto`}>
+                                                                                                    <Play size={12} fill="currentColor" className="sm:mr-1" />
+                                                                                                    <span className="hidden sm:inline">{t('watch_label')}</span>
+                                                                                                    <span className="hidden lg:inline ml-1">Bilibili</span>
+                                                                                                    <ExternalLink size={10} className="hidden sm:inline ml-1.5" />
+                                                                                                </a>
                                                                                             </div>
-                                                                                            <a href={getBilibiliUrl(epNum)} target="_blank" rel="noopener noreferrer" className={`flex-shrink-0 flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] font-black uppercase transition-all border ${isDarkMode ? 'bg-neutral-900 border-red-900/50 text-red-400 hover:bg-neutral-800' : 'bg-white border-neutral-200 text-red-600 hover:bg-red-50 shadow-sm'} h-8 sm:h-auto`}>
-                                                                                                <Play size={12} fill="currentColor" className="sm:mr-1" />
-                                                                                                <span className="hidden sm:inline">{t('watch_label')}</span>
-                                                                                                <span className="hidden lg:inline ml-1">Bilibili</span>
-                                                                                                <ExternalLink size={10} className="hidden sm:inline ml-1.5" />
-                                                                                            </a>
-                                                                                        </div>
-                                                                                    );
-                                                                                })}
-                                                                            </div>
-                                                                        </motion.div>
-                                                                    )}
-                                                                </AnimatePresence>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </section>
-                                );
-                            })}
+                                                                                        );
+                                                                                    })}
+                                                                                </div>
+                                                                            </motion.div>
+                                                                        )}
+                                                                    </AnimatePresence>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </section>
+                                    );
+                                })}
                             </div>
                         )
                     ) : (
@@ -1669,16 +1798,16 @@ export default function App() {
                         ) : (
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                                 {filteredMovies.map((movie) => (
-                                    <div 
-                                        key={movie.id} 
+                                    <div
+                                        key={movie.id}
                                         className={`flex flex-col rounded-[2rem] overflow-hidden transition-all duration-500 group border h-full ${watchedMovies.includes(movie.id) ? 'border-green-500/50 bg-green-500/[0.02]' : `${theme.card} hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1`}`}
                                     >
                                         {/* Poster Section */}
                                         <div className="relative aspect-[2/3] overflow-hidden cursor-pointer" onClick={() => toggleMovie(movie.id)}>
                                             {movie.poster ? (
-                                                <img 
-                                                    src={movie.poster} 
-                                                    alt={movie.title} 
+                                                <img
+                                                    src={movie.poster}
+                                                    alt={movie.title}
                                                     className={`w-full h-full object-cover transition-transform duration-700 ${watchedMovies.includes(movie.id) ? 'opacity-60 scale-100' : 'group-hover:scale-110'}`}
                                                     referrerPolicy="no-referrer"
                                                     loading="lazy"
@@ -1688,16 +1817,16 @@ export default function App() {
                                                     <Film size={40} className="text-neutral-400" />
                                                 </div>
                                             )}
-                                            
+
                                             {/* Overlays */}
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                            
+
                                             {/* Top Actions */}
                                             <div className="absolute top-3 right-3 flex flex-col gap-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                                                <a 
-                                                    href={`https://www.imdb.com/title/${movie.imdbId}/`} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer" 
+                                                <a
+                                                    href={`https://www.imdb.com/title/${movie.imdbId}/`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
                                                     className="p-2.5 rounded-xl bg-black/60 backdrop-blur-md text-amber-500 border border-white/10 hover:bg-amber-500 hover:text-white transition-all shadow-xl"
                                                     title={t('movie_imdb')}
                                                     onClick={(e) => e.stopPropagation()}
@@ -1726,18 +1855,18 @@ export default function App() {
                                         {/* Info Section */}
                                         <div className="p-4 flex flex-col flex-1 justify-between gap-3">
                                             <div className="cursor-pointer" onClick={() => toggleMovie(movie.id)}>
-                                                <h4 className={`font-black leading-tight mb-1 text-sm sm:text-base line-clamp-2 transition-colors ${watchedMovies.includes(movie.id) ? 'text-green-600 dark:text-green-400' : 'group-hover:text-red-600'}`}> 
-                                                    {movie.title} 
+                                                <h4 className={`font-black leading-tight mb-1 text-sm sm:text-base line-clamp-2 transition-colors ${watchedMovies.includes(movie.id) ? 'text-green-600 dark:text-green-400' : 'group-hover:text-red-600'}`}>
+                                                    {movie.title}
                                                 </h4>
-                                                <p className={`text-[10px] font-bold uppercase tracking-widest ${theme.muted}`}> 
-                                                    {movie.year} 
+                                                <p className={`text-[10px] font-bold uppercase tracking-widest ${theme.muted}`}>
+                                                    {movie.year}
                                                 </p>
                                             </div>
 
-                                            <button 
+                                            <button
                                                 onClick={() => toggleMovie(movie.id)}
-                                                className={`w-full py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${watchedMovies.includes(movie.id) 
-                                                    ? 'bg-green-500/10 text-green-500 border border-green-500/20' 
+                                                className={`w-full py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${watchedMovies.includes(movie.id)
+                                                    ? 'bg-green-500/10 text-green-500 border border-green-500/20'
                                                     : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-red-600 hover:text-white border border-transparent'}`}
                                             >
                                                 {watchedMovies.includes(movie.id) ? t('movie_finished') : t('movie_mark')}
