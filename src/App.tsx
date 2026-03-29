@@ -77,129 +77,7 @@ const getBilibiliUrl = (epNum: string | number) => {
 
 
 
-const SAGA_DATA = [
-    {
-        id: 'east-blue',
-        title: 'East Blue Saga',
-        description: 'Perjalanan Luffy mencari kru pertama: Zoro, Nami, Usopp, dan Sanji.',
-        arcs: [
-            { id: 'romance-dawn', title: 'Romance Dawn', start: 1, end: 3, type: 'Canon' },
-            { id: 'orange-town', title: 'Orange Town', start: 4, end: 8, type: 'Canon' },
-            { id: 'syrup-village', title: 'Syrup Village', start: 9, end: 18, type: 'Canon' },
-            { id: 'baratie', title: 'Baratie', start: 19, end: 30, type: 'Canon' },
-            { id: 'arlong-park', title: 'Arlong Park', start: 31, end: 44, type: 'Canon' },
-            { id: 'loguetown', title: 'Loguetown', start: 45, end: 53, type: 'Mixed' },
-            { id: 'warship-island', title: 'Warship Island', start: 54, end: 61, type: 'Filler' },
-        ]
-    },
-    {
-        id: 'arabasta',
-        title: 'Arabasta Saga',
-        description: 'Membantu Putri Vivi menyelamatkan Alabasta dari Baroque Works.',
-        arcs: [
-            { id: 'reverse-mountain', title: 'Reverse Mountain', start: 62, end: 63, type: 'Canon' },
-            { id: 'whiskey-peak', title: 'Whiskey Peak', start: 64, end: 67, type: 'Canon' },
-            { id: 'koby-helmeppo', title: 'Koby & Helmeppo', start: 68, end: 69, type: 'Canon' },
-            { id: 'little-garden', title: 'Little Garden', start: 70, end: 77, type: 'Canon' },
-            { id: 'drum-island', title: 'Drum Island', start: 78, end: 91, type: 'Canon' },
-            { id: 'arabasta-arc', title: 'Arabasta', start: 92, end: 130, type: 'Canon' },
-            { id: 'post-arabasta', title: 'Post-Arabasta', start: 131, end: 135, type: 'Filler' },
-        ]
-    },
-    {
-        id: 'sky-island',
-        title: 'Sky Island Saga',
-        description: 'Petualangan ke langit untuk mencari Kota Emas legendaris Shandora.',
-        arcs: [
-            { id: 'goat-island', title: 'Goat Island', start: 136, end: 138, type: 'Filler' },
-            { id: 'ruluka-island', title: 'Ruluka Island', start: 139, end: 143, type: 'Filler' },
-            { id: 'jaya', title: 'Jaya', start: 144, end: 152, type: 'Canon' },
-            { id: 'skypiea', title: 'Skypiea', start: 153, end: 195, type: 'Canon' },
-            { id: 'g8', title: 'G-8 (Navarone)', start: 196, end: 206, type: 'Recommended Filler' },
-        ]
-    },
-    {
-        id: 'water-7',
-        title: 'Water 7 Saga',
-        description: 'Konflik internal kru dan pertarungan epik di Enies Lobby.',
-        arcs: [
-            { id: 'long-ring', title: 'Long Ring Long Land', start: 207, end: 219, type: 'Canon' },
-            { id: 'oceans-dream', title: 'Ocean\'s Dream', start: 220, end: 224, type: 'Filler' },
-            { id: 'foxy-return', title: 'Foxy\'s Return', start: 225, end: 226, type: 'Filler' },
-            { id: 'water-7-arc', title: 'Water 7', start: 227, end: 263, type: 'Canon' },
-            { id: 'enies-lobby', title: 'Enies Lobby', start: 264, end: 312, type: 'Canon' },
-            { id: 'post-enies', title: 'Post-Enies Lobby', start: 313, end: 325, type: 'Canon' },
-        ]
-    },
-    {
-        id: 'thriller-bark',
-        title: 'Thriller Bark Saga',
-        description: 'Pertarungan melawan Shichibukai Gecko Moria dan merekrut Brook.',
-        arcs: [
-            { id: 'lovely-land', title: 'Lovely Land', start: 326, end: 336, type: 'Filler' },
-            { id: 'thriller-bark-arc', title: 'Thriller Bark', start: 337, end: 381, type: 'Canon' },
-            { id: 'spa-island', title: 'Spa Island', start: 382, end: 384, type: 'Filler' },
-        ]
-    },
-    {
-        id: 'summit-war',
-        title: 'Summit War Saga',
-        description: 'Puncak perang era lama untuk menyelamatkan Ace di Marineford.',
-        arcs: [
-            { id: 'sabaody', title: 'Sabaody Archipelago', start: 385, end: 405, type: 'Canon' },
-            { id: 'chopper-man', title: 'Special: Chopper Man', start: 406, end: 407, type: 'Filler' },
-            { id: 'amazon-lily', title: 'Amazon Lily', start: 408, end: 421, type: 'Canon' },
-            { id: 'impel-down-1', title: 'Impel Down (Part 1)', start: 422, end: 425, type: 'Canon' },
-            { id: 'little-east-blue', title: 'Little East Blue', start: 426, end: 429, type: 'Filler' },
-            { id: 'impel-down-2', title: 'Impel Down (Part 2)', start: 430, end: 452, type: 'Canon' },
-            { id: 'separation', title: 'Straw Hat\'s Separation', start: 453, end: 456, type: 'Mixed' },
-            { id: 'marineford', title: 'Marineford', start: 457, end: 489, type: 'Canon' },
-            { id: 'post-war', title: 'Post-War', start: 490, end: 516, type: 'Canon' },
-        ]
-    },
-    {
-        id: 'fishman-island',
-        title: 'Fish-Man Island Saga',
-        description: 'Kembalinya kru setelah 2 tahun masa latihan (Timeskip).',
-        arcs: [
-            { id: 'return-sabaody', title: 'Return to Sabaody', start: 517, end: 522, type: 'Canon' },
-            { id: 'fishman-arc', title: 'Fish-Man Island', start: 523, end: 574, type: 'Canon' },
-        ]
-    },
-    {
-        id: 'dressrosa-saga',
-        title: 'Dressrosa Saga',
-        description: 'Aliansi untuk menjatuhkan Shichibukai Doflamingo di Dressrosa.',
-        arcs: [
-            { id: 'z-ambition', title: 'Z\'s Ambition', start: 575, end: 578, type: 'Filler' },
-            { id: 'punk-hazard', title: 'Punk Hazard', start: 579, end: 625, type: 'Canon' },
-            { id: 'caesar-retrieval', title: 'Caesar Retrieval', start: 626, end: 628, type: 'Filler' },
-            { id: 'dressrosa-arc', title: 'Dressrosa', start: 629, end: 746, type: 'Canon' },
-            { id: 'silver-mine', title: 'Silver Mine', start: 747, end: 750, type: 'Filler' },
-        ]
-    },
-    {
-        id: 'yonko-saga',
-        title: 'Yonko Saga',
-        description: 'Konfrontasi melawan Kaisar Lautan: Big Mom dan Kaido.',
-        arcs: [
-            { id: 'zou', title: 'Zou', start: 751, end: 779, type: 'Canon' },
-            { id: 'marine-rookie', title: 'Marine Rookie', start: 780, end: 782, type: 'Filler' },
-            { id: 'whole-cake', title: 'Whole Cake Island', start: 783, end: 877, type: 'Canon' },
-            { id: 'reverie', title: 'Reverie', start: 878, end: 889, type: 'Mixed' },
-            { id: 'wano', title: 'Wano Country', start: 890, end: 1088, type: 'Canon' },
-        ]
-    },
-    {
-        id: 'final-saga',
-        title: 'Final Saga',
-        description: 'Awal puncak pencarian harta karun di Pulau Masa Depan.',
-        arcs: [
-            { id: 'egghead-1', title: 'Egghead Island (Part 1)', start: 1089, end: 1122, type: 'Canon' },
-            { id: 'egghead-2', title: 'Egghead Island (Part 2)', start: 1123, end: 1155, type: 'Canon' },
-        ]
-    }
-];
+// SAGA_DATA and MOVIE_DATA are now moved inside or handled differently to support translations
 
 const MOVIE_DATA = [
     { id: 'm1', title: 'One Piece: The Movie', year: 2000, imdbId: 'tt0814243', poster: 'https://m.media-amazon.com/images/M/MV5BOWNhMDU3NDQtYWViMC00M2Y4LTk4YTUtYjI2M2ZmN2Q5NDViXkEyXkFqcGc@._V1_.jpg' },
@@ -309,7 +187,283 @@ export default function App() {
     const [showFiller, setShowFiller] = useState(true);
     const [hideWatched, setHideWatched] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [language, setLanguage] = useState<'id' | 'en'>('id');
     const [searchQuery, setSearchQuery] = useState('');
+
+    const translations: Record<string, Record<string, string>> = {
+        id: {
+            app_title: 'OP Tracker',
+            movie_archive: 'OP Movie Archive',
+            nav_navigation: 'Navigasi',
+            nav_menu: 'Menu Utama',
+            nav_logbook: 'Logbook Navigation',
+            stats_main_story: 'Cerita Utama',
+            stats_sagas: 'Saga Selesai',
+            stats_filler: 'Filler Tontonan',
+            stats_movies: 'Film Layar Lebar',
+            stats_rank: 'Pangkat',
+            stats_rank_rookie: 'Tukang Pel (Rookie)',
+            stats_rank_cadet: 'Kadet Berani',
+            stats_rank_captain: 'Kapten Bajak Laut',
+            stats_rank_supernova: 'Supernova',
+            stats_rank_warlord: 'Shichibukai',
+            stats_rank_commander: 'Komandan Yonko',
+            stats_rank_emperor: 'Yonko / Raja Bajak Laut',
+            btn_show_off: 'Pamer Hasil!',
+            btn_input_name: 'Input Nama & Pamer!',
+            placeholder_name: 'Masukkan Nama Anda...',
+            device_unit: 'Unit Perangkat',
+            device_os_unknown: 'OS Tidak Diketahui',
+            sync_live: 'Live Sync',
+            sync_export: 'Export',
+            sync_import: 'Import',
+            sync_notif_active: 'Notifikasi Aktif',
+            sync_notif_enable: 'Aktifkan Notifikasi',
+            sync_footer: 'Tersimpan di browser {device}. Cadangkan berkala untuk keamanan.',
+            header_subtitle: 'Pantau Jejak Petualanganmu',
+            tab_anime: 'Anime',
+            tab_movie: 'Movie',
+            search_placeholder: 'Cari Judul, Arc, Episode...',
+            filter_no_filler: 'Tanpa Filler',
+            filter_hide_watched: 'Sembunyikan Selesai',
+            filter_continue: 'Lanjut',
+            ep_mission: 'Misi',
+            ep_missions: 'Misi',
+            ep_finished: 'Selesai SAGA Ini',
+            ep_watch_bilibili: 'Nonton di Bilibili',
+            movie_finished: 'Selesai Ditonton',
+            movie_mark: 'Tandai Tonton',
+            footer_reset: 'Reset Seluruh Log Progres',
+            footer_sync_warning: 'Data ini hanya ada di browser {device} ini. Simpan file jika ingin pindah perangkat.',
+            search_not_found: 'Pencarian Tidak Ditemukan',
+            search_not_found_desc: 'Coba gunakan kata kunci lain, atau hapus filter untuk melihat daftar episode lainnya.',
+            btn_reset_filter: 'Reset Filter',
+            movie_not_found: 'Film Tidak Ditemukan',
+            movie_not_found_desc: 'Tidak ada judul film layar lebar yang cocok dengan pencarian Anda.',
+            btn_reset_search: 'Reset Pencarian',
+            loading_preparing: 'Menyiapkan Logbook...',
+            notif_new_ep_title: 'Episode Baru Telah Rilis! 🏴‍☠️',
+            notif_new_ep_body: 'One Piece Episode {ep} sekarang tersedia. Siap Berlayar!',
+            alert_import_success: 'Progres berhasil diimpor!',
+            alert_import_invalid: 'Format file tidak valid.',
+            alert_notif_unsupported: 'Browser Anda tidak mendukung notifikasi desktop.',
+            alert_notif_enabled: 'Notifikasi untuk episode baru telah diaktifkan!',
+            confirm_reset: 'Hapus semua progres tontonan Anda secara lokal?',
+            sort_newest: 'Terbaru',
+            sort_oldest: 'Terlama',
+            rank_label: 'Rank',
+            watch_label: 'Nonton',
+            saga_east_blue_desc: 'Perjalanan Luffy mencari kru pertama: Zoro, Nami, Usopp, dan Sanji.',
+            saga_arabasta_desc: 'Membantu Putri Vivi menyelamatkan Alabasta dari Baroque Works.',
+            saga_sky_island_desc: 'Petualangan ke langit untuk mencari Kota Emas legendaris Shandora.',
+            saga_water_7_desc: 'Konflik internal kru dan pertarungan epik di Enies Lobby.',
+            saga_thriller_bark_desc: 'Pertarungan melawan Shichibukai Gecko Moria dan merekrut Brook.',
+            saga_summit_war_desc: 'Puncak perang era lama untuk menyelamatkan Ace di Marineford.',
+            saga_fishman_desc: 'Kembalinya kru setelah 2 tahun masa latihan (Timeskip).',
+            saga_dressrosa_desc: 'Aliansi untuk menjatuhkan Shichibukai Doflamingo di Dressrosa.',
+            saga_yonko_desc: 'Konfrontasi melawan Kaisar Lautan: Big Mom dan Kaido.',
+            saga_final_desc: 'Awal puncak pencarian harta karun di Pulau Masa Depan.',
+        },
+        en: {
+            app_title: 'OP Tracker',
+            movie_archive: 'OP Movie Archive',
+            nav_navigation: 'Navigation',
+            nav_menu: 'Main Menu',
+            nav_logbook: 'Logbook Navigation',
+            stats_main_story: 'Main Story',
+            stats_sagas: 'Sagas Completed',
+            stats_filler: 'Filler Watched',
+            stats_movies: 'Movies Archive',
+            stats_rank: 'Rank',
+            stats_rank_rookie: 'Chore Boy (Rookie)',
+            stats_rank_cadet: 'Brave Cadet',
+            stats_rank_captain: 'Pirate Captain',
+            stats_rank_supernova: 'Supernova',
+            stats_rank_warlord: 'Seven Warlords',
+            stats_rank_commander: 'Emperor Commander',
+            stats_rank_emperor: 'Emperor / Pirate King',
+            btn_show_off: 'Show Off Results!',
+            btn_input_name: 'Enter Name & Share!',
+            placeholder_name: 'Enter Your Name...',
+            device_unit: 'Device Status',
+            device_os_unknown: 'Unknown OS',
+            sync_live: 'Live Sync',
+            sync_export: 'Export',
+            sync_import: 'Import',
+            sync_notif_active: 'Notifs Active',
+            sync_notif_enable: 'Enable Notifs',
+            sync_footer: 'Saved in {device} browser. Backup regularly for safety.',
+            header_subtitle: 'Track Your Adventure Journey',
+            tab_anime: 'Anime',
+            tab_movie: 'Movie',
+            search_placeholder: 'Search Title, Arc, Episode...',
+            filter_no_filler: 'No Filler',
+            filter_hide_watched: 'Hide Completed',
+            filter_continue: 'Continue',
+            ep_mission: 'Episode',
+            ep_missions: 'Episodes',
+            ep_finished: 'Completed This SAGA',
+            ep_watch_bilibili: 'Watch on Bilibili',
+            movie_finished: 'Finished Watching',
+            movie_mark: 'Mark as Watched',
+            footer_reset: 'Reset Entire Progress Log',
+            footer_sync_warning: 'This data exists only on this {device}. Save the file if you want to switch devices.',
+            search_not_found: 'Search Not Found',
+            search_not_found_desc: 'Try different keywords or clear filters to see more episodes.',
+            btn_reset_filter: 'Reset Filter',
+            movie_not_found: 'Movie Not Found',
+            movie_not_found_desc: 'No movie titles match your search criteria.',
+            btn_reset_search: 'Reset Search',
+            loading_preparing: 'Preparing Logbook...',
+            notif_new_ep_title: 'New Episode Released! 🏴‍☠️',
+            notif_new_ep_body: 'One Piece Episode {ep} is now available. Ready to sail?',
+            alert_import_success: 'Progress imported successfully!',
+            alert_import_invalid: 'Invalid file format.',
+            alert_notif_unsupported: 'Your browser does not support desktop notifications.',
+            alert_notif_enabled: 'Notifications for new episodes enabled!',
+            confirm_reset: 'Reset all your watch progress locally?',
+            sort_newest: 'Newest',
+            sort_oldest: 'Oldest',
+            rank_label: 'Rank',
+            watch_label: 'Watch',
+            saga_east_blue_desc: 'Luffy\'s journey to find his first crew: Zoro, Nami, Usopp, and Sanji.',
+            saga_arabasta_desc: 'Helping Princess Vivi save Alabasta from Baroque Works.',
+            saga_sky_island_desc: 'Adventure to the sky to find the legendary Golden City of Shandora.',
+            saga_water_7_desc: 'Internal crew conflicts and epic battles at Enies Lobby.',
+            saga_thriller_bark_desc: 'Battle against Warlord Gecko Moria and recruiting Brook.',
+            saga_summit_war_desc: 'The peak of the old era war to save Ace at Marineford.',
+            saga_fishman_desc: 'The crew\'s return after 2 years of training (Timeskip).',
+            saga_dressrosa_desc: 'An alliance to take down Warlord Doflamingo in Dressrosa.',
+            saga_yonko_desc: 'Confrontation against the Emperors of the Sea: Big Mom and Kaido.',
+            saga_final_desc: 'The start of the ultimate search for treasure on Future Island.',
+        }
+    };
+
+    const t = (key: string) => translations[language][key] || key;
+
+    const SAGA_DATA = useMemo(() => [
+        {
+            id: 'east-blue',
+            title: 'East Blue Saga',
+            description: t('saga_east_blue_desc'),
+            arcs: [
+                { id: 'romance-dawn', title: 'Romance Dawn', start: 1, end: 3, type: 'Canon' },
+                { id: 'orange-town', title: 'Orange Town', start: 4, end: 8, type: 'Canon' },
+                { id: 'syrup-village', title: 'Syrup Village', start: 9, end: 18, type: 'Canon' },
+                { id: 'baratie', title: 'Baratie', start: 19, end: 30, type: 'Canon' },
+                { id: 'arlong-park', title: 'Arlong Park', start: 31, end: 44, type: 'Canon' },
+                { id: 'loguetown', title: 'Loguetown', start: 45, end: 53, type: 'Mixed' },
+                { id: 'warship-island', title: 'Warship Island', start: 54, end: 61, type: 'Filler' },
+            ]
+        },
+        {
+            id: 'arabasta',
+            title: 'Arabasta Saga',
+            description: t('saga_arabasta_desc'),
+            arcs: [
+                { id: 'reverse-mountain', title: 'Reverse Mountain', start: 62, end: 63, type: 'Canon' },
+                { id: 'whiskey-peak', title: 'Whiskey Peak', start: 64, end: 67, type: 'Canon' },
+                { id: 'koby-helmeppo', title: 'Koby & Helmeppo', start: 68, end: 69, type: 'Canon' },
+                { id: 'little-garden', title: 'Little Garden', start: 70, end: 77, type: 'Canon' },
+                { id: 'drum-island', title: 'Drum Island', start: 78, end: 91, type: 'Canon' },
+                { id: 'arabasta-arc', title: 'Arabasta', start: 92, end: 130, type: 'Canon' },
+                { id: 'post-arabasta', title: 'Post-Arabasta', start: 131, end: 135, type: 'Filler' },
+            ]
+        },
+        {
+            id: 'sky-island',
+            title: 'Sky Island Saga',
+            description: t('saga_sky_island_desc'),
+            arcs: [
+                { id: 'goat-island', title: 'Go Island', start: 136, end: 138, type: 'Filler' },
+                { id: 'ruluka-island', title: 'Ruluka Island', start: 139, end: 143, type: 'Filler' },
+                { id: 'jaya', title: 'Jaya', start: 144, end: 152, type: 'Canon' },
+                { id: 'skypiea', title: 'Skypiea', start: 153, end: 195, type: 'Canon' },
+                { id: 'g8', title: 'G-8 (Navarone)', start: 196, end: 206, type: 'Recommended Filler' },
+            ]
+        },
+        {
+            id: 'water-7',
+            title: 'Water 7 Saga',
+            description: t('saga_water_7_desc'),
+            arcs: [
+                { id: 'long-ring', title: 'Long Ring Long Land', start: 207, end: 219, type: 'Canon' },
+                { id: 'oceans-dream', title: 'Ocean\'s Dream', start: 220, end: 224, type: 'Filler' },
+                { id: 'foxy-return', title: 'Foxy\'s Return', start: 225, end: 226, type: 'Filler' },
+                { id: 'water-7-arc', title: 'Water 7', start: 227, end: 263, type: 'Canon' },
+                { id: 'enies-lobby', title: 'Enies Lobby', start: 264, end: 312, type: 'Canon' },
+                { id: 'post-enies', title: 'Post-Enies Lobby', start: 313, end: 325, type: 'Canon' },
+            ]
+        },
+        {
+            id: 'thriller-bark',
+            title: 'Thriller Bark Saga',
+            description: t('saga_thriller_bark_desc'),
+            arcs: [
+                { id: 'lovely-land', title: 'Lovely Land', start: 326, end: 336, type: 'Filler' },
+                { id: 'thriller-bark-arc', title: 'Thriller Bark', start: 337, end: 381, type: 'Canon' },
+                { id: 'spa-island', title: 'Spa Island', start: 382, end: 384, type: 'Filler' },
+            ]
+        },
+        {
+            id: 'summit-war',
+            title: 'Summit War Saga',
+            description: t('saga_summit_war_desc'),
+            arcs: [
+                { id: 'sabaody', title: 'Sabaody Archipelago', start: 385, end: 405, type: 'Canon' },
+                { id: 'chopper-man', title: 'Special: Chopper Man', start: 406, end: 407, type: 'Filler' },
+                { id: 'amazon-lily', title: 'Amazon Lily', start: 408, end: 421, type: 'Canon' },
+                { id: 'impel-down-1', title: 'Impel Down (Part 1)', start: 422, end: 425, type: 'Canon' },
+                { id: 'little-east-blue', title: 'Little East Blue', start: 426, end: 429, type: 'Filler' },
+                { id: 'impel-down-2', title: 'Impel Down (Part 2)', start: 430, end: 452, type: 'Canon' },
+                { id: 'separation', title: 'Straw Hat\'s Separation', start: 453, end: 456, type: 'Mixed' },
+                { id: 'marineford', title: 'Marineford', start: 457, end: 489, type: 'Canon' },
+                { id: 'post-war', title: 'Post-War', start: 490, end: 516, type: 'Canon' },
+            ]
+        },
+        {
+            id: 'fishman-island',
+            title: 'Fish-Man Island Saga',
+            description: t('saga_fishman_desc'),
+            arcs: [
+                { id: 'return-sabaody', title: 'Return to Sabaody', start: 517, end: 522, type: 'Canon' },
+                { id: 'fishman-arc', title: 'Fish-Man Island', start: 523, end: 574, type: 'Canon' },
+            ]
+        },
+        {
+            id: 'dressrosa-saga',
+            title: 'Dressrosa Saga',
+            description: t('saga_dressrosa_desc'),
+            arcs: [
+                { id: 'z-ambition', title: 'Z\'s Ambition', start: 575, end: 578, type: 'Filler' },
+                { id: 'punk-hazard', title: 'Punk Hazard', start: 579, end: 625, type: 'Canon' },
+                { id: 'caesar-retrieval', title: 'Caesar Retrieval', start: 626, end: 628, type: 'Filler' },
+                { id: 'dressrosa-arc', title: 'Dressrosa', start: 629, end: 746, type: 'Canon' },
+                { id: 'silver-mine', title: 'Silver Mine', start: 747, end: 750, type: 'Filler' },
+            ]
+        },
+        {
+            id: 'yonko-saga',
+            title: 'Yonko Saga',
+            description: t('saga_yonko_desc'),
+            arcs: [
+                { id: 'zou', title: 'Zou', start: 751, end: 779, type: 'Canon' },
+                { id: 'marine-rookie', title: 'Marine Rookie', start: 780, end: 782, type: 'Filler' },
+                { id: 'whole-cake', title: 'Whole Cake Island', start: 783, end: 877, type: 'Canon' },
+                { id: 'reverie', title: 'Reverie', start: 878, end: 889, type: 'Mixed' },
+                { id: 'wano', title: 'Wano Country', start: 890, end: 1088, type: 'Canon' },
+            ]
+        },
+        {
+            id: 'final-saga',
+            title: 'Final Saga',
+            description: t('saga_final_desc'),
+            arcs: [
+                { id: 'egghead-1', title: 'Egghead Island (Part 1)', start: 1089, end: 1122, type: 'Canon' },
+                { id: 'egghead-2', title: 'Egghead Island (Part 2)', start: 1123, end: 1155, type: 'Canon' },
+            ]
+        }
+    ], [language]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
     const [sagaViewMode, setSagaViewMode] = useState<'card' | 'list'>('card');
     const [isExporting, setIsExporting] = useState(false);
@@ -363,6 +517,7 @@ export default function App() {
                 if (data.watchedEpisodes) setWatchedEpisodes(data.watchedEpisodes);
                 if (data.watchedMovies) setWatchedMovies(data.watchedMovies);
                 if (data.isDarkMode !== undefined) setIsDarkMode(data.isDarkMode);
+                if (data.language !== undefined) setLanguage(data.language);
             } catch (e) {
                 console.error("Failed to load local storage:", e);
             }
@@ -381,8 +536,8 @@ export default function App() {
                 const savedMaxEp = savedMaxEpStr ? parseInt(savedMaxEpStr, 10) : maxEp;
 
                 if (maxEp > savedMaxEp) {
-                    const n = new Notification('Episode Baru Telah Rilis! 🏴‍☠️', {
-                        body: `One Piece Episode ${maxEp} sekarang tersedia. Siap Berlayar!`,
+                    const n = new Notification(t('notif_new_ep_title'), {
+                        body: t('notif_new_ep_body').replace('{ep}', maxEp.toString()),
                         icon: '/mugiwara-logo.png'
                     });
                     n.onclick = () => {
@@ -507,6 +662,12 @@ export default function App() {
         saveLocally({ isDarkMode: newMode });
     };
 
+    const toggleLanguage = () => {
+        const newLang = language === 'id' ? 'en' : 'id';
+        setLanguage(newLang);
+        saveLocally({ language: newLang });
+    };
+
     const getSagaProgress = (saga: any) => {
         let count = 0;
         let total = 0;
@@ -555,7 +716,7 @@ export default function App() {
 
 
     const resetProgress = () => {
-        if (window.confirm("Hapus semua progres tontonan Anda secara lokal?")) {
+        if (window.confirm(t('confirm_reset'))) {
             setWatchedEpisodes([]);
             setWatchedMovies([]);
             saveLocally({ watchedEpisodes: [], watchedMovies: [], lastUpdated: new Date().toISOString() });
@@ -593,9 +754,9 @@ export default function App() {
                     watchedMovies: data.watchedMovies || [],
                     lastUpdated: new Date().toISOString()
                 });
-                alert("Progres berhasil diimpor!");
+                alert(t('alert_import_success'));
             } catch (err) {
-                alert("Format file tidak valid.");
+                alert(t('alert_import_invalid'));
             }
         };
         reader.readAsText(file);
@@ -603,13 +764,13 @@ export default function App() {
 
     const requestNotification = () => {
         if (!('Notification' in window)) {
-            alert("Browser Anda tidak mendukung notifikasi desktop.");
+            alert(t('alert_notif_unsupported'));
             return;
         }
         Notification.requestPermission().then(permission => {
             setNotificationsEnabled(permission === 'granted');
             if (permission === 'granted') {
-                alert("Notifikasi untuk episode baru telah diaktifkan!");
+                alert(t('alert_notif_enabled'));
                 const keys = Object.keys(EPISODE_DB).map(Number).filter(n => !isNaN(n));
                 const maxEp = keys.length > 0 ? Math.max(...keys) : 0;
                 localStorage.setItem(`gl-tracker-${appId}-lastep`, maxEp.toString());
@@ -660,7 +821,7 @@ export default function App() {
 
     const getEpisodeTitle = (num: number | string) => {
         const epData = (EPISODE_DB as any)[num];
-        return epData?.title || `Episode ${num}: Petualangan`;
+        return epData?.title || `${t('ep_mission')} ${num}`;
     };
 
     // Auto-expand arcs and sagas when searching for a specific term
@@ -752,14 +913,14 @@ export default function App() {
 
     const gamerRank = useMemo(() => {
         const total = stats.canonWatched + stats.fillerWatched;
-        if (total === 0) return { title: 'Tukang Pel (Rookie)', color: 'text-neutral-500' };
-        if (total < 100) return { title: 'Kadet Berani', color: 'text-blue-500' };
-        if (total < 300) return { title: 'Kapten Bajak Laut', color: 'text-green-500' };
-        if (total < 500) return { title: 'Supernova', color: 'text-amber-500' };
-        if (total < 800) return { title: 'Shichibukai', color: 'text-purple-500' };
-        if (total < 1000) return { title: 'Komandan Yonko', color: 'text-rose-500' };
-        return { title: 'Yonko / Raja Bajak Laut', color: 'text-red-500 drop-shadow-md' };
-    }, [stats]);
+        if (total === 0) return { title: t('stats_rank_rookie'), color: 'text-neutral-500' };
+        if (total < 100) return { title: t('stats_rank_cadet'), color: 'text-blue-500' };
+        if (total < 300) return { title: t('stats_rank_captain'), color: 'text-green-500' };
+        if (total < 500) return { title: t('stats_rank_supernova'), color: 'text-amber-500' };
+        if (total < 800) return { title: t('stats_rank_warlord'), color: 'text-purple-500' };
+        if (total < 1000) return { title: t('stats_rank_commander'), color: 'text-rose-500' };
+        return { title: t('stats_rank_emperor'), color: 'text-red-500 drop-shadow-md' };
+    }, [stats, language]);
 
     const filteredEps = useMemo(() => {
         return SAGA_DATA.map(saga => ({
@@ -886,7 +1047,7 @@ export default function App() {
             <div className={`min-h-screen flex items-center justify-center transition-colors duration-500 ${isDarkMode ? 'bg-neutral-950' : 'bg-neutral-50'}`}>
                 <div className="flex flex-col items-center gap-4 text-red-600 animate-pulse">
                     <Ship size={64} className="animate-bounce" />
-                    <p className="font-bold text-xl uppercase tracking-widest text-center bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text">Menyiapkan Logbook...</p>
+                    <p className="font-bold text-xl uppercase tracking-widest text-center bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text">{t('loading_preparing')}</p>
                 </div>
             </div>
         );
@@ -927,7 +1088,7 @@ export default function App() {
                             }}
                             whileTap={{ scale: 0.9 }}
                             className="relative group flex items-center justify-center p-4 rounded-[1.5rem] bg-gradient-to-br from-red-600 via-red-600 to-amber-500 text-white shadow-2xl border border-white/20 backdrop-blur-xl group overflow-hidden"
-                            title="Buka Menu Utama"
+                            title={t('nav_menu')}
                         >
                             {/* Inner shine effect */}
                             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full" />
@@ -935,7 +1096,7 @@ export default function App() {
                             <div className="flex items-center gap-0 group-hover:gap-3 transition-all duration-500 ease-out">
                                 <Menu size={24} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform duration-500" />
                                 <span className="max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-500 text-[11px] font-black uppercase tracking-[0.2em] pt-0.5">
-                                    Navigasi
+                                    {t('nav_navigation')}
                                 </span>
                             </div>
                         </motion.button>
@@ -954,10 +1115,14 @@ export default function App() {
                     {/* Brand & Theme */}
                     <div className="flex items-center justify-between mb-8 sm:mb-10">
                         <div>
-                            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.3em] text-neutral-400 dark:text-neutral-500 mb-1 block">Logbook Navigation</span>
-                            <span className={`text-xl sm:text-2xl font-black uppercase tracking-tight drop-shadow-sm transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-neutral-800'}`}>Menu Utama</span>
+                            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.3em] text-neutral-400 dark:text-neutral-500 mb-1 block">{t('nav_logbook')}</span>
+                            <span className={`text-xl sm:text-2xl font-black uppercase tracking-tight drop-shadow-sm transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-neutral-800'}`}>{t('nav_menu')}</span>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                            <button onClick={toggleLanguage} className={`px-3.5 py-1.5 rounded-2xl transition-all duration-300 font-black text-[11px] uppercase tracking-widest border hover:scale-110 active:scale-95 shadow-sm flex items-center gap-2 ${isDarkMode ? 'bg-neutral-800/80 border-neutral-700/50 text-neutral-200 shadow-lg' : 'bg-white border-neutral-200 text-neutral-800 shadow-sm hover:bg-neutral-50'}`}>
+                                <span className={language === 'id' ? 'animate-pulse' : ''}>{language === 'id' ? '🇮🇩' : '🇺🇸'}</span>
+                                <span>{language === 'id' ? 'ID' : 'EN'}</span>
+                            </button>
                             <button onClick={toggleDarkMode} className={`p-3 rounded-[1.25rem] transition-all duration-300 hover:scale-110 active:scale-95 ${isDarkMode ? 'bg-neutral-800/80 border border-neutral-700/50 text-yellow-400 shadow-lg shadow-yellow-500/5' : 'bg-neutral-100 border border-neutral-200 text-neutral-600 shadow-sm'}`}>
                                 {isDarkMode ? <Sun size={20} strokeWidth={2.5} /> : <Moon size={20} strokeWidth={2.5} />}
                             </button>
@@ -977,7 +1142,7 @@ export default function App() {
                                 <div className="flex-1">
                                     <h3 className="text-[18px] font-black uppercase tracking-tight bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none pb-1">{userName || 'OP Tracker'}</h3>
                                     <div className="flex items-center gap-1.5 mt-0.5">
-                                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${isDarkMode ? 'bg-neutral-800 text-neutral-400' : 'bg-neutral-200 text-neutral-500'}`}>Pangkat</span>
+                                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${isDarkMode ? 'bg-neutral-800 text-neutral-400' : 'bg-neutral-200 text-neutral-500'}`}>{t('stats_rank')}</span>
                                         <span className={`text-[11px] font-black uppercase tracking-widest pt-0.5 ${gamerRank.color}`}>{gamerRank.title}</span>
                                     </div>
                                 </div>
@@ -987,7 +1152,7 @@ export default function App() {
                         <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-3 px-1">
                             {/* Canon Stats */}
                             <StatCard 
-                                title="Cerita Utama" 
+                                title={t('stats_main_story')} 
                                 icon={<Trophy size={20} strokeWidth={2.5} />}
                                 current={stats.canonWatched}
                                 total={stats.canonTotal}
@@ -999,7 +1164,7 @@ export default function App() {
 
                             {/* Saga Stats */}
                             <StatCard 
-                                title="Saga Selesai" 
+                                title={t('stats_sagas')} 
                                 icon={<Compass size={20} strokeWidth={2.5} />}
                                 current={stats.sagasWatched}
                                 total={stats.sagasTotal}
@@ -1011,7 +1176,7 @@ export default function App() {
 
                             {/* Filler Stats */}
                             <StatCard 
-                                title="Filler Tontonan" 
+                                title={t('stats_filler')} 
                                 icon={<Skull size={20} strokeWidth={2.5} />}
                                 current={stats.fillerWatched}
                                 total={stats.fillerTotal}
@@ -1023,7 +1188,7 @@ export default function App() {
 
                             {/* Movie Stats */}
                             <StatCard 
-                                title="Film Layar Lebar" 
+                                title={t('stats_movies')} 
                                 icon={<Film size={20} strokeWidth={2.5} />}
                                 current={stats.movieWatched}
                                 total={stats.movieTotal}
@@ -1040,7 +1205,7 @@ export default function App() {
                             <input 
                                 autoFocus
                                 type="text" 
-                                placeholder="Masukkan Nama Anda..." 
+                                placeholder={t('placeholder_name')} 
                                 className={`w-full p-3.5 pr-12 rounded-2xl font-black uppercase tracking-widest text-[11px] outline-none transition-all border ${isDarkMode ? 'bg-neutral-900 border-orange-500/40 text-white focus:border-orange-500' : 'bg-white border-orange-500/40 text-neutral-900 focus:border-orange-500 shadow-sm'}`}
                                 value={userName}
                                 onChange={(e) => setUserName(e.target.value)}
@@ -1070,7 +1235,7 @@ export default function App() {
                             {isExporting ? (
                                 <div className="w-4 h-4 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
                             ) : (
-                                <><Camera size={18} strokeWidth={2.5} /> {userName ? 'Pamer Hasil!' : 'Input Nama & Pamer!'}</>
+                                <><Camera size={18} strokeWidth={2.5} /> {userName ? t('btn_show_off') : t('btn_input_name')}</>
                             )}
                         </button>
                     )}
@@ -1084,7 +1249,7 @@ export default function App() {
                             <div className="flex flex-col gap-2.5 relative z-10">
                                 <div className="flex items-center justify-between gap-3">
                                     <div className="flex-1 min-w-0">
-                                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] mb-1 block ${isDarkMode ? 'text-neutral-500' : 'text-neutral-400'}`}>Unit Perangkat</span>
+                                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] mb-1 block ${isDarkMode ? 'text-neutral-500' : 'text-neutral-400'}`}>{t('device_unit')}</span>
                                         <div className="flex items-center gap-2">
                                             <div className={`p-1.5 rounded-lg scale-90 ${isDarkMode ? 'bg-amber-500/10 text-amber-500' : 'bg-amber-50 text-amber-600'}`}>
                                                 <Compass size={14} strokeWidth={2.5} />
@@ -1094,30 +1259,30 @@ export default function App() {
                                     </div>
                                     <div className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all ${isDarkMode ? 'bg-neutral-800/50 border-neutral-700/50 text-green-500' : 'bg-green-50 border-green-100 text-green-600'}`}>
                                         <div className={`w-1 h-1 rounded-full animate-pulse ${isDarkMode ? 'bg-green-500' : 'bg-green-600'}`} />
-                                        <span className="text-[7px] font-black uppercase tracking-widest">Live Sync</span>
+                                        <span className="text-[7px] font-black uppercase tracking-widest">{t('sync_live')}</span>
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-2">
                                     <button onClick={exportProgress} className={`flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all hover:scale-[1.03] active:scale-95 shadow-sm border ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-amber-500 hover:bg-neutral-700' : 'bg-neutral-50 border-neutral-200 text-amber-700 hover:bg-neutral-100'}`}>
                                         <Download size={13} strokeWidth={3} />
-                                        <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">Export</span>
+                                        <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">{t('sync_export')}</span>
                                     </button>
                                     <label className={`flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all hover:scale-[1.03] active:scale-95 shadow-sm border cursor-pointer ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-amber-500 hover:bg-neutral-700' : 'bg-neutral-50 border-neutral-200 text-amber-700 hover:bg-neutral-100'}`}>
                                         <Upload size={13} strokeWidth={3} />
-                                        <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">Import</span>
+                                        <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">{t('sync_import')}</span>
                                         <input type="file" className="hidden" accept=".json" onChange={(e) => { importProgress(e); setIsSidebarOpen(false); }} />
                                     </label>
                                 </div>
 
                                 <button onClick={requestNotification} disabled={notificationsEnabled} className={`w-full flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all hover:scale-[1.02] active:scale-95 shadow-sm border ${notificationsEnabled ? (isDarkMode ? 'bg-green-900/20 border-green-800/50 text-green-500 opacity-80' : 'bg-green-50 border-green-200 text-green-600 opacity-80') : (isDarkMode ? 'bg-neutral-800 border-neutral-700 text-blue-400 hover:bg-neutral-700' : 'bg-neutral-50 border-neutral-200 text-blue-600 hover:bg-neutral-100')}`}>
                                     <Bell size={13} strokeWidth={3} className={notificationsEnabled ? "" : "animate-pulse"} />
-                                    <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">{notificationsEnabled ? "Notifikasi Aktif" : "Aktifkan Notifikasi"}</span>
+                                    <span className="text-[9px] font-black uppercase tracking-widest pt-0.5">{notificationsEnabled ? t('sync_notif_active') : t('sync_notif_enable')}</span>
                                 </button>
 
                                 <div className="text-center">
                                     <p className={`text-[8px] font-bold uppercase ${isDarkMode ? 'text-neutral-500' : 'text-neutral-400'} leading-relaxed tracking-wider opacity-80`}>
-                                        Tersimpan di browser {deviceInfo.device}. <br /> Cadangkan berkala untuk keamanan.
+                                        {t('sync_footer').replace('{device}', deviceInfo.os)}
                                     </p>
                                 </div>
                             </div>
@@ -1136,14 +1301,14 @@ export default function App() {
                                 <img src="/mugiwara-logo.png" alt="Logo" className="w-8 h-8 sm:w-12 sm:h-12 object-contain drop-shadow-sm shrink-0" />
                                 <div className="min-w-0">
                                     <h2 className={`text-xs sm:text-lg lg:text-3xl font-black uppercase tracking-tight bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none truncate`}>
-                                        {activeTab === 'episodes' ? 'OP Tracker' : 'OP Movie Archive'}
+                                        {activeTab === 'episodes' ? t('app_title') : t('movie_archive')}
                                     </h2>
                                     <div className="flex items-center gap-1.5 mt-0.5">
                                         <span className={`text-[8px] sm:text-[10px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-neutral-400' : 'text-neutral-500'} shrink-0 hidden sm:block`}>
-                                            Pantau Jejak Petualanganmu
+                                            {t('header_subtitle')}
                                         </span>
                                         <div className="w-1 h-1 rounded-full bg-neutral-300 dark:bg-neutral-700 shrink-0 hidden sm:block"></div>
-                                        <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-widest px-1 py-0.5 rounded border ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-neutral-400' : 'bg-neutral-100 border-neutral-200 text-neutral-500'} shrink-0`}>Rank</span>
+                                        <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-widest px-1 py-0.5 rounded border ${isDarkMode ? 'bg-neutral-800 border-neutral-700 text-neutral-400' : 'bg-neutral-100 border-neutral-200 text-neutral-500'} shrink-0`}>{t('rank_label')}</span>
                                         <span className={`text-[7px] sm:text-[10px] font-black uppercase tracking-widest pt-0.5 truncate ${gamerRank.color}`}>{gamerRank.title}</span>
                                     </div>
                                 </div>
@@ -1152,8 +1317,8 @@ export default function App() {
                             <div className="flex items-center gap-2">
                                 {/* Compact Tab Switcher */}
                                 <div className={`flex p-0.5 rounded-lg border transition-all ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-neutral-200/50 border-neutral-300'}`}>
-                                    <button onClick={() => setActiveTab('episodes')} className={`px-2 py-1 text-[9px] sm:text-xs font-bold uppercase rounded-md transition-all ${activeTab === 'episodes' ? (isDarkMode ? 'bg-neutral-800 text-red-500 shadow-lg' : 'bg-white text-red-600 shadow-sm') : 'opacity-50 text-neutral-500'}`}>Anime</button>
-                                    <button onClick={() => setActiveTab('movies')} className={`px-2 py-1 text-[9px] sm:text-xs font-bold uppercase rounded-md transition-all ${activeTab === 'movies' ? (isDarkMode ? 'bg-neutral-800 text-indigo-400 shadow-lg' : 'bg-white text-indigo-600 shadow-sm') : 'opacity-50 text-neutral-500'}`}>Movie</button>
+                                    <button onClick={() => setActiveTab('episodes')} className={`px-2 py-1 text-[9px] sm:text-xs font-bold uppercase rounded-md transition-all ${activeTab === 'episodes' ? (isDarkMode ? 'bg-neutral-800 text-red-500 shadow-lg' : 'bg-white text-red-600 shadow-sm') : 'opacity-50 text-neutral-500'}`}>{t('tab_anime')}</button>
+                                    <button onClick={() => setActiveTab('movies')} className={`px-2 py-1 text-[9px] sm:text-xs font-bold uppercase rounded-md transition-all ${activeTab === 'movies' ? (isDarkMode ? 'bg-neutral-800 text-indigo-400 shadow-lg' : 'bg-white text-indigo-600 shadow-sm') : 'opacity-50 text-neutral-500'}`}>{t('tab_movie')}</button>
                                 </div>
 
                                 {activeTab === 'episodes' && (
@@ -1170,7 +1335,7 @@ export default function App() {
                             <div className="relative flex-1 flex gap-2">
                                 <div className="relative flex-1">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={14} />
-                                    <input type="text" placeholder="Cari Judul, Arc, Episode..." className={`w-full rounded-xl py-2.5 sm:py-2.5 pl-9 pr-4 text-[12px] sm:text-sm transition-all outline-none focus:ring-2 focus:ring-amber-500 shadow-none border ${isDarkMode ? 'bg-neutral-900 border-neutral-800 text-neutral-100' : 'bg-white border-neutral-200 text-neutral-900 shadow-sm'}`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                                    <input type="text" placeholder={t('search_placeholder')} className={`w-full rounded-xl py-2.5 sm:py-2.5 pl-9 pr-4 text-[12px] sm:text-sm transition-all outline-none focus:ring-2 focus:ring-amber-500 shadow-none border ${isDarkMode ? 'bg-neutral-900 border-neutral-800 text-neutral-100' : 'bg-white border-neutral-200 text-neutral-900 shadow-sm'}`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                                     {searchQuery && (
                                         <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-red-500 transition-colors"><X size={14} strokeWidth={3} /></button>
                                     )}
@@ -1180,11 +1345,11 @@ export default function App() {
                                     <button 
                                         onClick={() => setMovieSortOrder(movieSortOrder === 'desc' ? 'asc' : 'desc')}
                                         className={`px-3 rounded-xl border flex items-center gap-2 transition-all active:scale-95 ${isDarkMode ? 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white' : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50 shadow-sm'}`}
-                                        title={`Urutkan: ${movieSortOrder === 'desc' ? 'Terbaru' : 'Terlama'}`}
+                                        title={`${t('sort_label')}: ${movieSortOrder === 'desc' ? t('sort_newest') : t('sort_oldest')}`}
                                     >
                                         <ArrowUpDown size={14} />
                                         <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">
-                                            {movieSortOrder === 'desc' ? 'Terbaru' : 'Terlama'}
+                                            {movieSortOrder === 'desc' ? t('sort_newest') : t('sort_oldest')}
                                         </span>
                                     </button>
                                 )}
@@ -1197,22 +1362,22 @@ export default function App() {
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => setShowFiller(!showFiller)} 
-                                            title="Sembunyikan Filler" 
+                                            title={t('filter_no_filler')} 
                                             className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${!showFiller ? 'bg-gradient-to-r from-red-600 to-rose-600 border-rose-500 text-white shadow-lg shadow-red-500/20' : theme.buttonInactive}`}
                                         >
                                             <CircleMinus size={14} strokeWidth={2.5} />
-                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest"><span className="hidden sm:inline">Tanpa </span>Filler</span>
+                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest">{t('filter_no_filler')}</span>
                                         </motion.button>
 
                                         <motion.button 
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => setHideWatched(!hideWatched)} 
-                                            title="Sembunyikan Selesai" 
+                                            title={t('filter_hide_watched')} 
                                             className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${hideWatched ? 'bg-gradient-to-r from-emerald-600 to-green-600 border-green-500 text-white shadow-lg shadow-green-500/20' : theme.buttonInactive}`}
                                         >
                                             <CheckCircle2 size={14} strokeWidth={2.5} />
-                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest"><span className="hidden sm:inline">Sembunyikan </span>Selesai</span>
+                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest">{t('filter_hide_watched')}</span>
                                         </motion.button>
 
                                         <motion.button 
@@ -1229,7 +1394,7 @@ export default function App() {
                                                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -skew-x-12"
                                             />
                                             <Play size={14} fill="currentColor" strokeWidth={2.5} className="relative z-10" />
-                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest relative z-10">Lanjut</span>
+                                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest relative z-10">{t('filter_continue')}</span>
                                         </motion.button>
                                     </>
                                 )}
@@ -1244,9 +1409,9 @@ export default function App() {
                         filteredEps.length === 0 ? (
                             <div className="text-center py-20 px-4">
                                 <Ship size={64} className="mx-auto mb-4 text-neutral-400 dark:text-neutral-600 opacity-50" />
-                                <h3 className="text-xl font-black uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-2">Pencarian Tidak Ditemukan</h3>
-                                <p className="text-sm font-medium text-neutral-400 dark:text-neutral-500 max-w-sm mx-auto">Coba gunakan kata kunci lain, atau hapus filter untuk melihat daftar episode lainnya.</p>
-                                <button onClick={() => { setSearchQuery(''); setShowFiller(true); setHideWatched(false); }} className="mt-8 px-8 py-3 rounded-2xl bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 font-bold uppercase tracking-widest text-xs hover:bg-red-200 transition-colors shadow-sm"> Reset Filter </button>
+                                <h3 className="text-xl font-black uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-2">{t('search_not_found')}</h3>
+                                <p className="text-sm font-medium text-neutral-400 dark:text-neutral-500 max-w-sm mx-auto">{t('search_not_found_desc')}</p>
+                                <button onClick={() => { setSearchQuery(''); setShowFiller(true); setHideWatched(false); }} className="mt-8 px-8 py-3 rounded-2xl bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 font-bold uppercase tracking-widest text-xs hover:bg-red-200 transition-colors shadow-sm"> {t('btn_reset_filter')} </button>
                             </div>
                         ) : (
                             <div className={sagaViewMode === 'card' ? 'grid grid-cols-1 md:grid-cols-2 gap-4 items-start' : 'space-y-4'}>
@@ -1306,8 +1471,8 @@ export default function App() {
                                                         </button>
                                                         <div className="flex-1">
                                                             <div className="flex items-center justify-between text-[9px] font-bold mb-1">
-                                                                <span className={theme.muted}>{progress.percent}% Selesai SAGA Ini</span>
-                                                                <span className={theme.muted}>{progress.count} / {progress.total} Misi</span>
+                                                                <span className={theme.muted}>{progress.percent}% {t('ep_finished')}</span>
+                                                                <span className={theme.muted}>{progress.count} / {progress.total} {t('ep_missions')}</span>
                                                             </div>
                                                             <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-neutral-800' : 'bg-neutral-100'}`}>
                                                                 <div
@@ -1407,8 +1572,8 @@ export default function App() {
                                                                                             </div>
                                                                                             <a href={getBilibiliUrl(epNum)} target="_blank" rel="noopener noreferrer" className={`flex-shrink-0 flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] font-black uppercase transition-all border ${isDarkMode ? 'bg-neutral-900 border-red-900/50 text-red-400 hover:bg-neutral-800' : 'bg-white border-neutral-200 text-red-600 hover:bg-red-50 shadow-sm'} h-8 sm:h-auto`}>
                                                                                                 <Play size={12} fill="currentColor" className="sm:mr-1" />
-                                                                                                <span className="hidden sm:inline">Nonton</span>
-                                                                                                <span className="hidden lg:inline ml-1">di Bilibili</span>
+                                                                                                <span className="hidden sm:inline">{t('watch_label')}</span>
+                                                                                                <span className="hidden lg:inline ml-1">Bilibili</span>
                                                                                                 <ExternalLink size={10} className="hidden sm:inline ml-1.5" />
                                                                                             </a>
                                                                                         </div>
@@ -1433,9 +1598,9 @@ export default function App() {
                         filteredMovies.length === 0 ? (
                             <div className="text-center py-20 px-4">
                                 <Film size={64} className="mx-auto mb-4 text-neutral-400 dark:text-neutral-600 opacity-50" />
-                                <h3 className="text-xl font-black uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-2">Film Tidak Ditemukan</h3>
-                                <p className="text-sm font-medium text-neutral-400 dark:text-neutral-500 max-w-sm mx-auto">Tidak ada judul film layar lebar yang cocok dengan pencarian Anda.</p>
-                                <button onClick={() => setSearchQuery('')} className="mt-8 px-8 py-3 rounded-2xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400 font-bold uppercase tracking-widest text-xs hover:bg-indigo-200 transition-colors shadow-sm"> Reset Pencarian </button>
+                                <h3 className="text-xl font-black uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-2">{t('movie_not_found')}</h3>
+                                <p className="text-sm font-medium text-neutral-400 dark:text-neutral-500 max-w-sm mx-auto">{t('movie_not_found_desc')}</p>
+                                <button onClick={() => setSearchQuery('')} className="mt-8 px-8 py-3 rounded-2xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400 font-bold uppercase tracking-widest text-xs hover:bg-indigo-200 transition-colors shadow-sm"> {t('btn_reset_search')} </button>
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
@@ -1470,7 +1635,7 @@ export default function App() {
                                                     target="_blank" 
                                                     rel="noopener noreferrer" 
                                                     className="p-2.5 rounded-xl bg-black/60 backdrop-blur-md text-amber-500 border border-white/10 hover:bg-amber-500 hover:text-white transition-all shadow-xl"
-                                                    title="Lihat di IMDb"
+                                                    title={t('movie_imdb')}
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     <ExternalLink size={18} strokeWidth={2.5} />
@@ -1511,7 +1676,7 @@ export default function App() {
                                                     ? 'bg-green-500/10 text-green-500 border border-green-500/20' 
                                                     : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-red-600 hover:text-white border border-transparent'}`}
                                             >
-                                                {watchedMovies.includes(movie.id) ? 'Selesai Ditonton' : 'Tandai Tonton'}
+                                                {watchedMovies.includes(movie.id) ? t('movie_finished') : t('movie_mark')}
                                             </button>
                                         </div>
                                     </div>
@@ -1522,9 +1687,9 @@ export default function App() {
 
                     <div className="mt-12 flex flex-col items-center gap-4 border-t border-neutral-200 dark:border-neutral-800 pt-8">
                         <button onClick={resetProgress} className="flex items-center gap-2 text-xs font-bold text-red-400 hover:text-red-500 transition-all active:scale-95">
-                            <Trash2 size={14} /> Reset Seluruh Log Progres
+                            <Trash2 size={14} /> {t('footer_reset')}
                         </button>
-                        <p className="text-[10px] font-bold opacity-30 text-center">Data ini hanya ada di browser {deviceInfo.device} ini. <br /> Simpan file jika ingin pindah perangkat.</p>
+                        <p className="text-[10px] font-bold opacity-30 text-center">{t('footer_sync_warning').replace('{device}', deviceInfo.device)}</p>
                     </div>
                 </div>
             </main>
