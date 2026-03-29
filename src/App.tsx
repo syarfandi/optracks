@@ -765,6 +765,7 @@ export default function App() {
         const data = {
             watchedEpisodes,
             watchedMovies,
+            userName,
             lastUpdated: new Date().toISOString(),
             device: getDeviceInfo().device
         };
@@ -787,9 +788,14 @@ export default function App() {
                 const data = JSON.parse(event.target?.result as string);
                 if (data.watchedEpisodes) setWatchedEpisodes(data.watchedEpisodes);
                 if (data.watchedMovies) setWatchedMovies(data.watchedMovies);
+                if (data.userName) {
+                    setUserName(data.userName);
+                    localStorage.setItem('op-tracker-username', data.userName);
+                }
                 saveLocally({
                     watchedEpisodes: data.watchedEpisodes || [],
                     watchedMovies: data.watchedMovies || [],
+                    userName: data.userName || '',
                     lastUpdated: new Date().toISOString()
                 });
                 alert(t('alert_import_success'));
@@ -1109,7 +1115,7 @@ export default function App() {
 
     if (loading) {
         return (
-            <div className={`min-h-screen flex items-center justify-center transition-colors duration-500 ${isDarkMode ? 'bg-neutral-950' : 'bg-neutral-50'}`}>
+            <div className={`min-h-screen flex items-center justify-center transition-colors duration-200 ${isDarkMode ? 'bg-neutral-950' : 'bg-neutral-50'}`}>
                 <div className="flex flex-col items-center gap-4 text-red-600 animate-pulse">
                     <Ship size={64} className="animate-bounce" />
                     <p className="font-bold text-xl uppercase tracking-widest text-center bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text">{t('loading_preparing')}</p>
@@ -1119,7 +1125,7 @@ export default function App() {
     }
 
     return (
-        <div className={`min-h-screen font-sans selection:bg-amber-500/30 transition-colors duration-500 flex flex-col lg:flex-row-reverse ${theme.bg}`}>
+        <div className={`min-h-screen font-sans selection:bg-amber-500/30 transition-colors duration-200 flex flex-col lg:flex-row-reverse ${theme.bg}`}>
 
 
             {/* Menu FAB */}
@@ -1156,11 +1162,11 @@ export default function App() {
                             title={t('nav_menu')}
                         >
                             {/* Inner shine effect */}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full" />
+                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 -translate-x-full group-hover:translate-x-full" />
 
-                            <div className="flex items-center gap-0 group-hover:gap-3 transition-all duration-500 ease-out">
-                                <Menu size={24} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform duration-500" />
-                                <span className="max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-500 text-[11px] font-black uppercase tracking-[0.2em] pt-0.5">
+                            <div className="flex items-center gap-0 group-hover:gap-3 transition-all duration-200 ease-out">
+                                <Menu size={24} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform duration-200" />
+                                <span className="max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-200 text-[11px] font-black uppercase tracking-[0.2em] pt-0.5">
                                     {t('nav_navigation')}
                                 </span>
                             </div>
@@ -1175,13 +1181,13 @@ export default function App() {
             )}
 
             {/* Sidebar / Header */}
-            <aside className={`fixed inset-y-0 right-0 z-50 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-l backdrop-blur-3xl shadow-2xl transition-all duration-500 overflow-hidden ${isSidebarOpen ? 'w-full lg:w-[380px] translate-x-0 opacity-100' : 'w-full lg:w-0 translate-x-full lg:translate-x-0 opacity-0 lg:border-none'} ${isDarkMode ? 'bg-neutral-950/90 border-neutral-800/30' : 'bg-white/80 border-neutral-200/50'}`}>
+            <aside className={`fixed inset-y-0 right-0 z-50 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-l backdrop-blur-3xl shadow-2xl transition-all duration-200 overflow-hidden ${isSidebarOpen ? 'w-full lg:w-[380px] translate-x-0 opacity-100' : 'w-full lg:w-0 translate-x-full lg:translate-x-0 opacity-0 lg:border-none'} ${isDarkMode ? 'bg-neutral-950/90 border-neutral-800/30' : 'bg-white/80 border-neutral-200/50'}`}>
                 <div className="w-[100vw] lg:w-[380px] p-5 sm:p-6 flex flex-col min-h-full scrollbar-hidden overflow-y-auto">
                     {/* Brand & Theme */}
                     <div className="flex items-center justify-between mb-6">
                         <div className="relative">
                             <span className="text-[8px] font-black uppercase tracking-[0.4em] text-neutral-500/70 mb-1 block leading-none">{t('nav_logbook')}</span>
-                            <h2 className={`text-xl sm:text-2xl font-black uppercase tracking-tighter transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{t('nav_menu')}</h2>
+                            <h2 className={`text-xl sm:text-2xl font-black uppercase tracking-tighter transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{t('nav_menu')}</h2>
                             <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-1 h-6 bg-orange-500 rounded-full blur-[2px]" />
                         </div>
                         <div className="flex items-center gap-2">
@@ -1454,7 +1460,7 @@ export default function App() {
 
             {/* Main Content */}
             <main className="flex-1 w-full max-w-5xl mx-auto px-4 lg:px-10 pb-10 relative">
-                <div className={`sticky -top-0.5 z-40 pt-2 sm:pt-4 pb-2 sm:pb-4 -mx-4 px-4 lg:-mx-10 lg:px-10 transition-all duration-300 backdrop-blur-xl ${isDarkMode ? 'bg-neutral-950/75' : 'bg-neutral-50/50'}`}>
+                <div className={`sticky -top-0.5 z-40 pt-2 sm:pt-4 pb-2 sm:pb-4 -mx-4 px-4 lg:-mx-10 lg:px-10 transition-all duration-200 backdrop-blur-xl ${isDarkMode ? 'bg-neutral-950/75' : 'bg-neutral-50/50'}`}>
                     <div className="flex flex-col gap-2 sm:gap-4">
                         {/* Header Row 1: Brand & Switcher */}
                         <div className="flex items-center justify-between gap-2">
@@ -1804,7 +1810,7 @@ export default function App() {
                                 {filteredMovies.map((movie) => (
                                     <div
                                         key={movie.id}
-                                        className={`flex flex-col rounded-[2rem] overflow-hidden transition-all duration-500 group border h-full ${watchedMovies.includes(movie.id) ? 'border-green-500/50 bg-green-500/[0.02]' : `${theme.card} hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1`}`}
+                                        className={`flex flex-col rounded-[2rem] overflow-hidden transition-all duration-200 group border h-full ${watchedMovies.includes(movie.id) ? 'border-green-500/50 bg-green-500/[0.02]' : `${theme.card} hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1`}`}
                                     >
                                         {/* Poster Section */}
                                         <div className="relative aspect-[2/3] overflow-hidden cursor-pointer" onClick={() => toggleMovie(movie.id)}>
