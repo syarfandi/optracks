@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import * as htmlToImage from 'html-to-image';
 import EPISODE_DB from './data/bilibili_episodes.json';
+import ENGLISH_EPISODE_DB from './data/english_episodes.json';
 import {
     CheckCircle2,
     Circle,
@@ -187,7 +188,27 @@ export default function App() {
     const [showFiller, setShowFiller] = useState(true);
     const [hideWatched, setHideWatched] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
-    const [language, setLanguage] = useState<'id' | 'en'>('id');
+    const [language, setLanguage] = useState<'id' | 'en'>(() => {
+        const saved = localStorage.getItem(`gl-tracker-op-tracker-v4`);
+        if (saved) {
+            const data = JSON.parse(saved);
+            if (data.language) return data.language;
+        }
+        
+        // Auto-detect location/language
+        try {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const isID = tz.includes('Jakarta') || tz.includes('Makassar') || tz.includes('Jayapura');
+            if (isID) return 'id';
+            
+            const navLang = navigator.language.toLowerCase();
+            if (navLang.startsWith('id')) return 'id';
+        } catch (e) {
+            console.log("Location detection failed, defaulting to EN");
+        }
+        
+        return 'en';
+    });
     const [searchQuery, setSearchQuery] = useState('');
 
     const translations: Record<string, Record<string, string>> = {
@@ -254,7 +275,7 @@ export default function App() {
             rank_label: 'Rank',
             watch_label: 'Nonton',
             saga_east_blue_desc: 'Perjalanan Luffy mencari kru pertama: Zoro, Nami, Usopp, dan Sanji.',
-            saga_arabasta_desc: 'Membantu Putri Vivi menyelamatkan Alabasta dari Baroque Works.',
+            saga_alabasta_desc: 'Membantu Putri Vivi menyelamatkan Alabasta dari Baroque Works.',
             saga_sky_island_desc: 'Petualangan ke langit untuk mencari Kota Emas legendaris Shandora.',
             saga_water_7_desc: 'Konflik internal kru dan pertarungan epik di Enies Lobby.',
             saga_thriller_bark_desc: 'Pertarungan melawan Shichibukai Gecko Moria dan merekrut Brook.',
@@ -263,6 +284,17 @@ export default function App() {
             saga_dressrosa_desc: 'Aliansi untuk menjatuhkan Shichibukai Doflamingo di Dressrosa.',
             saga_yonko_desc: 'Konfrontasi melawan Kaisar Lautan: Big Mom dan Kaido.',
             saga_final_desc: 'Awal puncak pencarian harta karun di Pulau Masa Depan.',
+            // Saga Titles
+            saga_east_blue: 'Saga East Blue',
+            saga_alabasta: 'Saga Alabasta',
+            saga_sky_island: 'Saga Pulau Langit',
+            saga_water_7: 'Saga Water 7',
+            saga_thriller_bark: 'Saga Thriller Bark',
+            saga_summit_war: 'Saga Perang Puncak',
+            saga_fishman: 'Saga Pulau Manusia Ikan',
+            saga_dressrosa: 'Saga Dressrosa',
+            saga_yonko: 'Saga Yonko',
+            saga_final: 'Final Saga',
         },
         en: {
             app_title: 'OP Tracker',
@@ -327,7 +359,7 @@ export default function App() {
             rank_label: 'Rank',
             watch_label: 'Watch',
             saga_east_blue_desc: 'Luffy\'s journey to find his first crew: Zoro, Nami, Usopp, and Sanji.',
-            saga_arabasta_desc: 'Helping Princess Vivi save Alabasta from Baroque Works.',
+            saga_alabasta_desc: 'Helping Princess Vivi save Alabasta from Baroque Works.',
             saga_sky_island_desc: 'Adventure to the sky to find the legendary Golden City of Shandora.',
             saga_water_7_desc: 'Internal crew conflicts and epic battles at Enies Lobby.',
             saga_thriller_bark_desc: 'Battle against Warlord Gecko Moria and recruiting Brook.',
@@ -336,6 +368,17 @@ export default function App() {
             saga_dressrosa_desc: 'An alliance to take down Warlord Doflamingo in Dressrosa.',
             saga_yonko_desc: 'Confrontation against the Emperors of the Sea: Big Mom and Kaido.',
             saga_final_desc: 'The start of the ultimate search for treasure on Future Island.',
+            // Saga Titles
+            saga_east_blue: 'East Blue Saga',
+            saga_alabasta: 'Alabasta Saga',
+            saga_sky_island: 'Sky Island Saga',
+            saga_water_7: 'Water 7 Saga',
+            saga_thriller_bark: 'Thriller Bark Saga',
+            saga_summit_war: 'Summit War Saga',
+            saga_fishman: 'Fish-Man Island Saga',
+            saga_dressrosa: 'Dressrosa Saga',
+            saga_yonko: 'Yonko Saga',
+            saga_final: 'Final Saga',
         }
     };
 
@@ -344,7 +387,7 @@ export default function App() {
     const SAGA_DATA = useMemo(() => [
         {
             id: 'east-blue',
-            title: 'East Blue Saga',
+            title: t('saga_east_blue'),
             description: t('saga_east_blue_desc'),
             arcs: [
                 { id: 'romance-dawn', title: 'Romance Dawn', start: 1, end: 3, type: 'Canon' },
@@ -357,22 +400,22 @@ export default function App() {
             ]
         },
         {
-            id: 'arabasta',
-            title: 'Arabasta Saga',
-            description: t('saga_arabasta_desc'),
+            id: 'alabasta',
+            title: t('saga_alabasta'),
+            description: t('saga_alabasta_desc'),
             arcs: [
                 { id: 'reverse-mountain', title: 'Reverse Mountain', start: 62, end: 63, type: 'Canon' },
                 { id: 'whiskey-peak', title: 'Whiskey Peak', start: 64, end: 67, type: 'Canon' },
                 { id: 'koby-helmeppo', title: 'Koby & Helmeppo', start: 68, end: 69, type: 'Canon' },
                 { id: 'little-garden', title: 'Little Garden', start: 70, end: 77, type: 'Canon' },
                 { id: 'drum-island', title: 'Drum Island', start: 78, end: 91, type: 'Canon' },
-                { id: 'arabasta-arc', title: 'Arabasta', start: 92, end: 130, type: 'Canon' },
-                { id: 'post-arabasta', title: 'Post-Arabasta', start: 131, end: 135, type: 'Filler' },
+                { id: 'alabasta-arc', title: 'Alabasta', start: 92, end: 130, type: 'Canon' },
+                { id: 'post-alabasta', title: 'Post-Alabasta', start: 131, end: 135, type: 'Filler' },
             ]
         },
         {
             id: 'sky-island',
-            title: 'Sky Island Saga',
+            title: t('saga_sky_island'),
             description: t('saga_sky_island_desc'),
             arcs: [
                 { id: 'goat-island', title: 'Go Island', start: 136, end: 138, type: 'Filler' },
@@ -384,7 +427,7 @@ export default function App() {
         },
         {
             id: 'water-7',
-            title: 'Water 7 Saga',
+            title: t('saga_water_7'),
             description: t('saga_water_7_desc'),
             arcs: [
                 { id: 'long-ring', title: 'Long Ring Long Land', start: 207, end: 219, type: 'Canon' },
@@ -397,7 +440,7 @@ export default function App() {
         },
         {
             id: 'thriller-bark',
-            title: 'Thriller Bark Saga',
+            title: t('saga_thriller_bark'),
             description: t('saga_thriller_bark_desc'),
             arcs: [
                 { id: 'lovely-land', title: 'Lovely Land', start: 326, end: 336, type: 'Filler' },
@@ -407,7 +450,7 @@ export default function App() {
         },
         {
             id: 'summit-war',
-            title: 'Summit War Saga',
+            title: t('saga_summit_war'),
             description: t('saga_summit_war_desc'),
             arcs: [
                 { id: 'sabaody', title: 'Sabaody Archipelago', start: 385, end: 405, type: 'Canon' },
@@ -423,7 +466,7 @@ export default function App() {
         },
         {
             id: 'fishman-island',
-            title: 'Fish-Man Island Saga',
+            title: t('saga_fishman'),
             description: t('saga_fishman_desc'),
             arcs: [
                 { id: 'return-sabaody', title: 'Return to Sabaody', start: 517, end: 522, type: 'Canon' },
@@ -432,7 +475,7 @@ export default function App() {
         },
         {
             id: 'dressrosa-saga',
-            title: 'Dressrosa Saga',
+            title: t('saga_dressrosa'),
             description: t('saga_dressrosa_desc'),
             arcs: [
                 { id: 'z-ambition', title: 'Z\'s Ambition', start: 575, end: 578, type: 'Filler' },
@@ -444,7 +487,7 @@ export default function App() {
         },
         {
             id: 'yonko-saga',
-            title: 'Yonko Saga',
+            title: t('saga_yonko'),
             description: t('saga_yonko_desc'),
             arcs: [
                 { id: 'zou', title: 'Zou', start: 751, end: 779, type: 'Canon' },
@@ -456,14 +499,14 @@ export default function App() {
         },
         {
             id: 'final-saga',
-            title: 'Final Saga',
+            title: t('saga_final'),
             description: t('saga_final_desc'),
             arcs: [
                 { id: 'egghead-1', title: 'Egghead Island (Part 1)', start: 1089, end: 1122, type: 'Canon' },
                 { id: 'egghead-2', title: 'Egghead Island (Part 2)', start: 1123, end: 1155, type: 'Canon' },
             ]
         }
-    ], [language]);
+    ], [language, t]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
     const [sagaViewMode, setSagaViewMode] = useState<'card' | 'list'>('card');
     const [isExporting, setIsExporting] = useState(false);
@@ -662,12 +705,6 @@ export default function App() {
         saveLocally({ isDarkMode: newMode });
     };
 
-    const toggleLanguage = () => {
-        const newLang = language === 'id' ? 'en' : 'id';
-        setLanguage(newLang);
-        saveLocally({ language: newLang });
-    };
-
     const getSagaProgress = (saga: any) => {
         let count = 0;
         let total = 0;
@@ -762,6 +799,16 @@ export default function App() {
         reader.readAsText(file);
     };
 
+    const getEpisodeTitle = (num: number | string) => {
+        if (language === 'id') {
+            const epData = (EPISODE_DB as any)[num];
+            return epData?.title || `Misi ${num}`;
+        }
+        // English Title from local database
+        const engTitle = (ENGLISH_EPISODE_DB as any)[num];
+        return engTitle || `${t('ep_mission')} ${num}`;
+    };
+
     const requestNotification = () => {
         if (!('Notification' in window)) {
             alert(t('alert_notif_unsupported'));
@@ -817,11 +864,6 @@ export default function App() {
                 }
             }, 350);
         }
-    };
-
-    const getEpisodeTitle = (num: number | string) => {
-        const epData = (EPISODE_DB as any)[num];
-        return epData?.title || `${t('ep_mission')} ${num}`;
     };
 
     // Auto-expand arcs and sagas when searching for a specific term
@@ -909,7 +951,7 @@ export default function App() {
             movieWatched: watchedMovies.length,
             movieTotal: MOVIE_DATA.length
         };
-    }, [watchedEpisodes, watchedMovies]);
+    }, [watchedEpisodes, watchedMovies, SAGA_DATA]);
 
     const gamerRank = useMemo(() => {
         const total = stats.canonWatched + stats.fillerWatched;
@@ -963,7 +1005,7 @@ export default function App() {
                 return matchesSearch && matchesFiller && notFullyWatched;
             })
         })).filter(saga => saga.arcs.length > 0);
-    }, [searchQuery, showFiller, hideWatched, watchedEpisodes]);
+    }, [searchQuery, showFiller, hideWatched, watchedEpisodes, SAGA_DATA, language]);
 
     const filteredMovies = useMemo(() => {
         const filtered = MOVIE_DATA.filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -1119,10 +1161,6 @@ export default function App() {
                             <span className={`text-xl sm:text-2xl font-black uppercase tracking-tight drop-shadow-sm transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-neutral-800'}`}>{t('nav_menu')}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <button onClick={toggleLanguage} className={`px-3.5 py-1.5 rounded-2xl transition-all duration-300 font-black text-[11px] uppercase tracking-widest border hover:scale-110 active:scale-95 shadow-sm flex items-center gap-2 ${isDarkMode ? 'bg-neutral-800/80 border-neutral-700/50 text-neutral-200 shadow-lg' : 'bg-white border-neutral-200 text-neutral-800 shadow-sm hover:bg-neutral-50'}`}>
-                                <span className={language === 'id' ? 'animate-pulse' : ''}>{language === 'id' ? '🇮🇩' : '🇺🇸'}</span>
-                                <span>{language === 'id' ? 'ID' : 'EN'}</span>
-                            </button>
                             <button onClick={toggleDarkMode} className={`p-3 rounded-[1.25rem] transition-all duration-300 hover:scale-110 active:scale-95 ${isDarkMode ? 'bg-neutral-800/80 border border-neutral-700/50 text-yellow-400 shadow-lg shadow-yellow-500/5' : 'bg-neutral-100 border border-neutral-200 text-neutral-600 shadow-sm'}`}>
                                 {isDarkMode ? <Sun size={20} strokeWidth={2.5} /> : <Moon size={20} strokeWidth={2.5} />}
                             </button>
@@ -1315,18 +1353,44 @@ export default function App() {
                             </div>
 
                             <div className="flex items-center gap-2">
-                                {/* Compact Tab Switcher */}
+                                {activeTab === 'episodes' && (
+                                    <div className={`hidden sm:flex p-0.5 rounded-lg border transition-all ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-neutral-200/50 border-neutral-300'}`}>
+                                        <button 
+                                            onClick={() => setSagaViewMode('list')} 
+                                            className={`p-1 rounded-md transition-all ${sagaViewMode === 'list' ? (isDarkMode ? 'bg-neutral-800 text-white shadow-lg' : 'bg-white text-neutral-900 shadow-sm') : 'text-neutral-500 opacity-50'}`}
+                                        >
+                                            <List size={14} />
+                                        </button>
+                                        <button 
+                                            onClick={() => setSagaViewMode('card')} 
+                                            className={`p-1 rounded-md transition-all ${sagaViewMode === 'card' ? (isDarkMode ? 'bg-neutral-800 text-white shadow-lg' : 'bg-white text-neutral-900 shadow-sm') : 'text-neutral-500 opacity-50'}`}
+                                        >
+                                            <LayoutGrid size={14} />
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Language Switcher Toggle */}
+                                <div className={`flex p-0.5 rounded-lg border transition-all ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-neutral-200/50 border-neutral-300'}`}>
+                                    <button 
+                                        onClick={() => { setLanguage('id'); saveLocally({ language: 'id' }); }} 
+                                        className={`px-2 py-1 text-[9px] sm:text-xs font-bold uppercase rounded-md transition-all flex items-center gap-1.5 ${language === 'id' ? (isDarkMode ? 'bg-neutral-800 text-white shadow-lg' : 'bg-white text-neutral-900 shadow-sm') : 'opacity-50 text-neutral-500'}`}
+                                    >
+                                        <span>🇮🇩</span> <span className="hidden sm:inline">ID</span>
+                                    </button>
+                                    <button 
+                                        onClick={() => { setLanguage('en'); saveLocally({ language: 'en' }); }} 
+                                        className={`px-2 py-1 text-[9px] sm:text-xs font-bold uppercase rounded-md transition-all flex items-center gap-1.5 ${language === 'en' ? (isDarkMode ? 'bg-neutral-800 text-white shadow-lg' : 'bg-white text-neutral-900 shadow-sm') : 'opacity-50 text-neutral-500'}`}
+                                    >
+                                        <span>🇺🇸</span> <span className="hidden sm:inline">EN</span>
+                                    </button>
+                                </div>
+
+                                {/* Tab Switcher (Anime / Movie) */}
                                 <div className={`flex p-0.5 rounded-lg border transition-all ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-neutral-200/50 border-neutral-300'}`}>
                                     <button onClick={() => setActiveTab('episodes')} className={`px-2 py-1 text-[9px] sm:text-xs font-bold uppercase rounded-md transition-all ${activeTab === 'episodes' ? (isDarkMode ? 'bg-neutral-800 text-red-500 shadow-lg' : 'bg-white text-red-600 shadow-sm') : 'opacity-50 text-neutral-500'}`}>{t('tab_anime')}</button>
                                     <button onClick={() => setActiveTab('movies')} className={`px-2 py-1 text-[9px] sm:text-xs font-bold uppercase rounded-md transition-all ${activeTab === 'movies' ? (isDarkMode ? 'bg-neutral-800 text-indigo-400 shadow-lg' : 'bg-white text-indigo-600 shadow-sm') : 'opacity-50 text-neutral-500'}`}>{t('tab_movie')}</button>
                                 </div>
-
-                                {activeTab === 'episodes' && (
-                                    <div className={`hidden sm:flex p-0.5 rounded-xl border transition-all ${isDarkMode ? 'bg-neutral-900/50 border-neutral-800' : 'bg-neutral-100 border-neutral-200 shadow-inner'}`}>
-                                        <button onClick={() => setSagaViewMode('list')} className={`p-1.5 rounded-lg transition-all ${sagaViewMode === 'list' ? 'bg-gradient-to-br from-red-600 to-amber-600 text-white shadow-md' : 'text-neutral-500 opacity-60 hover:opacity-100 hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50'}`}><List size={16} /></button>
-                                        <button onClick={() => setSagaViewMode('card')} className={`p-1.5 rounded-lg transition-all ${sagaViewMode === 'card' ? 'bg-gradient-to-br from-red-600 to-amber-600 text-white shadow-md' : 'text-neutral-500 opacity-60 hover:opacity-100 hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50'}`}><LayoutGrid size={16} /></button>
-                                    </div>
-                                )}
                             </div>
                         </div>
 
