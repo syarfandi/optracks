@@ -164,13 +164,13 @@ const StatCard = ({ title, icon, current, total, percent, color, isDarkMode, isE
                 </div>
             </div>
             <div className="w-full space-y-0.5">
-                <h4 className={`text-[8px] font-black uppercase tracking-[0.2em] leading-tight ${textClasses[color]} opacity-70 group-hover:opacity-100 transition-opacity`}>
+                <h4 className={`text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] leading-tight ${textClasses[color]} opacity-80 group-hover:opacity-100 transition-opacity`}>
                     {title}
                 </h4>
-                <div className={`flex flex-col items-center leading-none ${isExporting ? 'gap-1.5 mt-1' : 'gap-0.5'}`}>
-                    <span className={`${isExporting ? 'text-[24px]' : 'text-[14px]'} font-black tracking-tight ${textClasses[color]} tabular-nums`}>{percent}%</span>
-                    <span className={`${isExporting ? 'text-[10px]' : 'text-[7px]'} font-bold uppercase tracking-[0.15em] opacity-40 ${isDarkMode ? 'text-white' : 'text-neutral-900'} tabular-nums`}>
-                        {current} / {total}
+                <div className={`flex flex-col items-center leading-none ${isExporting ? 'gap-2 mt-1.5' : 'gap-0.5'}`}>
+                    <span className={`${isExporting ? 'text-[32px]' : 'text-[18px]'} font-black tracking-tight ${textClasses[color]} tabular-nums`}>{percent}%</span>
+                    <span className={`${isExporting ? 'text-[12px]' : 'text-[9px]'} font-bold uppercase tracking-[0.1em] opacity-50 ${isDarkMode ? 'text-white' : 'text-neutral-900'} tabular-nums`}>
+                        {current} / {total} {isExporting && 'Misi'}
                     </span>
                 </div>
             </div>
