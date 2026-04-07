@@ -150,7 +150,7 @@ const StatCard = ({ title, icon, current, total, percent, color, isDarkMode, isE
     };
 
     return (
-        <div className={`p-4 rounded-[1.75rem] flex flex-col items-center text-center gap-1.5 group transition-all ${!isExporting ? `glass glass-card ${isDarkMode ? 'drop-shadow-2xl' : 'drop-shadow-sm'}` : 'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 !shadow-none !drop-shadow-none'}`}>
+        <div className={`p-4 rounded-[1.75rem] flex flex-col items-center text-center gap-1.5 group transition-all ${!isExporting ? `glass glass-card ${isDarkMode ? 'drop-shadow-2xl' : 'drop-shadow-sm'}` : 'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-none! drop-shadow-none!'}`}>
             <div className="relative shrink-0 flex items-center justify-center p-0.5 rounded-full">
                 <StatCircle percent={percent} color={color} isDarkMode={isDarkMode} isExporting={isExporting} />
                 <div className={`absolute inset-0 flex items-center justify-center ${textClasses[color]} transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6`}>
@@ -1159,7 +1159,7 @@ export default function App() {
             <div className={`min-h-screen flex items-center justify-center transition-colors duration-200 ${isDarkMode ? 'bg-neutral-950' : 'bg-neutral-50'}`}>
                 <div className="flex flex-col items-center gap-4 text-red-600 animate-pulse">
                     <Ship size={64} className="animate-bounce" />
-                    <p className="font-bold text-xl uppercase tracking-widest text-center bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text">{t('loading_preparing')}</p>
+                    <p className="font-bold text-xl uppercase tracking-widest text-center bg-linear-to-r from-red-600 to-amber-500 text-transparent bg-clip-text">{t('loading_preparing')}</p>
                 </div>
             </div>
         );
@@ -1189,7 +1189,7 @@ export default function App() {
                                 repeat: Infinity,
                                 ease: "easeInOut"
                             }}
-                            className="absolute inset-0 bg-gradient-to-br from-red-600 to-amber-500 rounded-3xl blur-2xl -z-10"
+                            className="absolute inset-0 bg-linear-to-br from-red-600 to-amber-500 rounded-3xl blur-2xl -z-10"
                         />
 
                         <motion.button
@@ -1199,11 +1199,11 @@ export default function App() {
                                 boxShadow: "0 20px 40px -10px rgba(220, 38, 38, 0.5)"
                             }}
                             whileTap={{ scale: 0.9 }}
-                            className="relative group flex items-center justify-center p-4 rounded-[1.5rem] bg-gradient-to-br from-red-600 via-red-600 to-amber-500 text-white shadow-2xl border border-white/20 backdrop-blur-xl group overflow-hidden"
+                            className="relative group flex items-center justify-center p-4 rounded-3xl bg-linear-to-br from-red-600 via-red-600 to-amber-500 text-white shadow-2xl border border-white/20 backdrop-blur-xl group overflow-hidden"
                             title={t('nav_menu')}
                         >
                             {/* Inner shine effect */}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 -translate-x-full group-hover:translate-x-full" />
+                            <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 -translate-x-full group-hover:translate-x-full" />
 
                             <div className="flex items-center gap-0 group-hover:gap-3 transition-all duration-200 ease-out">
                                 <Menu size={24} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform duration-200" />
@@ -1223,7 +1223,7 @@ export default function App() {
 
             {/* Sidebar / Header */}
             <aside className={`fixed inset-y-0 right-0 z-50 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-l backdrop-blur-2xl shadow-2xl transition-transform duration-200 will-change-transform overflow-hidden ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0 lg:w-0 lg:border-none'} w-full lg:w-[380px] ${isDarkMode ? 'bg-neutral-950/90 border-neutral-800/30' : 'bg-white/80 border-neutral-200/50'}`}>
-                <div className="w-[100vw] lg:w-[380px] p-5 sm:p-6 flex flex-col min-h-full scrollbar-hidden overflow-y-auto">
+                <div className="w-screen lg:w-[380px] p-5 sm:p-6 flex flex-col min-h-full scrollbar-hidden overflow-y-auto">
                     {/* Brand & Theme */}
                     <div className="flex items-center justify-between mb-6">
                         <div className="relative">
@@ -1253,7 +1253,7 @@ export default function App() {
 
 
                     {/* Compact Stats Section / Poster Export */}
-                    <div id="stats-poster" className={`transition-all duration-300 ${isExporting ? 'p-10 rounded-[2.5rem] bg-white dark:bg-neutral-950 !shadow-none min-w-[400px]' : ''}`}>
+                    <div id="stats-poster" className={`transition-all duration-300 ${isExporting ? 'p-10 rounded-[2.5rem] bg-white dark:bg-neutral-950 shadow-none! min-w-[400px]' : ''}`}>
                         {/* Judul & Pangkat Khusus untuk Hasil Export Poster */}
                         {isExporting && (
                             <div className="flex flex-col gap-4 mb-4 pb-4 border-b-2 border-neutral-100 dark:border-neutral-900">
@@ -1290,7 +1290,7 @@ export default function App() {
                                 animate={isExporting ? {} : { opacity: 1, y: 0 }}
                                 className="col-span-2"
                             >
-                                <div className={`relative p-5 rounded-[2rem] overflow-hidden transition-all ${isDarkMode ? 'bg-amber-500' : 'bg-amber-500'} !shadow-none border border-white/40`}>
+                                <div className={`relative p-5 rounded-4xl overflow-hidden transition-all ${isDarkMode ? 'bg-amber-500' : 'bg-amber-500'} shadow-none! border border-white/40`}>
                                     <div className="relative z-10 flex items-center gap-6">
                                         <div className={`relative shrink-0 flex items-center justify-center p-0.5 rounded-full bg-white/20 border border-white/30 ${isExporting ? 'scale-110' : ''}`}>
                                             <StatCircle percent={stats.canonPercent} color="white" isDarkMode={true} isExporting={isExporting} />
@@ -1422,7 +1422,7 @@ export default function App() {
                             whileTap={{ scale: 0.98 }}
                             onClick={exportImage}
                             disabled={isExporting}
-                            className={`mt-1 mb-3 w-full flex items-center justify-center gap-2 p-3 rounded-2xl bg-gradient-to-r from-orange-500 to-red-600 text-white transition-all font-black text-[11px] uppercase tracking-[0.2em] shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 relative overflow-hidden group`}
+                            className={`mt-1 mb-3 w-full flex items-center justify-center gap-2 p-3 rounded-2xl bg-linear-to-r from-orange-500 to-red-600 text-white transition-all font-black text-[11px] uppercase tracking-[0.2em] shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 relative overflow-hidden group`}
                         >
                             <div className="absolute inset-0 bg-white/10 translate-x-full group-hover:translate-x-0 transition-transform duration-500 skew-x-12" />
                             {isExporting ? (
@@ -1508,7 +1508,7 @@ export default function App() {
                             <div className="flex items-center gap-2 sm:gap-4 min-w-0">
                                 <img src="/mugiwara-logo.png" alt="Logo" className="w-8 h-8 sm:w-12 sm:h-12 object-contain drop-shadow-sm shrink-0" />
                                 <div className="min-w-0">
-                                    <h2 className={`text-xs sm:text-base lg:text-xl xl:text-3xl font-black uppercase tracking-tight bg-gradient-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none truncate shrink-0`}>
+                                    <h2 className={`text-xs sm:text-base lg:text-xl xl:text-3xl font-black uppercase tracking-tight bg-linear-to-r from-red-600 to-amber-500 text-transparent bg-clip-text leading-none truncate shrink-0`}>
                                         {activeTab === 'episodes' ? t('app_title') : t('movie_archive')}
                                     </h2>
                                     <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5 overflow-hidden">
@@ -1607,7 +1607,7 @@ export default function App() {
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => setShowFiller(!showFiller)}
                                             title={t('filter_no_filler')}
-                                            className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${!showFiller ? 'bg-gradient-to-r from-red-600 to-rose-600 border-rose-500 text-white shadow-lg shadow-red-500/20' : theme.buttonInactive}`}
+                                            className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${!showFiller ? 'bg-linear-to-r from-red-600 to-rose-600 border-rose-500 text-white shadow-lg shadow-red-500/20' : theme.buttonInactive}`}
                                         >
                                             <CircleMinus size={14} strokeWidth={2.5} />
                                             <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest">{t('filter_no_filler')}</span>
@@ -1618,7 +1618,7 @@ export default function App() {
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => setHideWatched(!hideWatched)}
                                             title={t('filter_hide_watched')}
-                                            className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${hideWatched ? 'bg-gradient-to-r from-emerald-600 to-green-600 border-green-500 text-white shadow-lg shadow-green-500/20' : theme.buttonInactive}`}
+                                            className={`flex-1 sm:flex-none px-2 py-2 rounded-xl border transition-all flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${hideWatched ? 'bg-linear-to-r from-emerald-600 to-green-600 border-green-500 text-white shadow-lg shadow-green-500/20' : theme.buttonInactive}`}
                                         >
                                             <CheckCircle2 size={14} strokeWidth={2.5} />
                                             <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest">{t('filter_hide_watched')}</span>
@@ -1629,13 +1629,13 @@ export default function App() {
                                             whileTap={{ scale: 0.95 }}
                                             onClick={continueWatching}
                                             title="Lanjutkan Menonton"
-                                            className="relative overflow-hidden group/btn flex-1 sm:flex-none px-2 py-2 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 text-white border border-rose-400/20 transition-all shadow-xl shadow-red-500/20 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap"
+                                            className="relative overflow-hidden group/btn flex-1 sm:flex-none px-2 py-2 rounded-xl bg-linear-to-r from-red-600 to-amber-600 text-white border border-rose-400/20 transition-all shadow-xl shadow-red-500/20 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap"
                                         >
                                             {/* Shine Sweep Effect */}
                                             <motion.div
                                                 animate={{ x: ['-200%', '200%'] }}
                                                 transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 2 }}
-                                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -skew-x-12"
+                                                className="absolute inset-0 bg-linear-to-r from-transparent via-white/25 to-transparent -skew-x-12"
                                             />
                                             <Play size={14} fill="currentColor" strokeWidth={2.5} className="relative z-10" />
                                             <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest relative z-10">{t('filter_continue')}</span>
@@ -1680,7 +1680,7 @@ export default function App() {
 
                                                                 {sagaViewMode === 'list' && (
                                                                     <div className="flex-1 flex items-center gap-3 sm:gap-4 lg:px-4" onClick={(e) => e.stopPropagation()}>
-                                                                        <button onClick={(e) => toggleSagaComplete(saga, e)} className={`flex-shrink-0 transition-all hover:scale-110 active:scale-95 ${finished ? 'text-green-500' : 'text-neutral-300'}`}>
+                                                                        <button onClick={(e) => toggleSagaComplete(saga, e)} className={`shrink-0 transition-all hover:scale-110 active:scale-95 ${finished ? 'text-green-500' : 'text-neutral-300'}`}>
                                                                             {finished ? <CheckCircle2 size={20} className="text-green-500" /> : <Circle size={20} />}
                                                                         </button>
                                                                         <div className="flex-1 min-w-0">
@@ -1690,7 +1690,7 @@ export default function App() {
                                                                             </div>
                                                                             <div className={`h-1 sm:h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-neutral-800' : 'bg-neutral-100'}`}>
                                                                                 <div
-                                                                                    className="h-full bg-gradient-to-r from-red-600 to-amber-500 transition-all duration-700 ease-out"
+                                                                                    className="h-full bg-linear-to-r from-red-600 to-amber-500 transition-all duration-700 ease-out"
                                                                                     style={{ width: `${progress.percent}%` }}
                                                                                 />
                                                                             </div>
@@ -1710,7 +1710,7 @@ export default function App() {
                                                 {/* Saga Progress Bar - Only for Card View or Mobile in List Mode */}
                                                 {sagaViewMode === 'card' && (
                                                     <div className={`flex items-center gap-3 mt-4 pt-4 border-t ${theme.border}`}>
-                                                        <button onClick={(e) => toggleSagaComplete(saga, e)} className={`flex-shrink-0 transition-all hover:scale-110 active:scale-95 ${finished ? 'text-green-500' : 'text-neutral-300'}`}>
+                                                        <button onClick={(e) => toggleSagaComplete(saga, e)} className={`shrink-0 transition-all hover:scale-110 active:scale-95 ${finished ? 'text-green-500' : 'text-neutral-300'}`}>
                                                             {finished ? <CheckCircle2 size={24} className="text-green-500" /> : <Circle size={24} />}
                                                         </button>
                                                         <div className="flex-1">
@@ -1720,7 +1720,7 @@ export default function App() {
                                                             </div>
                                                             <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-neutral-800' : 'bg-neutral-100'}`}>
                                                                 <div
-                                                                    className="h-full bg-gradient-to-r from-red-600 to-amber-500 transition-all duration-700 ease-out"
+                                                                    className="h-full bg-linear-to-r from-red-600 to-amber-500 transition-all duration-700 ease-out"
                                                                     style={{ width: `${progress.percent}%` }}
                                                                 />
                                                             </div>
@@ -1746,7 +1746,7 @@ export default function App() {
                                                             return (
                                                                 <div key={arc.id} className={`group ${arcIdx < saga.arcs.length - 1 ? `border-b ${theme.border}` : ''}`} ref={el => { arcRefs.current[arc.id] = el }}>
                                                                     <div className={`flex items-center py-2.5 px-3 sm:py-3 sm:px-4 transition-colors cursor-pointer ${theme.hover}`} onClick={() => toggleArcDropdown(arc.id)}>
-                                                                        <button onClick={(e) => toggleArcComplete(arc, e)} className={`flex-shrink-0 mr-3 sm:mr-3.5 transition-all hover:scale-110 active:scale-95 ${finished ? 'text-green-500' : 'text-neutral-300'}`}>
+                                                                        <button onClick={(e) => toggleArcComplete(arc, e)} className={`shrink-0 mr-3 sm:mr-3.5 transition-all hover:scale-110 active:scale-95 ${finished ? 'text-green-500' : 'text-neutral-300'}`}>
                                                                             {finished ? <CheckCircle2 size={22} className="text-green-500" /> : <Circle size={22} />}
                                                                         </button>
 
@@ -1763,7 +1763,7 @@ export default function App() {
                                                                                 <span className={`px-1 py-0.5 rounded text-[8px] uppercase tracking-tighter ${arc.type === 'Filler' ? 'bg-neutral-100 dark:bg-neutral-900/40 dark:text-neutral-400' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600'} whitespace-nowrap`}> {arc.type} </span>
                                                                             </div>
                                                                         </div>
-                                                                        <div className={`p-1 flex-shrink-0 rounded-lg transition-all ${isExpanded ? 'bg-red-500 text-white shadow-md' : theme.muted}`}>
+                                                                        <div className={`p-1 shrink-0 rounded-lg transition-all ${isExpanded ? 'bg-red-500 text-white shadow-md' : theme.muted}`}>
                                                                             {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                                                                         </div>
                                                                     </div>
@@ -1793,7 +1793,7 @@ export default function App() {
                                                                                         return (
                                                                                             <div id={`episode-${epNum}`} key={epNum} className={`flex items-center gap-2 sm:gap-4 py-2.5 sm:py-3 px-3 sm:px-5 transition-all duration-500 group/ep ${isWatched ? 'bg-green-500/5 opacity-90' : ''} ${!isLastEp ? `border-b border-dashed ${isDarkMode ? 'border-neutral-800' : 'border-neutral-200'}` : ''}`}>
                                                                                                 <div className="flex items-center flex-1 min-w-0 gap-2 sm:gap-3">
-                                                                                                    <button onClick={() => toggleEpisode(epNum)} className={`flex-shrink-0 transition-all ${isWatched ? 'text-green-500' : theme.muted}`}>
+                                                                                                    <button onClick={() => toggleEpisode(epNum)} className={`shrink-0 transition-all ${isWatched ? 'text-green-500' : theme.muted}`}>
                                                                                                         {isWatched ? <CheckCircle2 size={20} className="text-green-500 dark:bg-transparent rounded-full" /> : <Circle size={20} />}
                                                                                                     </button>
                                                                                                     <div className={`flex items-center justify-center px-1.5 sm:px-2 min-w-[30px] sm:min-w-[34px] h-[20px] sm:h-[22px] rounded-md border shadow-sm ${isWatched ? 'bg-green-50 border-green-200 text-green-600 dark:bg-green-900/30 dark:border-green-800 dark:text-green-400' : 'bg-white border-neutral-200 text-neutral-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400'} font-black text-[9px] sm:text-[10px] tracking-tight`}>
@@ -1801,7 +1801,7 @@ export default function App() {
                                                                                                     </div>
                                                                                                     <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleEpisode(epNum)}>
                                                                                                         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                                                                                                            <h5 className={`text-xs sm:text-[13px] font-bold leading-tight line-clamp-2 sm:line-clamp-none ${isWatched ? 'line-through decoration-neutral-400/50 decoration-[2px] text-neutral-400' : ''}`}>
+                                                                                                            <h5 className={`text-xs sm:text-[13px] font-bold leading-tight line-clamp-2 sm:line-clamp-none ${isWatched ? 'line-through decoration-neutral-400/50 decoration-2 text-neutral-400' : ''}`}>
                                                                                                                 {getEpisodeTitle(epNum)}
                                                                                                             </h5>
                                                                                                             {arc.type === 'Mixed' && (
@@ -1814,7 +1814,7 @@ export default function App() {
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </div>
-                                                                                                <a href={getBilibiliUrl(epNum)} target="_blank" rel="noopener noreferrer" className={`flex-shrink-0 flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] font-black uppercase transition-all border ${isDarkMode ? 'bg-neutral-900 border-red-900/50 text-red-400 hover:bg-neutral-800' : 'bg-white border-neutral-200 text-red-600 hover:bg-red-50 shadow-sm'} h-8 sm:h-auto`}>
+                                                                                                <a href={getBilibiliUrl(epNum)} target="_blank" rel="noopener noreferrer" className={`shrink-0 flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] font-black uppercase transition-all border ${isDarkMode ? 'bg-neutral-900 border-red-900/50 text-red-400 hover:bg-neutral-800' : 'bg-white border-neutral-200 text-red-600 hover:bg-red-50 shadow-sm'} h-8 sm:h-auto`}>
                                                                                                     <Play size={12} fill="currentColor" className="sm:mr-1" />
                                                                                                     <span className="hidden sm:inline">{t('watch_label')}</span>
                                                                                                     <span className="hidden lg:inline ml-1">Bilibili</span>
@@ -1851,10 +1851,10 @@ export default function App() {
                                 {filteredMovies.map((movie) => (
                                     <div
                                         key={movie.id}
-                                        className={`flex flex-col rounded-[2rem] overflow-hidden transition-all duration-200 group border h-full ${watchedMovies.includes(movie.id) ? 'border-green-500/50 bg-green-500/[0.02]' : `${theme.card} hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1`}`}
+                                        className={`flex flex-col rounded-4xl overflow-hidden transition-all duration-200 group border h-full ${watchedMovies.includes(movie.id) ? 'border-green-500/50 bg-green-500/2' : `${theme.card} hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1`}`}
                                     >
                                         {/* Poster Section */}
-                                        <div className="relative aspect-[2/3] overflow-hidden cursor-pointer" onClick={() => toggleMovie(movie.id)}>
+                                        <div className="relative aspect-2/3 overflow-hidden cursor-pointer" onClick={() => toggleMovie(movie.id)}>
                                             {movie.poster ? (
                                                 <img
                                                     src={movie.poster}
@@ -1870,7 +1870,7 @@ export default function App() {
                                             )}
 
                                             {/* Overlays */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                                             {/* Top Actions */}
                                             <div className="absolute top-3 right-3 flex flex-col gap-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
