@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import * as htmlToImage from 'html-to-image';
-import EPISODE_DB from './data/bilibili_episodes.json';
-import ENGLISH_EPISODE_DB from './data/english_episodes.json';
+import INITIAL_EPISODE_DB from '../public/data/bilibili_episodes.json';
+import INITIAL_ENGLISH_EPISODE_DB from '../public/data/english_episodes.json';
 import {
     CheckCircle2,
     Circle,
@@ -69,13 +69,7 @@ const getDeviceInfo = () => {
 
 // Episode Database is now imported from ./data/bilibili_episodes.json
 
-const getBilibiliUrl = (epNum: string | number) => {
-    const epData = (EPISODE_DB as any)[epNum];
-    if (epData && epData.url) {
-        return epData.url;
-    }
-    return `https://www.bilibili.tv/id/search-result?q=One+Piece+Episode+${epNum}`;
-};
+// getBilibiliUrl moved inside App component to access state
 
 
 
@@ -179,6 +173,17 @@ const StatCard = ({ title, icon, current, total, percent, color, isDarkMode, isE
 };
 
 export default function App() {
+    const [episodeDb, setEpisodeDb] = useState<any>(INITIAL_EPISODE_DB);
+    const [englishEpisodeDb, setEnglishEpisodeDb] = useState<any>(INITIAL_ENGLISH_EPISODE_DB);
+
+    const getBilibiliUrl = (epNum: string | number) => {
+        const epData = (episodeDb as any)[epNum];
+        if (epData && epData.url) {
+            return epData.url;
+        }
+        return `https://www.bilibili.tv/id/search-result?q=One+Piece+Episode+${epNum}`;
+    };
+
     const [watchedEpisodes, setWatchedEpisodes] = useState<string[]>([]);
     const [watchedMovies, setWatchedMovies] = useState<string[]>([]);
     const [activeTab, setActiveTab] = useState('episodes');
@@ -505,9 +510,10 @@ export default function App() {
             arcs: [
                 { id: 'egghead-1', title: 'Egghead Island (Part 1)', start: 1089, end: 1122, type: 'Canon' },
                 { id: 'egghead-2', title: 'Egghead Island (Part 2)', start: 1123, end: 1155, type: 'Canon' },
+                { id: 'elbaf', title: 'Elbaf', start: 1156, end: Math.max(1156, ...Object.keys(episodeDb).map(Number).filter(n => !isNaN(n))), type: 'Canon' },
             ]
         }
-    ], [language, t]);
+    ], [language, t, episodeDb]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
     const [sagaViewMode, setSagaViewMode] = useState<'card' | 'list'>('card');
     const [isExporting, setIsExporting] = useState(false);
@@ -574,27 +580,62 @@ export default function App() {
             setNotificationsEnabled(Notification.permission === 'granted');
 
             if (Notification.permission === 'granted') {
-                const keys = Object.keys(EPISODE_DB).map(Number).filter(n => !isNaN(n));
-                const maxEp = keys.length > 0 ? Math.max(...keys) : 0;
-                const savedMaxEpStr = localStorage.getItem(`gl-tracker-${appId}-lastep`);
-                const savedMaxEp = savedMaxEpStr ? parseInt(savedMaxEpStr, 10) : maxEp;
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then((registration) => {
+                         // Send message to start checker
+                        if (registration.active) {
+                            registration.active.postMessage({ type: 'START_CHECKER' });
+                        }
 
-                if (maxEp > savedMaxEp) {
-                    const n = new Notification(t('notif_new_ep_title'), {
-                        body: t('notif_new_ep_body').replace('{ep}', maxEp.toString()),
-                        icon: '/mugiwara-logo.png'
+                        // Try to register periodic sync if supported
+                        if ('periodicSync' in registration) {
+                            try {
+                                (registration as any).periodicSync.register('check-episodes', {
+                                    minInterval: 3 * 60 * 60 * 1000,
+                                });
+                            } catch (error) {
+                                console.error('Periodic background sync cannot be used.', error);
+                            }
+                        }
                     });
-                    n.onclick = () => {
-                        window.focus();
-                        n.close();
-                    };
-                    localStorage.setItem(`gl-tracker-${appId}-lastep`, maxEp.toString());
-                } else if (!savedMaxEpStr) {
-                    localStorage.setItem(`gl-tracker-${appId}-lastep`, maxEp.toString());
                 }
             }
         }
     }, [loading]);
+
+    useEffect(() => {
+        const fetchLatestData = async () => {
+            try {
+                const [resId, resEn] = await Promise.all([
+                    fetch('/data/bilibili_episodes.json?t=' + Date.now()),
+                    fetch('/data/english_episodes.json?t=' + Date.now())
+                ]);
+                if (resId.ok) setEpisodeDb(await resId.json());
+                if (resEn.ok) setEnglishEpisodeDb(await resEn.json());
+            } catch (e) {
+                console.error("Failed to fetch latest episode data", e);
+            }
+        };
+
+        fetchLatestData();
+
+        // Listen for updates from Service Worker
+        const handleMessage = (event: MessageEvent) => {
+            if (event.data && event.data.type === 'EPISODES_UPDATED') {
+                fetchLatestData();
+            }
+        };
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', handleMessage);
+        }
+
+        return () => {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.removeEventListener('message', handleMessage);
+            }
+        };
+    }, []);
 
     const saveLocally = (updates: any) => {
         const currentData = JSON.parse(localStorage.getItem(`gl-tracker-${appId}`) || '{}');
@@ -808,11 +849,11 @@ export default function App() {
 
     const getEpisodeTitle = (num: number | string) => {
         if (language === 'id') {
-            const epData = (EPISODE_DB as any)[num];
+            const epData = (episodeDb as any)[num];
             return epData?.title || `Misi ${num}`;
         }
         // English Title from local database
-        const engTitle = (ENGLISH_EPISODE_DB as any)[num];
+        const engTitle = (englishEpisodeDb as any)[num];
         return engTitle || `${t('ep_mission')} ${num}`;
     };
 
@@ -825,7 +866,7 @@ export default function App() {
             setNotificationsEnabled(permission === 'granted');
             if (permission === 'granted') {
                 alert(t('alert_notif_enabled'));
-                const keys = Object.keys(EPISODE_DB).map(Number).filter(n => !isNaN(n));
+                const keys = Object.keys(episodeDb).map(Number).filter(n => !isNaN(n));
                 const maxEp = keys.length > 0 ? Math.max(...keys) : 0;
                 localStorage.setItem(`gl-tracker-${appId}-lastep`, maxEp.toString());
             }
