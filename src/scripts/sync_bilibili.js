@@ -41,7 +41,7 @@ function extractEpisodes(result) {
     return episodes;
 }
 
-async function fetchTitleFromHTML(epId, locale) {
+async function fetchTitleFromHTML(epNum, epId, locale) {
     const lang = locale.split('_')[0];
     const url = `https://www.bilibili.tv/${lang}/play/37976/${epId}`;
     try {
@@ -52,45 +52,78 @@ async function fetchTitleFromHTML(epId, locale) {
             }
         });
 
-        if (!response.ok) {
-            console.warn(`⚠️ Scraping failed for ${epId}: HTTP ${response.status}`);
-            return null;
-        }
+        if (!response.ok) return null;
 
         const html = await response.text();
         
-        // Try multiple tags: og:title, twitter:title, and standard <title>
+        // Priority: <title> tag usually has the most specific info
         const tags = [
+            html.match(/<title>([^<]+)<\/title>/i),
             html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i),
-            html.match(/<meta\s+name=["']twitter:title["']\s+content=["']([^"']+)["']/i),
-            html.match(/<title>([^<]+)<\/title>/i)
+            html.match(/<meta\s+name=["']twitter:title["']\s+content=["']([^"']+)["']/i)
         ];
 
         for (const match of tags) {
             if (match && match[1]) {
                 const fullTitle = match[1].trim();
                 
-                // Cleanup: Handle "One Piece E1157 - Name - Bstation", "Name | One Piece | Bstation", etc.
-                // Regex handles various dash types (hyphen, en-dash, em-dash) and separators
+                // VALIDATION: Ensure the title actually refers to the episode we want
+                // Bstation sometimes has generic series metadata like "One Piece HD" in og:title
+                if (!fullTitle.includes(epNum) && !fullTitle.match(new RegExp(`E${epNum}`, 'i'))) {
+                    continue;
+                }
+
                 let cleaned = fullTitle
-                    .replace(/^One\s+Piece\s+(Episode|E)\d+\s*[\-\–\—\:\|]\s*/i, '') // Remove prefix
-                    .replace(/\s*[\-\–\—\:\|]\s*(Bstation|Bilibili|One Piece).*$/i, '') // Remove suffix
+                    .replace(/^One\s+Piece\s+(Episode|E)\d+\s*[\-\–\—\:\|]\s*/i, '')
+                    .replace(/\s*[\-\–\—\:\|]\s*(Bstation|Bilibili|One Piece).*$/i, '')
                     .trim();
 
-                if (cleaned && cleaned.toLowerCase() !== 'one piece' && cleaned !== fullTitle) {
+                const isGeneric = (t) => t.toLowerCase().includes('one piece') && (t.toLowerCase().includes('hd') || t.length < 15);
+                if (cleaned && !isGeneric(cleaned) && cleaned !== fullTitle) {
                     return cleaned;
                 }
             }
         }
-
-        // Diagnostic: If we found a title but couldn't clean it, or didn't find one at all
-        console.warn(`🔍 Scraper diagnostic for ${epId}: Tag list empty or cleanup failed.`);
-        if (html.includes('Cloudflare') || html.includes('captcha')) {
-            console.warn('🚨 Dideteksi blokir Bot/Cloudflare pada runner!');
-        }
-
     } catch (e) {
         console.error(`Error scraping HTML title for ${epId}:`, e.message);
+    }
+    return null;
+}
+
+/**
+ * Ultimate Fallback: Query AniList GraphQL API for official episode titles
+ */
+async function fetchTitleFromAniList(epNum) {
+    console.log(`🌐 Memanggil AniList API untuk Episode ${epNum}...`);
+    const query = `
+    query ($id: Int) {
+      Media (id: $id, type: ANIME) {
+        streamingEpisodes {
+          title
+        }
+      }
+    }`;
+
+    try {
+        const response = await fetch('https://graphql.anilist.co', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ query, variables: { id: 21 } }) // 21 is One Piece
+        });
+        
+        if (!response.ok) return null;
+        
+        const result = await response.json();
+        const episodes = result.data.Media.streamingEpisodes;
+        
+        // AniList titles often look like "Episode 1157 - Title Name"
+        const target = episodes.find(e => e.title.includes(`Episode ${epNum}`));
+        if (target) {
+            // Remove "Episode X - " prefix
+            return target.title.replace(/^Episode\s+\d+\s*[-\–\—]\s*/i, '').trim();
+        }
+    } catch (e) {
+        console.error('AniList API Error:', e.message);
     }
     return null;
 }
@@ -168,8 +201,14 @@ async function sync() {
             // Fallback 2: HTML Scraping if still generic
             if (isGeneric(finalTitleId)) {
                 console.log(`🌐 Scraping judul asli untuk Episode ${epNum} dari Web Bstation...`);
-                const htmlTitle = await fetchTitleFromHTML(epId, 'id_ID');
+                const htmlTitle = await fetchTitleFromHTML(epNum, epId, 'id_ID');
                 if (htmlTitle) finalTitleId = htmlTitle;
+            }
+
+            // Fallback 3: AniList API (Global Release)
+            if (isGeneric(finalTitleId)) {
+                const aniTitle = await fetchTitleFromAniList(epNum);
+                if (aniTitle) finalTitleId = aniTitle;
             }
 
             if (isGeneric(finalTitleEn)) {
@@ -178,8 +217,13 @@ async function sync() {
             }
             
             if (isGeneric(finalTitleEn)) {
-                const htmlTitleEn = await fetchTitleFromHTML(epId, 'en_US');
+                const htmlTitleEn = await fetchTitleFromHTML(epNum, epId, 'en_US');
                 if (htmlTitleEn) finalTitleEn = htmlTitleEn;
+            }
+
+            if (isGeneric(finalTitleEn)) {
+                const aniTitleEn = await fetchTitleFromAniList(epNum);
+                if (aniTitleEn) finalTitleEn = aniTitleEn;
             }
 
             // Fallback 2: Cross-language
