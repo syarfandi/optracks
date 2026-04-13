@@ -144,8 +144,38 @@ function sanitizeTitle(title) {
 }
 
 /**
- * Ultimate Fallback: Query AniList GraphQL API for official episode titles
+ * Ultimate Fallback: Query One Piece Fandom Wiki
  */
+async function fetchTitleFromFandom(epNum) {
+    console.log(`🌐 Memanggil Fandom Wiki API untuk Episode ${epNum}...`);
+    // Format title as 'Episode 1157'
+    const title = `Episode_${epNum}`;
+    const url = `https://onepiece.fandom.com/api.php?action=query&titles=${title}&prop=revisions&rvprop=content&format=json&origin=*`;
+    
+    try {
+        const response = await fetch(url);
+        if (!response.ok) return null;
+        const data = await response.json();
+        
+        const pages = data.query.pages;
+        const pageId = Object.keys(pages)[0];
+        if (pageId === "-1") return null;
+        
+        const content = pages[pageId].revisions[0]["*"];
+        // Extract title from Infobox (handles both |title= and |judul=)
+        const match = content.match(/\|\s*(title|judul)\s*=\s*([^|\n]+)/i);
+        if (match && match[2]) {
+            let result = match[2].replace(/\{\{.*?\}\}/g, '').trim();
+            // Remove any trailing commentary like " (episode)"
+            result = result.replace(/\s*\(.*?\)\s*/g, '').trim();
+            return result;
+        }
+    } catch (e) {
+        console.error('Fandom API Error:', e.message);
+    }
+    return null;
+}
+
 async function fetchTitleFromAniList(epNum) {
     console.log(`🌐 Memanggil AniList API untuk Episode ${epNum}...`);
     const query = `
@@ -274,7 +304,14 @@ async function sync() {
                     const aniTitle = await fetchTitleFromAniList(epNum);
                     if (aniTitle) finalTitleId = sanitizeTitle(aniTitle);
                 }
+
+                // Langkah 5: Fandom Wiki (Ultimate Fallback)
+                if (isGeneric(finalTitleId)) {
+                    const fandomTitleId = await fetchTitleFromFandom(epNum);
+                    if (fandomTitleId) finalTitleId = sanitizeTitle(fandomTitleId);
+                }
             }
+
 
             // --- PEMULIHAN JUDUL (INGGRIS) ---
             if (isGeneric(finalTitleEn)) {
@@ -299,13 +336,13 @@ async function sync() {
                     if (searchTitleEn) finalTitleEn = sanitizeTitle(searchTitleEn);
                 }
 
-                // Langkah 4: AniList
+                // Langkah 5: Fandom Wiki (Ultimate Fallback)
                 if (isGeneric(finalTitleEn)) {
-                    console.log(`🇬🇧 EP ${epNum} [EN] Langkah 4: Melalui AniList API...`);
-                    const aniTitleEn = await fetchTitleFromAniList(epNum);
-                    if (aniTitleEn) finalTitleEn = sanitizeTitle(aniTitleEn);
+                    const fandomTitle = await fetchTitleFromFandom(epNum);
+                    if (fandomTitle) finalTitleEn = sanitizeTitle(fandomTitle);
                 }
             }
+
 
             // --- LOGIKA FALLBACK ANTAR BAHASA ---
             // Hanya salin dari Inggris ke Indonesia jika Indonesia masih generik
@@ -336,12 +373,28 @@ async function sync() {
                 
                 newCount++;
                 console.log(`✅ Episode Baru: [${epNum}] ${currentDataId[epNum].title}`);
-            } else if (epNum && currentDataId[epNum] && isGeneric(currentDataId[epNum].title) && !isGeneric(finalTitleId)) {
-                console.log(`🔄 Memperbarui Judul: [${epNum}] ${currentDataId[epNum].title} -> ${finalTitleId}`);
-                currentDataId[epNum].title = finalTitleId;
-                currentDataEn[epNum] = finalTitleEn;
-                newCount++;
+            } else if (epNum && currentDataId[epNum]) {
+                const oldTitleId = currentDataId[epNum].title;
+                const oldTitleEn = currentDataEn[epNum];
+                
+                let updated = false;
+                // PERSISTENCE LOGIC: Only update if the new title is NOT generic
+                // AND it's different from the old title.
+                if (isGeneric(oldTitleId) && !isGeneric(finalTitleId)) {
+                    console.log(`🔄 Memperbarui Judul ID: [${epNum}] ${oldTitleId} -> ${finalTitleId}`);
+                    currentDataId[epNum].title = finalTitleId;
+                    updated = true;
+                }
+                
+                if (isGeneric(oldTitleEn) && !isGeneric(finalTitleEn)) {
+                    console.log(`🔄 Memperbarui Judul EN: [${epNum}] ${oldTitleEn} -> ${finalTitleEn}`);
+                    currentDataEn[epNum] = finalTitleEn;
+                    updated = true;
+                }
+
+                if (updated) newCount++;
             }
+
         }
 
         if (newCount > 0) {
