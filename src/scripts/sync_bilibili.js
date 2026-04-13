@@ -6,10 +6,10 @@ const DATA_PATH_ID = path.resolve('public/data/bilibili_episodes.json');
 const DATA_PATH_EN = path.resolve('public/data/english_episodes.json');
 
 async function fetchBilibiliData(locale) {
-    const url = `https://api.biliintl.com/intl/gateway/v2/ogv/view/app/season?season_id=${SEASON_ID}&language=${locale}&s_locale=${locale}`;
+    const url = `https://api.biliintl.com/intl/gateway/v2/ogv/view/app/season?season_id=${SEASON_ID}&language=${locale}&s_locale=${locale}&mobi_app=android&platform=android`;
     const response = await fetch(url, {
         headers: {
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
             'Referer': 'https://www.bilibili.tv/',
             'Accept': 'application/json'
         }
@@ -65,15 +65,36 @@ async function sync() {
             const epId = ep.id;
             const epEn = episodesEn.find(e => e.id === epId) || ep;
             
+            // Logic perbaikan judul: Jika judul generik, coba cari yang lebih deskriptif
+            const isGeneric = (t) => !t || t.toLowerCase() === `episode ${epNum}` || t === epNum;
+            
+            let finalTitleId = ep.long_title;
+            let finalTitleEn = epEn.long_title;
+
+            // Fallback: Jika ID generik tapi EN ada judul (atau sebaliknya), gunakan yang tersedia
+            if (isGeneric(finalTitleId) && !isGeneric(finalTitleEn)) finalTitleId = finalTitleEn;
+            if (isGeneric(finalTitleEn) && !isGeneric(finalTitleId)) finalTitleEn = finalTitleId;
+
+            // Jika masih generik, coba bersihkan "Episode XXX" jika ada info tambahan
+            const cleanTitle = (t) => t ? t.replace(/^Episode\s+\d+\s*[:-]?\s*/i, '').trim() : t;
+            if (isGeneric(finalTitleId)) finalTitleId = `Episode ${epNum}`;
+            if (isGeneric(finalTitleEn)) finalTitleEn = `Episode ${epNum}`;
+
             if (epNum && !currentDataId[epNum]) {
                 currentDataId[epNum] = {
-                    title: ep.long_title || `Episode ${epNum}`,
+                    title: finalTitleId,
                     url: `https://www.bilibili.tv/play/${SEASON_ID}/${epId}`
                 };
-                currentDataEn[epNum] = epEn.long_title || `Episode ${epNum}`;
+                currentDataEn[epNum] = finalTitleEn;
                 
                 newCount++;
                 console.log(`✅ Episode Baru: [${epNum}] ${currentDataId[epNum].title}`);
+            } else if (epNum && currentDataId[epNum] && isGeneric(currentDataId[epNum].title) && !isGeneric(finalTitleId)) {
+                // Perbarui judul jika sebelumnya tersimpan sebagai judul generik
+                console.log(`🔄 Memperbarui Judul: [${epNum}] ${currentDataId[epNum].title} -> ${finalTitleId}`);
+                currentDataId[epNum].title = finalTitleId;
+                currentDataEn[epNum] = finalTitleEn;
+                newCount++;
             }
         });
 
