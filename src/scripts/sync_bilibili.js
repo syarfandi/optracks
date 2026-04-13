@@ -113,9 +113,19 @@ async function fetchTitleFromJikan(epNum) {
         if (!response.ok) return null;
         
         const data = await response.json();
+        // Look for the episode in the data array
         const ep = data.data.find(e => e.mal_id == epNum);
         if (ep && ep.title) {
             return ep.title.trim();
+        }
+        
+        // If not found, try the NEXT page just in case of overlaps or 50-item pages
+        const nextUrl = `https://api.jikan.moe/v4/anime/21/episodes?page=${page + 1}`;
+        const nextResponse = await fetch(nextUrl);
+        if (nextResponse.ok) {
+            const nextData = await nextResponse.json();
+            const nextEp = nextData.data.find(e => e.mal_id == epNum);
+            if (nextEp && nextEp.title) return nextEp.title.trim();
         }
     } catch (e) {
         console.error('Jikan API Error:', e.message);
@@ -160,7 +170,8 @@ async function fetchTitleFromAniList(epNum) {
         const episodes = result.data.Media.streamingEpisodes;
         
         // AniList titles often look like "Episode 1157 - Title Name"
-        const target = episodes.find(e => e.title.includes(`Episode ${epNum}`));
+        // We look for both "Episode X" and "Episode 0X" etc.
+        const target = episodes.find(e => e.title.includes(`Episode ${epNum}`) || e.title.includes(` ${epNum} `));
         if (target) {
             // Remove "Episode X - " prefix
             return target.title.replace(/^Episode\s+\d+\s*[-\–\—]\s*/i, '').trim();
@@ -234,69 +245,83 @@ async function sync() {
             let finalTitleId = ep.long_title;
             let finalTitleEn = epEn.long_title;
 
-            // Fallback 1: Search API if generic
+            // --- PEMULIHAN JUDUL (INDONESIA) ---
             if (isGeneric(finalTitleId)) {
-                console.log(`🔍 Mencari judul asli untuk Episode ${epNum} via Search API...`);
-                const searchTitle = await fetchTitleFromSearch(epNum, 'id_ID');
-                if (searchTitle) finalTitleId = searchTitle;
-            }
-
-            // Fallback 2: HTML Scraping if still generic
-            if (isGeneric(finalTitleId)) {
-                console.log(`🌐 Scraping judul asli untuk Episode ${epNum} dari Web Bstation...`);
+                console.log(`🇮🇩 EP ${epNum}: Memulai pemulihan judul bahasa Indonesia...`);
+                
+                // Langkah 1: Scraping (NEXT_DATA)
+                console.log(`🇮🇩 EP ${epNum} [ID] Langkah 1: Scraping Web Bstation...`);
                 const htmlTitle = await fetchTitleFromHTML(epNum, epId, 'id_ID');
-                if (htmlTitle) finalTitleId = htmlTitle;
+                if (htmlTitle) finalTitleId = sanitizeTitle(htmlTitle);
+
+                // Langkah 2: MyAnimeList (Jikan)
+                if (isGeneric(finalTitleId)) {
+                    console.log(`🇮🇩 EP ${epNum} [ID] Langkah 2: Mencari di MyAnimeList (Jikan)...`);
+                    const jikanTitle = await fetchTitleFromJikan(epNum);
+                    if (jikanTitle) finalTitleId = sanitizeTitle(jikanTitle);
+                }
+
+                // Langkah 3: Search API
+                if (isGeneric(finalTitleId)) {
+                    console.log(`🇮🇩 EP ${epNum} [ID] Langkah 3: Melalui Search API...`);
+                    const searchTitle = await fetchTitleFromSearch(epNum, 'id_ID');
+                    if (searchTitle) finalTitleId = sanitizeTitle(searchTitle);
+                }
+
+                // Langkah 4: AniList
+                if (isGeneric(finalTitleId)) {
+                    console.log(`🇮🇩 EP ${epNum} [ID] Langkah 4: Melalui AniList API...`);
+                    const aniTitle = await fetchTitleFromAniList(epNum);
+                    if (aniTitle) finalTitleId = sanitizeTitle(aniTitle);
+                }
             }
 
-            // Fallback 3: AniList API (Global Release)
-            if (isGeneric(finalTitleId)) {
-                const aniTitle = await fetchTitleFromAniList(epNum);
-                if (aniTitle) finalTitleId = aniTitle;
-            }
+            // --- PEMULIHAN JUDUL (INGGRIS) ---
+            if (isGeneric(finalTitleEn)) {
+                console.log(`🇬🇧 EP ${epNum}: Memulai pemulihan judul bahasa Inggris...`);
 
-            if (isGeneric(finalTitleEn)) {
-                const searchTitleEn = await fetchTitleFromSearch(epNum, 'en_US');
-                if (searchTitleEn) finalTitleEn = searchTitleEn;
-            }
-            
-            if (isGeneric(finalTitleEn)) {
+                // Langkah 1: Scraping (NEXT_DATA)
+                console.log(`🇬🇧 EP ${epNum} [EN] Langkah 1: Scraping Web Bstation...`);
                 const htmlTitleEn = await fetchTitleFromHTML(epNum, epId, 'en_US');
-                if (htmlTitleEn) finalTitleEn = htmlTitleEn;
+                if (htmlTitleEn) finalTitleEn = sanitizeTitle(htmlTitleEn);
+
+                // Langkah 2: MyAnimeList (Jikan)
+                if (isGeneric(finalTitleEn)) {
+                    console.log(`🇬🇧 EP ${epNum} [EN] Langkah 2: Mencari di MyAnimeList (Jikan)...`);
+                    const jikanTitleEn = await fetchTitleFromJikan(epNum);
+                    if (jikanTitleEn) finalTitleEn = sanitizeTitle(jikanTitleEn);
+                }
+
+                // Langkah 3: Search API
+                if (isGeneric(finalTitleEn)) {
+                    console.log(`🇬🇧 EP ${epNum} [EN] Langkah 3: Melalui Search API...`);
+                    const searchTitleEn = await fetchTitleFromSearch(epNum, 'en_US');
+                    if (searchTitleEn) finalTitleEn = sanitizeTitle(searchTitleEn);
+                }
+
+                // Langkah 4: AniList
+                if (isGeneric(finalTitleEn)) {
+                    console.log(`🇬🇧 EP ${epNum} [EN] Langkah 4: Melalui AniList API...`);
+                    const aniTitleEn = await fetchTitleFromAniList(epNum);
+                    if (aniTitleEn) finalTitleEn = sanitizeTitle(aniTitleEn);
+                }
             }
 
-            // Fallback 4: MyAnimeList (Jikan) - Extreme Reliability
-            if (isGeneric(finalTitleId)) {
-                const jikanTitle = await fetchTitleFromJikan(epNum);
-                if (jikanTitle) finalTitleId = jikanTitle;
-            }
-
-            // Fallback 2: Cross-language
-            if (isGeneric(finalTitleId) && !isGeneric(finalTitleEn)) finalTitleId = finalTitleEn;
-            if (isGeneric(finalTitleEn) && !isGeneric(finalTitleId)) finalTitleEn = finalTitleId;
-
-            // Final Sanity Check for Chinese Titles
-            finalTitleId = sanitizeTitle(finalTitleId);
-            finalTitleEn = sanitizeTitle(finalTitleEn);
-
-            // Simple Auto-Translate for common One Piece titles if Indonesian is still generic
+            // --- LOGIKA FALLBACK ANTAR BAHASA ---
+            // Hanya salin dari Inggris ke Indonesia jika Indonesia masih generik
             if (isGeneric(finalTitleId) && !isGeneric(finalTitleEn)) {
-                // Common One Piece terms from English to Indonesian
+                console.log(`🇮🇩 EP ${epNum}: Menggunakan judul Inggris sebagai dasar terjemahan Indonesia...`);
+                // Simple Auto-Translate for common One Piece titles
                 const map = {
-                    'Adventure': 'Petualangan',
-                    'Kingdom': 'Kerajaan',
-                    'Problem': 'Masalah',
-                    'Trouble': 'Masalah',
-                    'Fix': 'Masalah', 
-                    'Block': 'Blok',
-                    'Mystery': 'Misteri',
-                    'Battle': 'Pertempuran'
+                    'Adventure': 'Petualangan', 'Kingdom': 'Kerajaan', 'Problem': 'Masalah',
+                    'Trouble': 'Masalah', 'Fix': 'Masalah', 'Block': 'Blok',
+                    'Mystery': 'Misteri', 'Battle': 'Pertempuran'
                 };
                 let translated = finalTitleEn;
                 Object.keys(map).forEach(key => {
-                    const regex = new RegExp(key, 'gi');
-                    translated = translated.replace(regex, map[key]);
+                    translated = translated.replace(new RegExp(key, 'gi'), map[key]);
                 });
-                if (translated !== finalTitleEn) finalTitleId = translated;
+                finalTitleId = translated;
             }
 
             if (isGeneric(finalTitleId)) finalTitleId = `Episode ${epNum}`;
