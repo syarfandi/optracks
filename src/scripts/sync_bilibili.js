@@ -41,6 +41,33 @@ function extractEpisodes(result) {
     return episodes;
 }
 
+async function fetchTitleFromHTML(epId, locale) {
+    const lang = locale.split('_')[0];
+    const url = `https://www.bilibili.tv/${lang}/play/37976/${epId}`;
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }
+        });
+        const html = await response.text();
+        // Regex to extract title from <title> tag
+        const titleMatch = html.match(/<title>([^<]+)<\/title>/);
+        if (titleMatch) {
+            let fullTitle = titleMatch[1];
+            // Format: "One Piece E1157 - Title Name - Bstation"
+            let cleaned = fullTitle.replace(/^One Piece E\d+\s*[-]\s*/i, '');
+            cleaned = cleaned.replace(/\s*[-]\s*Bstation\s*$/i, '');
+            cleaned = cleaned.replace(/\s*[-]\s*Bilibili\s*$/i, '');
+            
+            if (cleaned && cleaned !== fullTitle) return cleaned.trim();
+        }
+    } catch (e) {
+        console.error(`Error scraping HTML title for ${epId}:`, e);
+    }
+    return null;
+}
+
 async function fetchTitleFromSearch(epNum, locale) {
     const url = `https://api.biliintl.com/intl/gateway/v2/app/search/v2?keyword=One%20Piece%20Episode%20${epNum}&language=${locale}&s_locale=${locale}&mobi_app=android&platform=android&pn=1&ps=10`;
     try {
@@ -104,9 +131,21 @@ async function sync() {
                 if (searchTitle) finalTitleId = searchTitle;
             }
 
+            // Fallback 2: HTML Scraping if still generic
+            if (isGeneric(finalTitleId)) {
+                console.log(`🌐 Scraping judul asli untuk Episode ${epNum} dari Web Bstation...`);
+                const htmlTitle = await fetchTitleFromHTML(epId, 'id_ID');
+                if (htmlTitle) finalTitleId = htmlTitle;
+            }
+
             if (isGeneric(finalTitleEn)) {
                 const searchTitleEn = await fetchTitleFromSearch(epNum, 'en_US');
                 if (searchTitleEn) finalTitleEn = searchTitleEn;
+            }
+            
+            if (isGeneric(finalTitleEn)) {
+                const htmlTitleEn = await fetchTitleFromHTML(epId, 'en_US');
+                if (htmlTitleEn) finalTitleEn = htmlTitleEn;
             }
 
             // Fallback 2: Cross-language
