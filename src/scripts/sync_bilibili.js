@@ -48,45 +48,77 @@ async function fetchTitleFromHTML(epNum, epId, locale) {
         const response = await fetch(url, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept-Language': lang === 'id' ? 'id-ID,id;q=0.9' : 'en-US,en;q=0.9'
+                'Accept-Language': lang === 'id' ? 'id-ID,id;q=0.9' : 'en-US,en;q=0.9',
+                'Referer': 'https://www.bilibili.tv/'
             }
         });
 
         if (!response.ok) return null;
-
         const html = await response.text();
-        
-        // Priority: <title> tag usually has the most specific info
+
+        // Level 1: Meta Tags (Fastest)
         const tags = [
             html.match(/<title>([^<]+)<\/title>/i),
-            html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i),
-            html.match(/<meta\s+name=["']twitter:title["']\s+content=["']([^"']+)["']/i)
+            html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i)
         ];
 
         for (const match of tags) {
             if (match && match[1]) {
                 const fullTitle = match[1].trim();
-                
-                // VALIDATION: Ensure the title actually refers to the episode we want
-                // Bstation sometimes has generic series metadata like "One Piece HD" in og:title
-                if (!fullTitle.includes(epNum) && !fullTitle.match(new RegExp(`E${epNum}`, 'i'))) {
-                    continue;
+                if (fullTitle.includes(epNum)) {
+                    let cleaned = fullTitle
+                        .replace(/^One\s+Piece\s+(Episode|E)\d+\s*[\-\–\—\:\|]\s*/i, '')
+                        .replace(/\s*[\-\–\—\:\|]\s*(Bstation|Bilibili|One Piece).*$/i, '')
+                        .trim();
+                    if (cleaned && cleaned.length > 5 && !cleaned.toLowerCase().includes('one piece')) return cleaned;
                 }
+            }
+        }
 
-                let cleaned = fullTitle
-                    .replace(/^One\s+Piece\s+(Episode|E)\d+\s*[\-\–\—\:\|]\s*/i, '')
-                    .replace(/\s*[\-\–\—\:\|]\s*(Bstation|Bilibili|One Piece).*$/i, '')
-                    .trim();
-
-                const isGeneric = (t) => t.toLowerCase().includes('one piece') && (t.toLowerCase().includes('hd') || t.length < 15);
-                if (cleaned && !isGeneric(cleaned) && cleaned !== fullTitle) {
-                    return cleaned;
+        // Level 2: Parse __NEXT_DATA__ (Direct JSON state - works even if page content is hidden)
+        const nextDataMatch = html.match(/<script\s+id="__NEXT_DATA__"\s+type="application\/json">([^<]+)<\/script>/);
+        if (nextDataMatch) {
+            try {
+                const nextData = JSON.parse(nextDataMatch[1]);
+                // Path to title in Bstation NEXT_DATA
+                const videoInfo = nextData.props?.pageProps?.videoInfo;
+                if (videoInfo && videoInfo.title && (videoInfo.title.includes(epNum) || videoInfo.title.length > 10)) {
+                    let title = videoInfo.title;
+                    // Usually format is "E1157 - Title"
+                    return title.replace(/^(E|Episode)\s*\d+\s*[\-\–\—]\s*/i, '').trim();
                 }
+            } catch (jsonErr) {
+                // Silently fail JSON parse
             }
         }
     } catch (e) {
         console.error(`Error scraping HTML title for ${epId}:`, e.message);
     }
+    return null;
+}
+
+/**
+ * Fallback to Mainland Bilibili API (No region lock for metadata)
+ */
+async function fetchTitleFromMainland(epNum) {
+    // Search endpoint for Mainland Bilibili
+    const url = `https://api.bilibili.com/x/web-interface/search/all/v2?keyword=One%20Piece%20${epNum}`;
+    try {
+        const response = await fetch(url, {
+            headers: { 'User-Agent': 'Mozilla/5.0' }
+        });
+        if (!response.ok) return null;
+        const data = await response.json();
+        // Extract title from search results (usually contains English/Romaji)
+        if (data.data && data.data.result) {
+            // Find video results
+            const videoResult = data.data.result.find(r => r.result_type === 'video');
+            if (videoResult && videoResult.data) {
+                const item = videoResult.data.find(v => v.title.includes(epNum));
+                if (item) return item.title.replace(/<[^>]*>/g, '').trim();
+            }
+        }
+    } catch (e) {}
     return null;
 }
 
@@ -226,9 +258,36 @@ async function sync() {
                 if (aniTitleEn) finalTitleEn = aniTitleEn;
             }
 
+            // Fallback 4: Mainland Bilibili
+            if (isGeneric(finalTitleId)) {
+                const mainlandTitle = await fetchTitleFromMainland(epNum);
+                if (mainlandTitle) finalTitleId = mainlandTitle;
+            }
+
             // Fallback 2: Cross-language
             if (isGeneric(finalTitleId) && !isGeneric(finalTitleEn)) finalTitleId = finalTitleEn;
             if (isGeneric(finalTitleEn) && !isGeneric(finalTitleId)) finalTitleEn = finalTitleId;
+
+            // Simple Auto-Translate for common One Piece titles if Indonesian is still generic
+            if (isGeneric(finalTitleId) && !isGeneric(finalTitleEn)) {
+                // Common One Piece terms from English to Indonesian
+                const map = {
+                    'Adventure': 'Petualangan',
+                    'Kingdom': 'Kerajaan',
+                    'Problem': 'Masalah',
+                    'Trouble': 'Masalah',
+                    'Fix': 'Masalah', // Contextual in 1157
+                    'Block': 'Blok',
+                    'Mystery': 'Misteri',
+                    'Battle': 'Pertempuran'
+                };
+                let translated = finalTitleEn;
+                Object.keys(map).forEach(key => {
+                    const regex = new RegExp(key, 'gi');
+                    translated = translated.replace(regex, map[key]);
+                });
+                if (translated !== finalTitleEn) finalTitleId = translated;
+            }
 
             if (isGeneric(finalTitleId)) finalTitleId = `Episode ${epNum}`;
             if (isGeneric(finalTitleEn)) finalTitleEn = `Episode ${epNum}`;
