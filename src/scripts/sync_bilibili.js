@@ -47,23 +47,50 @@ async function fetchTitleFromHTML(epId, locale) {
     try {
         const response = await fetch(url, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept-Language': lang === 'id' ? 'id-ID,id;q=0.9' : 'en-US,en;q=0.9'
             }
         });
-        const html = await response.text();
-        // Regex to extract title from <title> tag
-        const titleMatch = html.match(/<title>([^<]+)<\/title>/);
-        if (titleMatch) {
-            let fullTitle = titleMatch[1];
-            // Format: "One Piece E1157 - Title Name - Bstation"
-            let cleaned = fullTitle.replace(/^One Piece E\d+\s*[-]\s*/i, '');
-            cleaned = cleaned.replace(/\s*[-]\s*Bstation\s*$/i, '');
-            cleaned = cleaned.replace(/\s*[-]\s*Bilibili\s*$/i, '');
-            
-            if (cleaned && cleaned !== fullTitle) return cleaned.trim();
+
+        if (!response.ok) {
+            console.warn(`⚠️ Scraping failed for ${epId}: HTTP ${response.status}`);
+            return null;
         }
+
+        const html = await response.text();
+        
+        // Try multiple tags: og:title, twitter:title, and standard <title>
+        const tags = [
+            html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i),
+            html.match(/<meta\s+name=["']twitter:title["']\s+content=["']([^"']+)["']/i),
+            html.match(/<title>([^<]+)<\/title>/i)
+        ];
+
+        for (const match of tags) {
+            if (match && match[1]) {
+                const fullTitle = match[1].trim();
+                
+                // Cleanup: Handle "One Piece E1157 - Name - Bstation", "Name | One Piece | Bstation", etc.
+                // Regex handles various dash types (hyphen, en-dash, em-dash) and separators
+                let cleaned = fullTitle
+                    .replace(/^One\s+Piece\s+(Episode|E)\d+\s*[\-\–\—\:\|]\s*/i, '') // Remove prefix
+                    .replace(/\s*[\-\–\—\:\|]\s*(Bstation|Bilibili|One Piece).*$/i, '') // Remove suffix
+                    .trim();
+
+                if (cleaned && cleaned.toLowerCase() !== 'one piece' && cleaned !== fullTitle) {
+                    return cleaned;
+                }
+            }
+        }
+
+        // Diagnostic: If we found a title but couldn't clean it, or didn't find one at all
+        console.warn(`🔍 Scraper diagnostic for ${epId}: Tag list empty or cleanup failed.`);
+        if (html.includes('Cloudflare') || html.includes('captcha')) {
+            console.warn('🚨 Dideteksi blokir Bot/Cloudflare pada runner!');
+        }
+
     } catch (e) {
-        console.error(`Error scraping HTML title for ${epId}:`, e);
+        console.error(`Error scraping HTML title for ${epId}:`, e.message);
     }
     return null;
 }
