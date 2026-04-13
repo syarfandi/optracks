@@ -107,8 +107,8 @@ async function sync() {
             console.error('Cant find result in API response:', resultId);
         }
 
-        const episodesId = extractEpisodes(resultId.result || resultId.data || {});
-        const episodesEn = extractEpisodes(resultEn.result || resultEn.data || {});
+        const episodesId = extractEpisodes(resultId || {});
+        const episodesEn = extractEpisodes(resultEn || {});
 
         const currentDataId = JSON.parse(fs.readFileSync(DATA_PATH_ID, 'utf8'));
         const currentDataEn = JSON.parse(fs.readFileSync(DATA_PATH_EN, 'utf8'));
