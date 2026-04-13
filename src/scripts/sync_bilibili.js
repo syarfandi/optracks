@@ -76,6 +76,13 @@ async function fetchTitleFromSearch(epNum, locale) {
                 'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
             }
         });
+
+        // Pastikan respon adalah JSON sebelum melakukan parsing
+        const contentType = response.headers.get('content-type');
+        if (!response.ok || !contentType || !contentType.includes('application/json')) {
+            return null; // Silent fallback jika bukan JSON (biasanya 404/region-lock)
+        }
+
         const data = await response.json();
         
         if (data.result && data.result.items) {

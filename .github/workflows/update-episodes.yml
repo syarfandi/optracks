@@ -2,7 +2,8 @@ name: Update One Piece Episodes
 
 on:
   schedule:
-    - cron: '0 * * * 0,1,6' # Run every hour on Sun, Mon, Sat
+    - cron: '0 3,4 * * 1' # Monday 10:00 & 11:00 AM WIB (Exact Release Window)
+    - cron: '0 */6 * * 0' # Every 6 hours on Sunday (Background Checks)
   workflow_dispatch: # Allow manual trigger
 
 jobs:
