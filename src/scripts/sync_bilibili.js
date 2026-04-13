@@ -98,28 +98,39 @@ async function fetchTitleFromHTML(epNum, epId, locale) {
 }
 
 /**
- * Fallback to Mainland Bilibili API (No region lock for metadata)
+ * Fetch Official English Title from MyAnimeList (via Jikan API)
+ * High reliability, no region-locking.
  */
-async function fetchTitleFromMainland(epNum) {
-    // Search endpoint for Mainland Bilibili
-    const url = `https://api.bilibili.com/x/web-interface/search/all/v2?keyword=One%20Piece%20${epNum}`;
+async function fetchTitleFromJikan(epNum) {
+    console.log(`🌐 Mengambil judul resmi dari MyAnimeList (Jikan) untuk Episode ${epNum}...`);
+    // One Piece ID on MAL is 21. Querying the episodes endpoint.
+    // Since it's paginated, we search for the specific episode number.
+    const page = Math.ceil(epNum / 100); 
+    const url = `https://api.jikan.moe/v4/anime/21/episodes?page=${page}`;
+    
     try {
-        const response = await fetch(url, {
-            headers: { 'User-Agent': 'Mozilla/5.0' }
-        });
+        const response = await fetch(url);
         if (!response.ok) return null;
+        
         const data = await response.json();
-        // Extract title from search results (usually contains English/Romaji)
-        if (data.data && data.data.result) {
-            // Find video results
-            const videoResult = data.data.result.find(r => r.result_type === 'video');
-            if (videoResult && videoResult.data) {
-                const item = videoResult.data.find(v => v.title.includes(epNum));
-                if (item) return item.title.replace(/<[^>]*>/g, '').trim();
-            }
+        const ep = data.data.find(e => e.mal_id == epNum);
+        if (ep && ep.title) {
+            return ep.title.trim();
         }
-    } catch (e) {}
+    } catch (e) {
+        console.error('Jikan API Error:', e.message);
+    }
     return null;
+}
+
+function sanitizeTitle(title) {
+    if (!title) return null;
+    // Reject titles with Chinese/Japanese characters (Kanji/Hanzi/Hiragana/Katakana)
+    // to prevent fan reaction videos or mainland duplicates from polluting the data.
+    if (/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]/.test(title)) {
+        return null;
+    }
+    return title.trim();
 }
 
 /**
@@ -253,20 +264,19 @@ async function sync() {
                 if (htmlTitleEn) finalTitleEn = htmlTitleEn;
             }
 
-            if (isGeneric(finalTitleEn)) {
-                const aniTitleEn = await fetchTitleFromAniList(epNum);
-                if (aniTitleEn) finalTitleEn = aniTitleEn;
-            }
-
-            // Fallback 4: Mainland Bilibili
+            // Fallback 4: MyAnimeList (Jikan) - Extreme Reliability
             if (isGeneric(finalTitleId)) {
-                const mainlandTitle = await fetchTitleFromMainland(epNum);
-                if (mainlandTitle) finalTitleId = mainlandTitle;
+                const jikanTitle = await fetchTitleFromJikan(epNum);
+                if (jikanTitle) finalTitleId = jikanTitle;
             }
 
             // Fallback 2: Cross-language
             if (isGeneric(finalTitleId) && !isGeneric(finalTitleEn)) finalTitleId = finalTitleEn;
             if (isGeneric(finalTitleEn) && !isGeneric(finalTitleId)) finalTitleEn = finalTitleId;
+
+            // Final Sanity Check for Chinese Titles
+            finalTitleId = sanitizeTitle(finalTitleId);
+            finalTitleEn = sanitizeTitle(finalTitleEn);
 
             // Simple Auto-Translate for common One Piece titles if Indonesian is still generic
             if (isGeneric(finalTitleId) && !isGeneric(finalTitleEn)) {
@@ -276,7 +286,7 @@ async function sync() {
                     'Kingdom': 'Kerajaan',
                     'Problem': 'Masalah',
                     'Trouble': 'Masalah',
-                    'Fix': 'Masalah', // Contextual in 1157
+                    'Fix': 'Masalah', 
                     'Block': 'Blok',
                     'Mystery': 'Misteri',
                     'Battle': 'Pertempuran'
