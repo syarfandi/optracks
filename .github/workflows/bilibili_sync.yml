@@ -31,7 +31,7 @@ jobs:
         run: |
           git config --global user.name "Grand Line Bot"
           git config --global user.email "bot@grandlinetracker.com"
-          git add src/data/bilibili_episodes.json
+          git add public/data/*.json
           if git diff --staged --quiet; then
             echo "No new episodes to commit."
           else
