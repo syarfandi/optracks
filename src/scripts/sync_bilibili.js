@@ -144,13 +144,17 @@ function sanitizeTitle(title) {
 }
 
 /**
- * Ultimate Fallback: Query One Piece Fandom Wiki
+ * Ultimate Fallback: Query One Piece Fandom Wiki (Supports both ID and EN)
  */
-async function fetchTitleFromFandom(epNum) {
-    console.log(`🌐 Memanggil Fandom Wiki API untuk Episode ${epNum}...`);
+async function fetchTitleFromFandom(epNum, locale = 'en_US') {
+    const isId = locale === 'id_ID';
+    const domain = isId ? 'onepiece.fandom.com/id' : 'onepiece.fandom.com';
+    const langLog = isId ? 'ID' : 'EN';
+    console.log(`🌐 Memanggil Fandom Wiki API (${langLog}) untuk Episode ${epNum}...`);
+    
     // Format title as 'Episode 1157'
     const title = `Episode_${epNum}`;
-    const url = `https://onepiece.fandom.com/api.php?action=query&titles=${title}&prop=revisions&rvprop=content&format=json&origin=*`;
+    const url = `https://${domain}/api.php?action=query&titles=${title}&prop=revisions&rvprop=content&format=json&origin=*`;
     
     try {
         const response = await fetch(url);
@@ -282,19 +286,28 @@ async function sync() {
             if (isGeneric(finalTitleId)) {
                 console.log(`🇮🇩 EP ${epNum}: Memulai pemulihan judul bahasa Indonesia...`);
                 
-                // Langkah 1: Scraping (NEXT_DATA)
-                console.log(`🇮🇩 EP ${epNum} [ID] Langkah 1: Scraping Web Bstation...`);
-                const htmlTitle = await fetchTitleFromHTML(epNum, epId, 'id_ID');
-                if (htmlTitle) finalTitleId = sanitizeTitle(htmlTitle);
+                // Langkah 1: Fandom Wiki Indonesia (Prioritas Utama)
+                console.log(`🇮🇩 EP ${epNum} [ID] Langkah 1: Melalui Fandom Wiki ID...`);
+                const fandomTitleId = await fetchTitleFromFandom(epNum, 'id_ID');
+                if (fandomTitleId && !isGeneric(fandomTitleId)) {
+                     finalTitleId = sanitizeTitle(fandomTitleId);
+                }
 
-                // Langkah 2: Search API
+                // Langkah 2: Scraping (NEXT_DATA)
                 if (isGeneric(finalTitleId)) {
-                    console.log(`🇮🇩 EP ${epNum} [ID] Langkah 2: Melalui Search API...`);
+                    console.log(`🇮🇩 EP ${epNum} [ID] Langkah 2: Scraping Web Bstation...`);
+                    const htmlTitle = await fetchTitleFromHTML(epNum, epId, 'id_ID');
+                    if (htmlTitle) finalTitleId = sanitizeTitle(htmlTitle);
+                }
+
+                // Langkah 3: Search API
+                if (isGeneric(finalTitleId)) {
+                    console.log(`🇮🇩 EP ${epNum} [ID] Langkah 3: Melalui Search API...`);
                     const searchTitle = await fetchTitleFromSearch(epNum, 'id_ID');
                     if (searchTitle) finalTitleId = sanitizeTitle(searchTitle);
                 }
 
-                // Langkah 3: Bstation Main API (Opsi Terakhir)
+                // Langkah 4: Bstation Main API (Opsi Terakhir)
                 if (isGeneric(finalTitleId) && apiTitleId) {
                     if (!isGeneric(apiTitleId)) finalTitleId = sanitizeTitle(apiTitleId);
                 }
@@ -335,7 +348,7 @@ async function sync() {
 
                 // Langkah 5: Fandom Wiki (Ultimate Fallback)
                 if (isGeneric(finalTitleEn)) {
-                    const fandomTitle = await fetchTitleFromFandom(epNum);
+                    const fandomTitle = await fetchTitleFromFandom(epNum, 'en_US');
                     if (fandomTitle) finalTitleEn = sanitizeTitle(fandomTitle);
                 }
 
@@ -348,21 +361,8 @@ async function sync() {
 
 
             // --- LOGIKA FALLBACK ANTAR BAHASA ---
-            // Hanya salin dari Inggris ke Indonesia jika Indonesia masih generik
-            if (isGeneric(finalTitleId) && !isGeneric(finalTitleEn)) {
-                console.log(`🇮🇩 EP ${epNum}: Menggunakan judul Inggris sebagai dasar terjemahan Indonesia...`);
-                // Simple Auto-Translate for common One Piece titles
-                const map = {
-                    'Adventure': 'Petualangan', 'Kingdom': 'Kerajaan', 'Problem': 'Masalah',
-                    'Trouble': 'Masalah', 'Fix': 'Masalah', 'Block': 'Blok',
-                    'Mystery': 'Misteri', 'Battle': 'Pertempuran'
-                };
-                let translated = finalTitleEn;
-                Object.keys(map).forEach(key => {
-                    translated = translated.replace(new RegExp(key, 'gi'), map[key]);
-                });
-                finalTitleId = translated;
-            }
+            // Hapus translasi kaku campuran bahasa
+
 
             if (isGeneric(finalTitleId)) finalTitleId = `Episode ${epNum}`;
             if (isGeneric(finalTitleEn)) finalTitleEn = `Episode ${epNum}`;
