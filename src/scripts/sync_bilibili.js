@@ -375,7 +375,9 @@ async function sync() {
                 currentDataEn[epNum] = finalTitleEn;
                 
                 newCount++;
-                console.log(`✅ Episode Baru: [${epNum}] ${currentDataId[epNum].title}`);
+                console.log(`✅ Episode Baru: [${epNum}]`);
+                console.log(`   🇮🇩 ID: ${currentDataId[epNum].title}`);
+                console.log(`   🇬🇧 EN: ${currentDataEn[epNum]}`);
             } else if (epNum && currentDataId[epNum]) {
                 const oldTitleId = currentDataId[epNum].title;
                 const oldTitleEn = currentDataEn[epNum];
