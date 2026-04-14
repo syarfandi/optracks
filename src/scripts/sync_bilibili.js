@@ -272,8 +272,11 @@ async function sync() {
             
             const isGeneric = (t) => !t || t.toLowerCase() === `episode ${epNum}` || t === epNum;
             
-            let finalTitleId = ep.long_title;
-            let finalTitleEn = epEn.long_title;
+            let finalTitleId = '';
+            let finalTitleEn = '';
+            const apiTitleId = ep.long_title;
+            const apiTitleEn = epEn.long_title;
+
 
             // --- PEMULIHAN JUDUL (INDONESIA) ---
             if (isGeneric(finalTitleId)) {
@@ -284,33 +287,20 @@ async function sync() {
                 const htmlTitle = await fetchTitleFromHTML(epNum, epId, 'id_ID');
                 if (htmlTitle) finalTitleId = sanitizeTitle(htmlTitle);
 
-                // Langkah 2: MyAnimeList (Jikan)
+                // Langkah 2: Search API
                 if (isGeneric(finalTitleId)) {
-                    console.log(`🇮🇩 EP ${epNum} [ID] Langkah 2: Mencari di MyAnimeList (Jikan)...`);
-                    const jikanTitle = await fetchTitleFromJikan(epNum);
-                    if (jikanTitle) finalTitleId = sanitizeTitle(jikanTitle);
-                }
-
-                // Langkah 3: Search API
-                if (isGeneric(finalTitleId)) {
-                    console.log(`🇮🇩 EP ${epNum} [ID] Langkah 3: Melalui Search API...`);
+                    console.log(`🇮🇩 EP ${epNum} [ID] Langkah 2: Melalui Search API...`);
                     const searchTitle = await fetchTitleFromSearch(epNum, 'id_ID');
                     if (searchTitle) finalTitleId = sanitizeTitle(searchTitle);
                 }
 
-                // Langkah 4: AniList
-                if (isGeneric(finalTitleId)) {
-                    console.log(`🇮🇩 EP ${epNum} [ID] Langkah 4: Melalui AniList API...`);
-                    const aniTitle = await fetchTitleFromAniList(epNum);
-                    if (aniTitle) finalTitleId = sanitizeTitle(aniTitle);
-                }
-
-                // Langkah 5: Fandom Wiki (Ultimate Fallback)
-                if (isGeneric(finalTitleId)) {
-                    const fandomTitleId = await fetchTitleFromFandom(epNum);
-                    if (fandomTitleId) finalTitleId = sanitizeTitle(fandomTitleId);
+                // Langkah 3: Bstation Main API (Opsi Terakhir)
+                if (isGeneric(finalTitleId) && apiTitleId) {
+                    if (!isGeneric(apiTitleId)) finalTitleId = sanitizeTitle(apiTitleId);
                 }
             }
+
+
 
 
             // --- PEMULIHAN JUDUL (INGGRIS) ---
@@ -336,12 +326,25 @@ async function sync() {
                     if (searchTitleEn) finalTitleEn = sanitizeTitle(searchTitleEn);
                 }
 
+                // Langkah 4: AniList
+                if (isGeneric(finalTitleEn)) {
+                    console.log(`🇬🇧 EP ${epNum} [EN] Langkah 4: Melalui AniList API...`);
+                    const aniTitleEn = await fetchTitleFromAniList(epNum);
+                    if (aniTitleEn) finalTitleEn = sanitizeTitle(aniTitleEn);
+                }
+
                 // Langkah 5: Fandom Wiki (Ultimate Fallback)
                 if (isGeneric(finalTitleEn)) {
                     const fandomTitle = await fetchTitleFromFandom(epNum);
                     if (fandomTitle) finalTitleEn = sanitizeTitle(fandomTitle);
                 }
+
+                // Langkah 6: Bstation Main API (Opsi Terakhir)
+                if (isGeneric(finalTitleEn) && apiTitleEn) {
+                    if (!isGeneric(apiTitleEn)) finalTitleEn = sanitizeTitle(apiTitleEn);
+                }
             }
+
 
 
             // --- LOGIKA FALLBACK ANTAR BAHASA ---
