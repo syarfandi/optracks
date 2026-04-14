@@ -286,18 +286,18 @@ async function sync() {
             if (isGeneric(finalTitleId)) {
                 console.log(`🇮🇩 EP ${epNum}: Memulai pemulihan judul bahasa Indonesia...`);
                 
-                // Langkah 1: Fandom Wiki Indonesia (Prioritas Utama)
-                console.log(`🇮🇩 EP ${epNum} [ID] Langkah 1: Melalui Fandom Wiki ID...`);
-                const fandomTitleId = await fetchTitleFromFandom(epNum, 'id_ID');
-                if (fandomTitleId && !isGeneric(fandomTitleId)) {
-                     finalTitleId = sanitizeTitle(fandomTitleId);
-                }
+                // Langkah 1: Scraping (NEXT_DATA)
+                console.log(`🇮🇩 EP ${epNum} [ID] Langkah 1: Scraping Web Bstation...`);
+                const htmlTitle = await fetchTitleFromHTML(epNum, epId, 'id_ID');
+                if (htmlTitle) finalTitleId = sanitizeTitle(htmlTitle);
 
-                // Langkah 2: Scraping (NEXT_DATA)
+                // Langkah 2: Fandom Wiki Indonesia
                 if (isGeneric(finalTitleId)) {
-                    console.log(`🇮🇩 EP ${epNum} [ID] Langkah 2: Scraping Web Bstation...`);
-                    const htmlTitle = await fetchTitleFromHTML(epNum, epId, 'id_ID');
-                    if (htmlTitle) finalTitleId = sanitizeTitle(htmlTitle);
+                    console.log(`🇮🇩 EP ${epNum} [ID] Langkah 2: Melalui Fandom Wiki ID...`);
+                    const fandomTitleId = await fetchTitleFromFandom(epNum, 'id_ID');
+                    if (fandomTitleId && !isGeneric(fandomTitleId)) {
+                         finalTitleId = sanitizeTitle(fandomTitleId);
+                    }
                 }
 
                 // Langkah 3: Search API
