@@ -162,8 +162,8 @@ async function fetchTitleFromFandom(epNum) {
         if (pageId === "-1") return null;
         
         const content = pages[pageId].revisions[0]["*"];
-        // Extract title from Infobox (handles both |title= and |judul=)
-        const match = content.match(/\|\s*(title|judul)\s*=\s*([^|\n]+)/i);
+        // Extract title from Infobox (handles Translation=, crunchyTitle=, title=, judul=)
+        const match = content.match(/\|\s*(Translation|crunchyTitle|title|judul)\s*=\s*([^|\n]+)/i);
         if (match && match[2]) {
             let result = match[2].replace(/\{\{.*?\}\}/g, '').trim();
             // Remove any trailing commentary like " (episode)"
