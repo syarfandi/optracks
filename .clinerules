@@ -1,0 +1,3 @@
+# Antigravity Agent Rules
+
+- Jangan pernah jalankan perintah `npm run build`. Gunakan `npm run dev` sebagai gantinya untuk setiap keperluan build, verifikasi, atau pengembangan. Aturan ini berlaku secara global.
