@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Antigravity/Gemini rule file
+GEMINI.md
+ECC/
+.agent/
